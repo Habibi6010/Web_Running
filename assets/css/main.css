@@ -470,7 +470,7 @@ section,
 --------------------------------------------------------------*/
 .section-title {
   text-align: center;
-  padding-bottom: 60px;
+  /* padding-bottom: 30px; */
   position: relative;
 }
 
@@ -1556,15 +1556,15 @@ section,
 .container_checkbox {
   max-width: 800px;
   width: 100%;
-  padding: 20px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin: 0 auto; /* Centers the container horizontally */
 }
-.control-buttons {
+/* .control-buttons {
   margin-bottom: 20px;
-}
+} */
 
 button {
   padding: 10px 20px;

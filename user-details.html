@@ -89,7 +89,7 @@
     <h2>Upload File </h2>
   </div><!-- End Section Title -->
 <div class="container_checkbox">
-  <h1>Upload Your File</h1>
+  <h4>Upload Your File</h4>
   <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
     <div class="form-group" style="margin-bottom: 20px;">
       <label for="videoUpload" style="display: block; margin-bottom: 10px;">Select Video File:</label>
@@ -99,7 +99,7 @@
 </div>
 
 <div class="container_checkbox">
-  <h1>Select AI Model</h1>
+  <h4>Select AI Model</h4>
   <div class="form-group">
     <div class="checkbox-group">
       <label><input type="radio" name="model" value="Model 1" checked> Mediapipe</label>
@@ -109,7 +109,7 @@
 </div>
 
 <div class="container_checkbox">
-  <h1>Select Analysis Settings and Colors</h1>
+  <h4>Select Analysis Settings and Colors</h4>
   <div class="container_checkbox">
     <h5>Control Buttons</h5>
     <!-- Control buttons -->
@@ -118,7 +118,7 @@
       <button type="button" id="full_flight" onclick="full_flight_click([2, 3, 6,10,11])">Full-Flight</button>
       <button type="button" id="touch_down" onclick="touch_down_click([5,6,8,12,13,14])">Touch-Down</button>
       <button type="button" id="full_support" onclick="full_support_click([2,6,9,13])">Full-Support</button>
-      <button type="button" onclick="clearSettings()">Clear All</button> <!-- Clear Button -->
+      <button type="button" id="clear" onclick="clear_click()">Select All</button> <!-- Clear Button -->
     </div>
   </div>
 

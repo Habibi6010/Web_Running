@@ -426,24 +426,25 @@ function getColorRGB(settingNumber) {
   alert(`Setting ${settingNumber} Color (RGB): ${rgbColor}`);
 }
 
-// Function to clear all settings (uncheck all checkboxes)
-function clearSettings() {
-  const settings = document.querySelectorAll('input[type="checkbox"]');
-  settings.forEach(setting => {
-      setting.checked = false;
-  });
-}
+// // Function to clear all settings (uncheck all checkboxes)
+// function clearSettings() {
+//   const settings = document.querySelectorAll('input[type="checkbox"]');
+//   settings.forEach(setting => {
+//       setting.checked = false;
+//   });
+// }
 
-// Function to automatically select settings based on the button clicked
-function selectSettings(settingNumbers) {
-  const settings = document.querySelectorAll('input[type="checkbox"]');
-  settings.forEach(setting => {
-      setting.checked = false; // Uncheck all settings first
-  });
-  settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = true; // Check specific settings
-  });
-}
+// // Function to automatically select settings based on the button clicked
+// function selectSettings(settingNumbers) {
+//   const settings = document.querySelectorAll('input[type="checkbox"]');
+//   settings.forEach(setting => {
+//       setting.checked = false; // Uncheck all settings first
+//   });
+//   settingNumbers.forEach(number => {
+//       document.getElementById(`setting${number}`).checked = true; // Check specific settings
+//   });
+// }
+
 let toe_off = true;
 let full_flight = true;
 let touch_down = true;
@@ -464,7 +465,13 @@ function toe_off_click(settingNumbers){
     settingNumbers.forEach(number => {
         document.getElementById(`setting${number}`).checked = false; // Check specific settings
     });
+    clear = true;
+    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    document.getElementById("clear").innerText = "Select All";
   }
+  select_button_check();
+  select_checkbox();
+
 }
 function full_flight_click(settingNumbers){
   const button = document.getElementById('full_flight');
@@ -480,7 +487,12 @@ function full_flight_click(settingNumbers){
     settingNumbers.forEach(number => {
         document.getElementById(`setting${number}`).checked = false; // Check specific settings
     });
+    clear = true;
+    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    document.getElementById("clear").innerText = "Select All";
   }
+  select_button_check();
+  select_checkbox();
 }
 function touch_down_click(settingNumbers){
   const button = document.getElementById('touch_down');
@@ -496,8 +508,14 @@ function touch_down_click(settingNumbers){
     settingNumbers.forEach(number => {
         document.getElementById(`setting${number}`).checked = false; // Check specific settings
     });
+    clear = true;
+    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    document.getElementById("clear").innerText = "Select All";
   }
+  select_button_check();
+  select_checkbox();
 }
+
 function full_support_click(settingNumbers){
   const button = document.getElementById('full_support');
   if (full_support) {
@@ -512,5 +530,71 @@ function full_support_click(settingNumbers){
     settingNumbers.forEach(number => {
         document.getElementById(`setting${number}`).checked = false; // Check specific settings
     });
+    clear = true;
+    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    document.getElementById("clear").innerText = "Select All";
   }
+  select_button_check();
+  select_checkbox();
+}
+function clear_click(){
+  const button = document.getElementById('clear');
+  const settings = document.querySelectorAll('input[type="checkbox"]');
+  if (clear) {
+    clear = false;
+    button.style.backgroundColor = 'green';
+    settings.forEach(setting => {
+      setting.checked = true;
+  });
+    document.getElementById("clear").innerText = "Clear All";
+    full_support = false;
+    document.getElementById('full_support').style.backgroundColor = 'green';
+    full_flight = false;
+    document.getElementById('full_flight').style.backgroundColor = 'green';
+    touch_down = false;
+    document.getElementById('touch_down').style.backgroundColor = 'green';
+    toe_off = false;
+    document.getElementById('toe_off').style.backgroundColor = 'green';
+  }else{
+    clear = true;
+    button.style.backgroundColor = '#007BFF';
+    settings.forEach(setting => {
+      setting.checked = false;
+  });
+  document.getElementById("clear").innerText = "Select All";
+  full_support = true;
+  document.getElementById('full_support').style.backgroundColor = '#007BFF';
+  full_flight = true;
+  document.getElementById('full_flight').style.backgroundColor = '#007BFF';
+  touch_down = true;
+  document.getElementById('touch_down').style.backgroundColor = '#007BFF';
+  toe_off = true;
+  document.getElementById('toe_off').style.backgroundColor = '#007BFF';
+  }
+}
+
+function select_button_check(){
+  if (!(toe_off  || full_flight || touch_down || full_support)) {
+    document.getElementById('clear').style.backgroundColor = 'green';
+    document.getElementById("clear").innerText = "Clear All";
+    clear = false;
+  }
+}
+function select_checkbox(){
+  const settingNumbers=[] ;
+  if(!toe_off){
+    settingNumbers. push(...[1,2,3,4,5,6,7,8,9]);
+  }
+  if(!full_flight){
+    settingNumbers. push(...[2,3,6,10,11]);
+  }
+  if(!touch_down){
+    settingNumbers. push(...[5,6,8,12,13,14]);
+  }
+  if(!full_support){
+    settingNumbers. push(...[2,6,9,13]);
+  }
+  settingNumbers.forEach(number => {
+    document.getElementById(`setting${number}`).checked = true; // Check specific settings
+  });
 }

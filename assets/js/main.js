@@ -444,3 +444,73 @@ function selectSettings(settingNumbers) {
       document.getElementById(`setting${number}`).checked = true; // Check specific settings
   });
 }
+let toe_off = true;
+let full_flight = true;
+let touch_down = true;
+let full_support = true;
+let clear = true;
+
+function toe_off_click(settingNumbers){
+  const button = document.getElementById('toe_off');
+  if (toe_off) {
+    toe_off = false;
+    button.style.backgroundColor = 'green';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = true; // Check specific settings
+    });
+  }else{
+    toe_off = true;
+    button.style.backgroundColor = '#007BFF';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = false; // Check specific settings
+    });
+  }
+}
+function full_flight_click(settingNumbers){
+  const button = document.getElementById('full_flight');
+  if (full_flight) {
+    full_flight = false;
+    button.style.backgroundColor = 'green';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = true; // Check specific settings
+    });
+  }else{
+    full_flight = true;
+    button.style.backgroundColor = '#007BFF';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = false; // Check specific settings
+    });
+  }
+}
+function touch_down_click(settingNumbers){
+  const button = document.getElementById('touch_down');
+  if (touch_down) {
+    touch_down = false;
+    button.style.backgroundColor = 'green';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = true; // Check specific settings
+    });
+  }else{
+    touch_down = true;
+    button.style.backgroundColor = '#007BFF';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = false; // Check specific settings
+    });
+  }
+}
+function full_support_click(settingNumbers){
+  const button = document.getElementById('full_support');
+  if (full_support) {
+    full_support = false;
+    button.style.backgroundColor = 'green';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = true; // Check specific settings
+    });
+  }else{
+    full_support = true;
+    button.style.backgroundColor = '#007BFF';
+    settingNumbers.forEach(number => {
+        document.getElementById(`setting${number}`).checked = false; // Check specific settings
+    });
+  }
+}

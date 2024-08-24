@@ -306,7 +306,6 @@ function handelSigninButton(event) {
     alert("Please Enter Email or Password");
     return false;
   }
-
   // Regular expression for validating an email address
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -317,22 +316,26 @@ function handelSigninButton(event) {
     email,
     password
   }
-
   fetch('http://localhost:5000/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(data)
-  }).then(response => response.json())
+  })
+    .then(response => response.json())
     .then(data => {
-      if (data.error) {
-        alert(data.error);
-      } else {
-        alert('Login successful');
+      if (data.accsess) {
+        alert('Login successful: \n' + email + ' \n' + password);
+        window.location.href = "user-details.html";
       }
+      else {
+        alert('Login failed: \n' + 'Invalid email or password');
+      }
+    })
+    .catch(error => {
+      alert("Server Error");
     });
-  alert('Login successful: \n' + email + ' \n' + password);
 }
 
 // foget password button 
@@ -379,13 +382,35 @@ function handelContactUsButton(event) {
     alert("Please enter a valid email address for contact.");
     return;
   }
-
   // If validation passes, process the form data
-  alert(`Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`);
+  const data = {
+    name,
+    email,
+    subject,
+    message
+  }
+  fetch('http://localhost:5000/contact_us', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.accsess) {
+        alert('Thank you for contacting us');
+      }
+      else {
+        alert('Sending failed \n' + 'Please try again later');
+      }
+    })
+    .catch(error => {
+      alert("Server Error");
+    });
+
   //reset form
   document.getElementById('contact-form').reset();
-  // Show success message
-  alert('Thank you for contacting us');
 }
 
 // Show video preview when a file is selected for upload 

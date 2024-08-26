@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+import json
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -32,6 +33,18 @@ def contact_us():
     print(name, email, subject, message)
     # Need to Connect to Database to save the data
     return jsonify({"accsess":True})
+
+@app.route('/run_analysis', methods=['POST'])
+def run_analysis():
+
+    video_file=request.files.get('videoUpload')
+    height_runner = request.form.get('height_runner')
+    selectedModel = request.form.get('selectedModel')
+    settings_colors = request.form.get('settings_colors')
+    settings_colors = json.loads(settings_colors) if settings_colors else {}
+    print(height_runner, selectedModel, settings_colors)
+    # Need to Connect to Database to save the data
+    return jsonify({"response":True})
 
 if __name__ == '__main__':
     app.run(debug=True)

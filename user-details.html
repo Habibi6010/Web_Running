@@ -26,14 +26,6 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
-
-  <!-- =======================================================
-  * Template Name: MyResume
-  * Template URL: https://bootstrapmade.com/free-html-bootstrap-template-my-resume/
-  * Updated: Jun 29 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body class="service-details-page">
@@ -102,8 +94,8 @@
   <h4>Select AI Model</h4>
   <div class="form-group">
     <div class="checkbox-group">
-      <label><input type="radio" name="model" value="Model 1" checked> Mediapipe</label>
-      <label><input type="radio" name="model" value="Model 2"> YOLO</label>
+      <label><input type="radio" name="model" value="mediapipe" checked> Mediapipe</label>
+      <label><input type="radio" name="model" value="yolo"> YOLO</label>
     </div>
   </div>
 </div>
@@ -131,47 +123,47 @@
         <label> Settings</label>
         <label>Color of each parameter</label>
 
-        <label><input type="checkbox" id= "setting1" name="setting" value="Setting 1"> 1-Angle of foot with ground.</label>
-        <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000" onchange="getColorRGB(1)">
+        <label><input type="checkbox" id= "setting1" name="setting" value="foot_ground_angle"> 1-Angle of foot with ground.</label>
+        <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000">
 
-        <label><input type="checkbox" id= "setting2" name="setting" value="Setting 2"> 2-Angle of knee (shin-thigh) joint.</label>
-        <input type="color" id="colorSetting2" name="colorSetting2" value="#ff0000" onchange="getColorRGB(2)">
+        <label><input type="checkbox" id= "setting2" name="setting" value="knee_joint_angle"> 2-Angle of knee (shin-thigh) joint.</label>
+        <input type="color" id="colorSetting2" name="colorSetting2" value="#ff0000">
 
-        <label><input type="checkbox" id= "setting3" name="setting" value="Setting 3"> 3-Angle between thighs.</label>
-        <input type="color" id="colorSetting3" name="colorSetting3" value="#ff0000" onchange="getColorRGB(3)">
+        <label><input type="checkbox" id= "setting3" name="setting" value="between_thigh_angle"> 3-Angle between thighs.</label>
+        <input type="color" id="colorSetting3" name="colorSetting3" value="#ff0000" >
         
-        <label><input type="checkbox" id= "setting4" name="setting" value="Setting 4"> 4-Angle of foot line with x-axis.</label>
-        <input type="color" id="colorSetting4" name="colorSetting4" value="#ff0000" onchange="getColorRGB(4)">
+        <label><input type="checkbox" id= "setting4" name="setting" value="knee_toe_angle"> 4-Angle of foot line with x-axis.</label>
+        <input type="color" id="colorSetting4" name="colorSetting4" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting5" name="setting" value="Setting 5"> 5-Angle of elbow joint.</label>
-        <input type="color" id="colorSetting5" name="colorSetting5" value="#ff0000" onchange="getColorRGB(5)">
+        <label><input type="checkbox" id= "setting5" name="setting" value="elbow_joint_angle"> 5-Angle of elbow joint.</label>
+        <input type="color" id="colorSetting5" name="colorSetting5" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting6" name="setting" value="Setting 6"> 6-Angle of ankle (toe-heel-shin) joint.</label>
-        <input type="color" id="colorSetting6" name="colorSetting6" value="#ff0000" onchange="getColorRGB(6)">
+        <label><input type="checkbox" id= "setting6" name="setting" value="flexion_foot"> 6-Angle of ankle (toe-heel-shin) joint.</label>
+        <input type="color" id="colorSetting6" name="colorSetting6" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting7" name="setting" value="Setting 7"> 7-Angle of forearm with x-axis.</label>
-        <input type="color" id="colorSetting7" name="colorSetting7" value="#ff0000" onchange="getColorRGB(7)">
+        <label><input type="checkbox" id= "setting7" name="setting" value="forearm_x_axis"> 7-Angle of forearm with x-axis.</label>
+        <input type="color" id="colorSetting7" name="colorSetting7" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting8" name="setting" value="Setting 8"> 8-Angle of shins with x-axis.</label>
-        <input type="color" id="colorSetting8" name="colorSetting8" value="#ff0000" onchange="getColorRGB(8)">
+        <label><input type="checkbox" id= "setting8" name="setting" value="shin_x_axis"> 8-Angle of shins with x-axis.</label>
+        <input type="color" id="colorSetting8" name="colorSetting8" value="#ff0000">
 
-        <label><input type="checkbox" id= "setting9" name="setting" value="Setting 9"> 9-Angle of thighs with x-axis.</label>
-        <input type="color" id="colorSetting9" name="colorSetting9" value="#ff0000" onchange="getColorRGB(9)">
+        <label><input type="checkbox" id= "setting9" name="setting" value="thigh_x_axis"> 9-Angle of thighs with x-axis.</label>
+        <input type="color" id="colorSetting9" name="colorSetting9" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting10" name="setting" value="Setting 10">  10-Angle of ear-nose line with x-axis.</label>
-        <input type="color" id="colorSetting10" name="colorSetting10" value="#ff0000" onchange="getColorRGB(10)">
+        <label><input type="checkbox" id= "setting10" name="setting" value="ear_nose_x_axis">  10-Angle of ear-nose line with x-axis.</label>
+        <input type="color" id="colorSetting10" name="colorSetting10" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting11" name="setting" value="Setting 11">  11-Angle of ear-hip line with the x-axis.</label>
-        <input type="color" id="colorSetting11" name="colorSetting11" value="#ff0000" onchange="getColorRGB(11)">
+        <label><input type="checkbox" id= "setting11" name="setting" value="ear_hip_x_axis">  11-Angle of ear-hip line with the x-axis.</label>
+        <input type="color" id="colorSetting11" name="colorSetting11" value="#ff0000" >
 
-        <label><input type="checkbox" id= "setting12" name="setting" value="Setting 12">  12-Distance between knees.</label>
-        <input type="color" id="colorSetting12" name="colorSetting12" value="#00ff00" onchange="getColorRGB(12)">
+        <label><input type="checkbox" id= "setting12" name="setting" value="distance_knee">  12-Distance between knees.</label>
+        <input type="color" id="colorSetting12" name="colorSetting12" value="#00ff00" >
 
-        <label><input type="checkbox" id= "setting13" name="setting" value="Setting 13">  13-Distance of hip to heel.</label>
-        <input type="color" id="colorSetting13" name="colorSetting13" value="#00ff00" onchange="getColorRGB(13)">
+        <label><input type="checkbox" id= "setting13" name="setting" value="distance_heel_hip">  13-Distance of hip to heel.</label>
+        <input type="color" id="colorSetting13" name="colorSetting13" value="#00ff00" >
 
-        <label><input type="checkbox" id= "setting14" name="setting" value="Setting 14">  14-Distance of hip to wrist.</label>
-        <input type="color" id="colorSetting14" name="colorSetting14" value="#00ff00" onchange="getColorRGB(14)">
+        <label><input type="checkbox" id= "setting14" name="setting" value="distance_wrist_hip">  14-Distance of hip to wrist.</label>
+        <input type="color" id="colorSetting14" name="colorSetting14" value="#00ff00" >
       </div>
     </div>
 

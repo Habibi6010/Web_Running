@@ -436,19 +436,8 @@ function hexToRgb(hex) {
   let r = (bigint >> 16) & 255;
   let g = (bigint >> 8) & 255;
   let b = bigint & 255;
-
-  return `rgb(${r}, ${g}, ${b})`;
+  return [r, g, b];
 }
-
-// get hex color from selected color button
-function getColorRGB(settingNumber) {
-  const colorInput = document.getElementById(`colorSetting${settingNumber}`);
-  const hexColor = colorInput.value;
-  const rgbColor = hexToRgb(hexColor);
-  console.log(`Setting ${settingNumber} Color (RGB):`, rgbColor);
-  alert(`Setting ${settingNumber} Color (RGB): ${rgbColor}`);
-}
-
 
 let toe_off = true;
 let full_flight = true;
@@ -605,20 +594,40 @@ function select_checkbox() {
 }
 
 // Send and receive data from server and work with API
-function sendData_login() {
-  const name = document.getElementById('nameInput').value;
-  console.log(name);
+function sendData() {
 
-  fetch('http://localhost:5000/get_data', {
+  // Get the form element
+  const form = document.getElementById('uploadForm');
+  // Create a new FormData object
+  const formData = new FormData(form);
+
+  // Get height_runner from the input field
+  const height_runner = document.getElementById('numberInput').value;
+  // Get selected AI model (radio buttons)
+  const selectedModel = document.querySelector('input[name="model"]:checked').value;
+
+
+  // Manually add the selected checkboxes and colors to the formData
+  const settings_colors = {};
+
+  for (let i = 1; i <= 14; i++) {
+    const checkbox = document.getElementById(`setting${i}`);
+    const colorInput = document.getElementById(`colorSetting${i}`);
+    settings_colors[document.getElementById(`setting${i}`).value] = [checkbox.checked, hexToRgb(colorInput.value)];
+  }
+  //Append the height_runner, selectedModel, and settings_colors to the formData
+  formData.append('height_runner', height_runner);
+  formData.append('selectedModel', selectedModel);
+  formData.append('settings_colors', JSON.stringify(settings_colors));
+
+  // Send the data to the server
+  fetch('http://localhost:5000/run_analysis', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ name: name })
+    body: formData
   })
     .then(response => response.json())
     .then(data => {
-      document.getElementById('response').textContent = data.message;
+      console.log(data.response);
     })
     .catch(error => {
       console.error('Error:', error);

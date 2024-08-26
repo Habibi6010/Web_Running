@@ -15,7 +15,9 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -48,149 +50,153 @@
 
   <main class="main">
 
-<!-- Page Title -->
-<div class="page-title" data-aos="fade">
-  <div class="container">
-    <nav class="breadcrumbs">
-      <ol>
-        <li><a href="index.html">Home</a></li>
-        <li class="current">User Dashboard</li>
-      </ol>
-    </nav>
-    <h1>Welcome!</h1>
+    <!-- Page Title -->
+    <div class="page-title" data-aos="fade">
+      <div class="container">
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="index.html">Home</a></li>
+            <li class="current">User Dashboard</li>
+          </ol>
+        </nav>
+        <h1>Welcome!</h1>
 
 
-    <!-- User Profile Dropdown -->
-    <div class="user-profile">
-      <button class="profile-button" aria-haspopup="true" aria-expanded="false">
-        <i class="bi bi-person-circle"></i> <span>Profile</span>
-      </button>
-      <div class="dropdown-menu">
-        <a href="profile.html">View Profile</a>
-        <a href="settings.html">Settings</a>
-        <a href="index.html">Logout</a>
+        <!-- User Profile Dropdown -->
+        <div class="user-profile">
+          <button class="profile-button" aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-person-circle"></i> <span>Profile</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="profile.html">View Profile</a>
+            <a href="settings.html">Settings</a>
+            <a href="index.html">Logout</a>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div><!-- End Page Title -->
+    </div><!-- End Page Title -->
 
 
-<section id="upload">
+    <section id="upload">
 
-  <div class="container section-title" data-aos="fade-up">
-    <h2>Upload File </h2>
-  </div><!-- End Section Title -->
-<div class="container_checkbox">
-  <h4>Upload Your File</h4>
-  <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
-    <div class="form-group" style="margin-bottom: 20px;">
-      <label for="videoUpload" style="display: block; margin-bottom: 10px;">Select Video File:</label>
-      <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
-      <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
-    </div>
-</div>
-
-<div class="container_checkbox">
-  <h4>Select AI Model</h4>
-  <div class="form-group">
-    <div class="checkbox-group">
-      <label><input type="radio" name="model" value="mediapipe" checked> Mediapipe</label>
-      <label><input type="radio" name="model" value="yolo"> YOLO</label>
-    </div>
-  </div>
-</div>
-
-<div class="container_checkbox">
-  <h4>Select Analysis Settings and Colors</h4>
-  <div class="container_checkbox">
-    <h5>Control Buttons</h5>
-    <!-- Control buttons -->
-    <div class="control-buttons">
-      <button type="button" id="toe_off" onclick="toe_off_click([1, 2, 3, 4,5,6,7,8,9])">Toe-Off</button>
-      <button type="button" id="full_flight" onclick="full_flight_click([2, 3, 6,10,11])">Full-Flight</button>
-      <button type="button" id="touch_down" onclick="touch_down_click([5,6,8,12,13,14])">Touch-Down</button>
-      <button type="button" id="full_support" onclick="full_support_click([2,6,9,13])">Full-Support</button>
-      <button type="button" id="clear" onclick="clear_click()">Select All</button> <!-- Clear Button -->
-    </div>
-  </div>
-
-    <div class="form-group">
-      <div class="checkbox-group">
-        <label> Height of Runner (Meter): </label>
-        <input type="number" id="numberInput" name="numberInput" min="0" max="3" step="0.1" style="width: 100px;">
-        <label> </label>
-        <label> </label>
-        <label> Settings</label>
-        <label>Color of each parameter</label>
-
-        <label><input type="checkbox" id= "setting1" name="setting" value="foot_ground_angle"> 1-Angle of foot with ground.</label>
-        <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000">
-
-        <label><input type="checkbox" id= "setting2" name="setting" value="knee_joint_angle"> 2-Angle of knee (shin-thigh) joint.</label>
-        <input type="color" id="colorSetting2" name="colorSetting2" value="#ff0000">
-
-        <label><input type="checkbox" id= "setting3" name="setting" value="between_thigh_angle"> 3-Angle between thighs.</label>
-        <input type="color" id="colorSetting3" name="colorSetting3" value="#ff0000" >
-        
-        <label><input type="checkbox" id= "setting4" name="setting" value="knee_toe_angle"> 4-Angle of foot line with x-axis.</label>
-        <input type="color" id="colorSetting4" name="colorSetting4" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting5" name="setting" value="elbow_joint_angle"> 5-Angle of elbow joint.</label>
-        <input type="color" id="colorSetting5" name="colorSetting5" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting6" name="setting" value="flexion_foot"> 6-Angle of ankle (toe-heel-shin) joint.</label>
-        <input type="color" id="colorSetting6" name="colorSetting6" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting7" name="setting" value="forearm_x_axis"> 7-Angle of forearm with x-axis.</label>
-        <input type="color" id="colorSetting7" name="colorSetting7" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting8" name="setting" value="shin_x_axis"> 8-Angle of shins with x-axis.</label>
-        <input type="color" id="colorSetting8" name="colorSetting8" value="#ff0000">
-
-        <label><input type="checkbox" id= "setting9" name="setting" value="thigh_x_axis"> 9-Angle of thighs with x-axis.</label>
-        <input type="color" id="colorSetting9" name="colorSetting9" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting10" name="setting" value="ear_nose_x_axis">  10-Angle of ear-nose line with x-axis.</label>
-        <input type="color" id="colorSetting10" name="colorSetting10" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting11" name="setting" value="ear_hip_x_axis">  11-Angle of ear-hip line with the x-axis.</label>
-        <input type="color" id="colorSetting11" name="colorSetting11" value="#ff0000" >
-
-        <label><input type="checkbox" id= "setting12" name="setting" value="distance_knee">  12-Distance between knees.</label>
-        <input type="color" id="colorSetting12" name="colorSetting12" value="#00ff00" >
-
-        <label><input type="checkbox" id= "setting13" name="setting" value="distance_heel_hip">  13-Distance of hip to heel.</label>
-        <input type="color" id="colorSetting13" name="colorSetting13" value="#00ff00" >
-
-        <label><input type="checkbox" id= "setting14" name="setting" value="distance_wrist_hip">  14-Distance of hip to wrist.</label>
-        <input type="color" id="colorSetting14" name="colorSetting14" value="#00ff00" >
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Upload File </h2>
+      </div><!-- End Section Title -->
+      <div class="container_checkbox">
+        <h4>Upload Your File</h4>
+        <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Select Video File:</label>
+            <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
+            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
+          </div>
       </div>
-    </div>
 
+      <div class="container_checkbox">
+        <h4>Select AI Model</h4>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <label><input type="radio" name="model" value="mediapipe" checked> Mediapipe</label>
+            <label><input type="radio" name="model" value="yolo"> YOLO</label>
+          </div>
+        </div>
+      </div>
 
+      <div class="container_checkbox">
+        <h4>Select Analysis Settings and Colors</h4>
+        <div class="container_checkbox">
+          <h5>Control Buttons</h5>
+          <!-- Control buttons -->
+          <div class="control-buttons">
+            <button type="button" id="toe_off" onclick="toe_off_click([1, 2, 3, 4,5,6,7,8,9])">Toe-Off</button>
+            <button type="button" id="full_flight" onclick="full_flight_click([2, 3, 6,10,11])">Full-Flight</button>
+            <button type="button" id="touch_down" onclick="touch_down_click([5,6,8,12,13,14])">Touch-Down</button>
+            <button type="button" id="full_support" onclick="full_support_click([2,6,9,13])">Full-Support</button>
+            <button type="button" id="clear" onclick="clear_click()">Select All</button> <!-- Clear Button -->
+          </div>
+        </div>
 
+        <div class="form-group">
+          <div class="checkbox-group">
+            <label> Height of Runner (Meter): </label>
+            <input type="number" id="numberInput" name="numberInput" min="0" max="3" step="0.1" style="width: 100px;">
+            <label> </label>
+            <label> </label>
+            <label> Settings</label>
+            <label>Color of each parameter</label>
 
-    <button type="submit" onclick="sendData()" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
-  </form>
-</div>
-</section>
+            <label><input type="checkbox" id="setting1" name="setting" value="foot_ground_angle"> 1-Angle of foot with
+              ground.</label>
+            <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000">
+
+            <label><input type="checkbox" id="setting2" name="setting" value="knee_joint_angle"> 2-Angle of knee
+              (shin-thigh) joint.</label>
+            <input type="color" id="colorSetting2" name="colorSetting2" value="#ff0000">
+
+            <label><input type="checkbox" id="setting3" name="setting" value="between_thigh_angle"> 3-Angle between
+              thighs.</label>
+            <input type="color" id="colorSetting3" name="colorSetting3" value="#ff0000">
+
+            <label><input type="checkbox" id="setting4" name="setting" value="knee_toe_angle"> 4-Angle of foot line with
+              x-axis.</label>
+            <input type="color" id="colorSetting4" name="colorSetting4" value="#ff0000">
+
+            <label><input type="checkbox" id="setting5" name="setting" value="elbow_joint_angle"> 5-Angle of elbow
+              joint.</label>
+            <input type="color" id="colorSetting5" name="colorSetting5" value="#ff0000">
+
+            <label><input type="checkbox" id="setting6" name="setting" value="flexion_foot"> 6-Angle of ankle
+              (toe-heel-shin) joint.</label>
+            <input type="color" id="colorSetting6" name="colorSetting6" value="#ff0000">
+
+            <label><input type="checkbox" id="setting7" name="setting" value="forearm_x_axis"> 7-Angle of forearm with
+              x-axis.</label>
+            <input type="color" id="colorSetting7" name="colorSetting7" value="#ff0000">
+
+            <label><input type="checkbox" id="setting8" name="setting" value="shin_x_axis"> 8-Angle of shins with
+              x-axis.</label>
+            <input type="color" id="colorSetting8" name="colorSetting8" value="#ff0000">
+
+            <label><input type="checkbox" id="setting9" name="setting" value="thigh_x_axis"> 9-Angle of thighs with
+              x-axis.</label>
+            <input type="color" id="colorSetting9" name="colorSetting9" value="#ff0000">
+
+            <label><input type="checkbox" id="setting10" name="setting" value="ear_nose_x_axis"> 10-Angle of ear-nose
+              line with x-axis.</label>
+            <input type="color" id="colorSetting10" name="colorSetting10" value="#ff0000">
+
+            <label><input type="checkbox" id="setting11" name="setting" value="ear_hip_x_axis"> 11-Angle of ear-hip line
+              with the x-axis.</label>
+            <input type="color" id="colorSetting11" name="colorSetting11" value="#ff0000">
+
+            <label><input type="checkbox" id="setting12" name="setting" value="distance_knee"> 12-Distance between
+              knees.</label>
+            <input type="color" id="colorSetting12" name="colorSetting12" value="#00ff00">
+
+            <label><input type="checkbox" id="setting13" name="setting" value="distance_heel_hip"> 13-Distance of hip to
+              heel.</label>
+            <input type="color" id="colorSetting13" name="colorSetting13" value="#00ff00">
+
+            <label><input type="checkbox" id="setting14" name="setting" value="distance_wrist_hip"> 14-Distance of hip
+              to wrist.</label>
+            <input type="color" id="colorSetting14" name="colorSetting14" value="#00ff00">
+          </div>
+        </div>
+
+        <button type="submit" onclick="sendData(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
+
+        <div id="parent-container" style="display: none;">
+          <h2>Uploading...</h2>
+          <div id="loading" style="display: none; width: 100%; height: 50px; position: relative;">
+            <img src="assets/img/loading.gif" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
+          </div>
+        </div>
+        </form>
+      </div>
+    </section>
   </main>
-
-  <div id="progressSection" style="display: none;">
-    <h2>Uploading...</h2>
-    <div class="progress-container">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
-    <p id="progressText">0%</p>
   </div>
-</div>
-<script src="assets/js/scripts.js"></script>
-
-
-
-
-
-
+  
   <footer id="footer" class="footer position-relative light-background">
     <div class="container">
       <h3 class="sitename">Smart Running</h3>
@@ -217,7 +223,8 @@
   </footer>
 
   <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Preloader -->
   <div id="preloader"></div>

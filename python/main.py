@@ -34,10 +34,22 @@ def contact_us():
     # Need to Connect to Database to save the data
     return jsonify({"accsess":True})
 
+
+# Define a directory to save the video files
+VIDEO_SAVE_PATH = './received_videos/'
+
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
 
     video_file=request.files.get('videoUpload')
+    # get the uploaded video file
+    if video_file:
+        video_file.save(VIDEO_SAVE_PATH + video_file.filename)
+        print('Video file saved successfully')
+    else:
+        print('No video file uploaded')
+        return jsonify({"response":False})
+    
     height_runner = request.form.get('height_runner')
     selectedModel = request.form.get('selectedModel')
     settings_colors = request.form.get('settings_colors')

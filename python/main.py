@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 from drawing import drawing
 import cv2
+import threading
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -60,15 +61,24 @@ def run_analysis():
     settings_colors = json.loads(settings_colors) if settings_colors else {}
     print(height_runner, selectedModel, settings_colors)
     # Need to Connect to Database to save the data
-    text=running_model(height_runner, selectedModel,
-                 settings_colors,video_file.filename)
+    text=""
+    # text=running_model(height_runner, selectedModel,
+    #              settings_colors,video_file.filename)
+    threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename)).start()
+
     return jsonify({"response": True, "message": text,"link":ANALYZED_VIDEO_SAVE_PATH+video_file.filename})
+
+
+def background_analysis(height_runner, selected_model, settings_colors, video_name):
+    # Running model analysis in the background
+    result_text = running_model(height_runner, selected_model, settings_colors, video_name)
+    print(result_text)
+    # Here you can add any additional logic such as notifying users via a webhook or other mechanisms.
+
 
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = './analyzed_videos/'
-
-
 def running_model(height_runner, selectModel, settings_colors, video_name):
     drawing_object = drawing()
     cap = cv2.VideoCapture(VIDEO_SAVE_PATH+video_name)
@@ -173,4 +183,4 @@ def running_model(height_runner, selectModel, settings_colors, video_name):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

@@ -416,6 +416,7 @@ function toe_off_click(settingNumbers) {
   }
   select_button_check();
   select_checkbox();
+  check_radio();
 
 }
 function full_flight_click(settingNumbers) {
@@ -438,6 +439,7 @@ function full_flight_click(settingNumbers) {
   }
   select_button_check();
   select_checkbox();
+  check_radio();
 }
 function touch_down_click(settingNumbers) {
   const button = document.getElementById('touch_down');
@@ -459,6 +461,7 @@ function touch_down_click(settingNumbers) {
   }
   select_button_check();
   select_checkbox();
+  check_radio();
 }
 
 function full_support_click(settingNumbers) {
@@ -481,8 +484,10 @@ function full_support_click(settingNumbers) {
   }
   select_button_check();
   select_checkbox();
+  check_radio();
 }
 function clear_click() {
+  
   const button = document.getElementById('clear');
   const settings = document.querySelectorAll('input[type="checkbox"]');
   if (clear) {
@@ -516,6 +521,7 @@ function clear_click() {
     toe_off = true;
     document.getElementById('toe_off').style.backgroundColor = '#007BFF';
   }
+  check_radio();
 }
 
 function select_button_check() {
@@ -548,7 +554,11 @@ function select_checkbox() {
 function sendData(event) {
 
   event.preventDefault(); // Stop form from submitting the traditional way
-
+  check_radio();
+  if (document.getElementById('videoUpload').files.length == 0) {
+    alert("You didn't upload video.");
+    return;
+  }
   const loading = document.getElementById('parent-container');
   const loading2 = document.getElementById('loading');
 
@@ -560,7 +570,6 @@ function sendData(event) {
   const form = document.getElementById('uploadForm');
   // Create a new FormData object
   const formData = new FormData(form);
-
   // Get height_runner from the input field
   const height_runner = document.getElementById('numberInput').value;
   // Get selected AI model (radio buttons)
@@ -607,4 +616,34 @@ function sendData(event) {
       loading.style.display = 'none';
       loading2.style.display = 'none';
     });
+}
+
+function check_yolo(checkbox, text) {
+  let radios = document.getElementsByName('model');
+  let modelType = "";
+  for (let i = 0; i < radios.length; i++) {
+    if (radios[i].checked) {
+      modelType = radios[i].value;
+      break;
+    }
+  }
+  if (checkbox.checked && modelType == "yolo") {
+    alert("AI model you select can't analysis " + text)
+    checkbox.checked = false
+  }
+}
+function check_radio() {
+  if (document.querySelector('input[name="model"]:checked').value == 'yolo') {
+    let set1 = document.getElementById("setting1");
+    let set2 = document.getElementById("setting2");
+    let set3 = document.getElementById("setting6");
+    let set4 = document.getElementById("setting13");
+    if (set1.checked || set2.checked || set3.checked || set4.checked) {
+      set1.checked = false;
+      set2.checked = false;
+      set3.checked = false;
+      set4.checked = false;
+      alert(" You selected analysis setting are not compatible with AI model you selected");
+    }
+  }
 }

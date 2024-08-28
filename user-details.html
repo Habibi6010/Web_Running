@@ -96,8 +96,8 @@
         <h4>Select AI Model</h4>
         <div class="form-group">
           <div class="checkbox-group">
-            <label><input type="radio" name="model" value="mediapipe" checked> Mediapipe</label>
-            <label><input type="radio" name="model" value="yolo"> YOLO</label>
+            <label><input type="radio" name="model" value="mediapipe" checked  onchange="check_radio()"> Mediapipe</label>
+            <label><input type="radio" name="model" value="yolo" onchange="check_radio()"> YOLO</label>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
             <label> Settings</label>
             <label>Color of each parameter</label>
 
-            <label><input type="checkbox" id="setting1" name="setting" value="foot_ground_angle"> 1-Angle of foot with
+            <label><input type="checkbox" id="setting1" name="setting" value="foot_ground_angle" onchange="check_yolo(this,'Angle of foot with ground')"> 1-Angle of foot with
               ground.</label>
             <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000">
 

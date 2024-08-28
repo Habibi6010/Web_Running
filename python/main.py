@@ -174,9 +174,9 @@ def running_model(height_runner, selectModel, settings_colors, video_name):
                         value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
                         
         out.write(frame)
-        cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # cv2.imshow('frame', frame)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
     cap.release()
     out.release()
     return("Analysis Done")

@@ -55,23 +55,25 @@ def run_analysis():
         print('No video file uploaded')
         return jsonify({"response": False, "message": "No video file uploaded","link":None})
 
+    username = request.form.get('username')
     height_runner = request.form.get('height_runner')
     selectedModel = request.form.get('selectedModel')
     settings_colors = request.form.get('settings_colors')
     settings_colors = json.loads(settings_colors) if settings_colors else {}
     print(height_runner, selectedModel, settings_colors)
+    
     # Need to Connect to Database to save the data
     text=""
     # text=running_model(height_runner, selectedModel,
     #              settings_colors,video_file.filename)
-    threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename)).start()
+    threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
 
     return jsonify({"response": True, "message": text,"link":ANALYZED_VIDEO_SAVE_PATH+video_file.filename})
 
 
-def background_analysis(height_runner, selected_model, settings_colors, video_name):
+def background_analysis(height_runner, selected_model, settings_colors, video_name,username):
     # Running model analysis in the background
-    result_text = running_model(height_runner, selected_model, settings_colors, video_name)
+    result_text = running_model(height_runner, selected_model, settings_colors, video_name,username)
     print(result_text)
     # Here you can add any additional logic such as notifying users via a webhook or other mechanisms.
 
@@ -79,7 +81,7 @@ def background_analysis(height_runner, selected_model, settings_colors, video_na
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = './analyzed_videos/'
-def running_model(height_runner, selectModel, settings_colors, video_name):
+def running_model(height_runner, selectModel, settings_colors, video_name,username):
     drawing_object = drawing()
     cap = cv2.VideoCapture(VIDEO_SAVE_PATH+video_name)
     # Check if the video opened successfully
@@ -90,7 +92,7 @@ def running_model(height_runner, selectModel, settings_colors, video_name):
     # Define the codec and create VideoWriter object
     
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
-    out = cv2.VideoWriter(f'{ANALYZED_VIDEO_SAVE_PATH+video_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+    out = cv2.VideoWriter(f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                           (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))  # Output file
     
     while True:

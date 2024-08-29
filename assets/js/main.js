@@ -247,6 +247,14 @@
   });
 
 })();
+// add listener to user-details page to get user details when page load
+document.addEventListener('DOMContentLoaded', function () {
+  // extract username from url
+  const urlParams = new URLSearchParams(window.location.search);
+  const username = urlParams.get('username') || 'Profile';
+  // Update span for show username
+  document.getElementById("usernameDisplay").innerText = username;
+});
 
 // submit signin form
 function handelSigninButton(event) {
@@ -278,7 +286,8 @@ function handelSigninButton(event) {
     .then(data => {
       if (data.accsess) {
         alert('Login successful: \n' + email);
-        window.location.href = "user-details.html";
+        window.location.href = `user-details.html?username=${encodeURIComponent(email)}`;
+
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');
@@ -574,7 +583,8 @@ function sendData(event) {
   const height_runner = document.getElementById('numberInput').value;
   // Get selected AI model (radio buttons)
   const selectedModel = document.querySelector('input[name="model"]:checked').value;
-
+  // Get usrname from usernameeDisplay span
+  const username = document.getElementById('usernameDisplay').innerText;
 
   // Manually add the selected checkboxes and colors to the formData
   const settings_colors = {};
@@ -588,7 +598,8 @@ function sendData(event) {
   formData.append('height_runner', height_runner);
   formData.append('selectedModel', selectedModel);
   formData.append('settings_colors', JSON.stringify(settings_colors));
-
+  formData.append('username', username);
+  
   // Send the data to the server
   fetch('http://localhost:5000/run_analysis', {
     method: 'POST',

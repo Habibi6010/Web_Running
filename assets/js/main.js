@@ -277,7 +277,7 @@ function handelSigninButton(event) {
     .then(response => response.json())
     .then(data => {
       if (data.accsess) {
-        alert('Login successful: \n' + email + ' \n' + password);
+        alert('Login successful: \n' + email);
         window.location.href = "user-details.html";
       }
       else {

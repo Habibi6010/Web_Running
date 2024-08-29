@@ -105,28 +105,28 @@ def running_model(height_runner, selectModel, settings_colors, video_name):
         else:
             scale_factor = 0.0
         if selectModel == 'yolo':
-            if len(yolo_landmarkss)>0:
                 for yolo_landmarks in yolo_landmarkss:
-                    if settings_colors['knee_joint_angle'][0]:
-                        left_value,right_value = drawing_object.yolo_knee_joint_angle(frame, yolo_landmarks, settings_colors['knee_joint_angle'][1])
-                    if settings_colors['between_thigh_angle'][0]:
-                        value = drawing_object.yolo_between_thigh_angle(frame, yolo_landmarks, settings_colors['between_thigh_angle'][1])
-                    if settings_colors['elbow_joint_angle'][0]:
-                        left_value,right_value = drawing_object.yolo_elbow_joint_angle(frame, yolo_landmarks, settings_colors['elbow_joint_angle'][1])
-                    if settings_colors['forearm_x_axis'][0]:
-                        left_value,right_value = drawing_object.yolo_forearm_x_axis(frame, yolo_landmarks, settings_colors['forearm_x_axis'][1])
-                    if settings_colors['shin_x_axis'][0]:
-                        left_value,right_value = drawing_object.yolo_shin_x_axis(frame, yolo_landmarks, settings_colors['shin_x_axis'][1])
-                    if settings_colors['thigh_x_axis'][0]:
-                        left_value,right_value = drawing_object.yolo_thigh_x_axis(frame, yolo_landmarks, settings_colors['thigh_x_axis'][1])
-                    if settings_colors['ear_hip_x_axis'][0]:
-                        value = drawing_object.yolo_ear_hip_x_axis(frame, yolo_landmarks, settings_colors['ear_hip_x_axis'][1])
-                    if settings_colors['distance_knee'][0]:
-                        value = drawing_object.yolo_distance_knee(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1],scale_factor)
-                    if settings_colors['distance_wrist_hip'][0]:
-                        left_value,right_value = drawing_object.yolo_distance_wrist_hip(frame, yolo_landmarks, settings_colors['distance_wrist_hip'][1],scale_factor)
-                    if settings_colors['ear_nose_x_axis'][0]:
-                        value = drawing_object.yolo_ear_nose_x_axis(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1])
+                    if len(yolo_landmarks)>0:
+                        if settings_colors['knee_joint_angle'][0]:
+                            left_value,right_value = drawing_object.yolo_knee_joint_angle(frame, yolo_landmarks, settings_colors['knee_joint_angle'][1])
+                        if settings_colors['between_thigh_angle'][0]:
+                            value = drawing_object.yolo_between_thigh_angle(frame, yolo_landmarks, settings_colors['between_thigh_angle'][1])
+                        if settings_colors['elbow_joint_angle'][0]:
+                            left_value,right_value = drawing_object.yolo_elbow_joint_angle(frame, yolo_landmarks, settings_colors['elbow_joint_angle'][1])
+                        if settings_colors['forearm_x_axis'][0]:
+                            left_value,right_value = drawing_object.yolo_forearm_x_axis(frame, yolo_landmarks, settings_colors['forearm_x_axis'][1])
+                        if settings_colors['shin_x_axis'][0]:
+                            left_value,right_value = drawing_object.yolo_shin_x_axis(frame, yolo_landmarks, settings_colors['shin_x_axis'][1])
+                        if settings_colors['thigh_x_axis'][0]:
+                            left_value,right_value = drawing_object.yolo_thigh_x_axis(frame, yolo_landmarks, settings_colors['thigh_x_axis'][1])
+                        if settings_colors['ear_hip_x_axis'][0]:
+                            value = drawing_object.yolo_ear_hip_x_axis(frame, yolo_landmarks, settings_colors['ear_hip_x_axis'][1])
+                        if settings_colors['distance_knee'][0]:
+                            value = drawing_object.yolo_distance_knee(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1],scale_factor)
+                        if settings_colors['distance_wrist_hip'][0]:
+                            left_value,right_value = drawing_object.yolo_distance_wrist_hip(frame, yolo_landmarks, settings_colors['distance_wrist_hip'][1],scale_factor)
+                        if settings_colors['ear_nose_x_axis'][0]:
+                            value = drawing_object.yolo_ear_nose_x_axis(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1])
         
         elif selectModel == 'mediapipe':
             mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)

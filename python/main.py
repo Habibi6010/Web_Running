@@ -92,6 +92,7 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
     # Define the codec and create VideoWriter object
     
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
+    
     out = cv2.VideoWriter(f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                           (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))  # Output file
     

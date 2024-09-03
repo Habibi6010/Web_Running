@@ -247,6 +247,7 @@
   });
 
 })();
+
 // add listener to user-details page to get user details when page load
 document.addEventListener('DOMContentLoaded', function () {
   // extract username from url
@@ -286,8 +287,7 @@ function handelSigninButton(event) {
     .then(data => {
       if (data.accsess) {
         alert('Login successful: \n' + email);
-        window.location.href = `user-details.html?username=${encodeURIComponent(email)}`;
-
+        window.location.href = `dashboard.html?username=${encodeURIComponent(email)}`;
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');
@@ -658,3 +658,19 @@ function check_radio() {
     }
   }
 }
+
+// add listener to view profile click and send username to profile page
+document.getElementById("videprofileLink").addEventListener("click", function (event) {
+  event.preventDefault();
+  const username = document.getElementById('usernameDisplay').innerText;
+  window.location.href = `profile.html?username=${encodeURIComponent(username)}`;
+});
+
+// add listener to profile page to get user details when page load
+document.addEventListener('DOMContentLoaded', function () {
+  // extract username from url
+  const urlParams = new URLSearchParams(window.location.search);
+  const username = urlParams.get('username') || 'No-Profile';
+  // Update span for show username
+  document.getElementById("usernameDisplay").innerText = username;
+});

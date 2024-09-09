@@ -75,10 +75,9 @@
 
 
     <section id="upload">
-
       <div class="container section-title" data-aos="fade-up">
         <h2>Upload File </h2>
-      </div><!-- End Section Title -->
+      </div>
       <div class="container_checkbox">
         <h4>Upload Your File</h4>
         <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
@@ -88,7 +87,12 @@
             <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
           </div>
       </div>
+    </section>
 
+    <section id="analysis">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Aanlysis Settings </h2>
+      </div>
       <div class="container_checkbox">
         <h4>Select AI Model</h4>
         <div class="form-group">
@@ -189,6 +193,16 @@
           </div>
         </div>
         </form>
+      </div>
+    </section>
+
+    <section id = "result" style="display: none;">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Analysis Result </h2>
+      </div>
+      <div class="container_checkbox">
+        <label for="resultVideo" style="display: block; margin-bottom: 10px;">Result Video:</label>
+        <video id="resultVideoPreview" controls style="display:none; width: 100%; margin-top: 20px;" type="video/mp4"></video>
       </div>
     </section>
   </main>

@@ -4,14 +4,24 @@ import json
 from drawing import drawing
 import cv2
 import threading
-
+import os
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+@app.route('/video_list', methods=['POST'])
+def video_list():
+    username = request.json.get('username')
+    print(username)
+    video_list = []
+    for file in os.listdir(VIDEO_SAVE_PATH):
+        if file.startswith(username):
+            video_list.append(file)
+    return jsonify({"video_list": video_list})
 
 
 @app.route('/')
 def index():
-    return jsonify({"message": "Saeed"})
+    return jsonify({"message": "Mostafa's API"})
 
 
 @app.route('/login', methods=['POST'])
@@ -47,142 +57,138 @@ VIDEO_SAVE_PATH = './received_videos/'
 def run_analysis():
 
     video_file = request.files.get('videoUpload')
-    # get the uploaded video file
-    if video_file:
-        video_file.save(VIDEO_SAVE_PATH + video_file.filename)
-        print('Video file saved successfully')
-    else:
-        print('No video file uploaded')
-        return jsonify({"response": False, "message": "No video file uploaded","link":None})
-
     username = request.form.get('username')
     height_runner = request.form.get('height_runner')
     selectedModel = request.form.get('selectedModel')
     settings_colors = request.form.get('settings_colors')
     settings_colors = json.loads(settings_colors) if settings_colors else {}
     print(height_runner, selectedModel, settings_colors)
-    
+    # get the uploaded video file
+    if video_file:
+        video_file.save(f'{VIDEO_SAVE_PATH}{username}_{video_file.filename}')
+        print('Video file saved successfully')
+    else:
+        print('No video file uploaded')
+        return jsonify({"response": False, "message": "No video file uploaded","link":None})
     # Need to Connect to Database to save the data
     text=""
-    # text=running_model(height_runner, selectedModel,
-    #              settings_colors,video_file.filename)
-    threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
-
-    return jsonify({"response": True, "message": text,"link":ANALYZED_VIDEO_SAVE_PATH+video_file.filename})
+    text,response,write_file_name=running_model(height_runner, selectedModel,
+                 settings_colors,video_file.filename,username)
+    print(text)
+    print(response)
+    print("file: "+write_file_name)
+    # threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
+    return jsonify({"response": response, "message": text,"link":write_file_name+".mp4"})
 
 
 def background_analysis(height_runner, selected_model, settings_colors, video_name,username):
     # Running model analysis in the background
-    result_text = running_model(height_runner, selected_model, settings_colors, video_name,username)
+    result_text,response = running_model(height_runner, selected_model, settings_colors, video_name,username)
     print(result_text)
+    print(response)
     # Here you can add any additional logic such as notifying users via a webhook or other mechanisms.
 
 
 
 # Define a directory to save the video files after analysis
-ANALYZED_VIDEO_SAVE_PATH = './analyzed_videos/'
+ANALYZED_VIDEO_SAVE_PATH = 'video/'
 def running_model(height_runner, selectModel, settings_colors, video_name,username):
     drawing_object = drawing()
-    cap = cv2.VideoCapture(VIDEO_SAVE_PATH+video_name)
+    cap = cv2.VideoCapture(f'{VIDEO_SAVE_PATH}{username}_{video_name}')
+    print(VIDEO_SAVE_PATH+video_name)
     # Check if the video opened successfully
     if not cap.isOpened():
         print("Error: Could not open video.")
-        exit()
-    
-    # Define the codec and create VideoWriter object
-    
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
-    
-    out = cv2.VideoWriter(f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
-                          (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))  # Output file
-    
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        # Run yolo model
-        yolo_landmarkss,bounding_boxs = drawing_object.yolo_landmark_detection(frame)
-        if len(bounding_boxs)!=0:
-            w,y,x,h=bounding_boxs[0][:4]
-            scale_factor = float(height_runner)/float(h-y)
-        else:
-            scale_factor = 0.0
-        if selectModel == 'yolo':
-                for yolo_landmarks in yolo_landmarkss:
-                    if len(yolo_landmarks)>0:
-                        if settings_colors['knee_joint_angle'][0]:
-                            left_value,right_value = drawing_object.yolo_knee_joint_angle(frame, yolo_landmarks, settings_colors['knee_joint_angle'][1])
-                        if settings_colors['between_thigh_angle'][0]:
-                            value = drawing_object.yolo_between_thigh_angle(frame, yolo_landmarks, settings_colors['between_thigh_angle'][1])
-                        if settings_colors['elbow_joint_angle'][0]:
-                            left_value,right_value = drawing_object.yolo_elbow_joint_angle(frame, yolo_landmarks, settings_colors['elbow_joint_angle'][1])
-                        if settings_colors['forearm_x_axis'][0]:
-                            left_value,right_value = drawing_object.yolo_forearm_x_axis(frame, yolo_landmarks, settings_colors['forearm_x_axis'][1])
-                        if settings_colors['shin_x_axis'][0]:
-                            left_value,right_value = drawing_object.yolo_shin_x_axis(frame, yolo_landmarks, settings_colors['shin_x_axis'][1])
-                        if settings_colors['thigh_x_axis'][0]:
-                            left_value,right_value = drawing_object.yolo_thigh_x_axis(frame, yolo_landmarks, settings_colors['thigh_x_axis'][1])
-                        if settings_colors['ear_hip_x_axis'][0]:
-                            value = drawing_object.yolo_ear_hip_x_axis(frame, yolo_landmarks, settings_colors['ear_hip_x_axis'][1])
-                        if settings_colors['distance_knee'][0]:
-                            value = drawing_object.yolo_distance_knee(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1],scale_factor)
-                        if settings_colors['distance_wrist_hip'][0]:
-                            left_value,right_value = drawing_object.yolo_distance_wrist_hip(frame, yolo_landmarks, settings_colors['distance_wrist_hip'][1],scale_factor)
-                        if settings_colors['ear_nose_x_axis'][0]:
-                            value = drawing_object.yolo_ear_nose_x_axis(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1])
+        return("Error: Could not open video.",False,"")
+    try:
         
-        elif selectModel == 'mediapipe':
-            mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
-            if (len(mediapipe_landmarks)>0):
-                    if(settings_colors["foot_ground_angle"][0]):
-                        left_value,right_value=drawing_object.foot_ground_angle_mediapipe(frame,mediapipe_landmarks,settings_colors["foot_ground_angle"][1])
-
-                    if(settings_colors["knee_joint_angle"][0]):
-                        left_value,right_value=drawing_object.mediapipe_knee_joint_angle(frame,mediapipe_landmarks,settings_colors["knee_joint_angle"][1])
-
-                    if(settings_colors["between_thigh_angle"][0]):
-                        value=drawing_object.mediapipe_between_thigh_angle(frame,mediapipe_landmarks,settings_colors["between_thigh_angle"][1])
-
-                    if(settings_colors["knee_toe_angle"][0]):
-                        left_value,right_value=drawing_object.mediapipe_knee_toe_angle(frame,mediapipe_landmarks,settings_colors["knee_toe_angle"][1])
-                        
-                    if(settings_colors["elbow_joint_angle"][0]):
-                        left_value,right_value=drawing_object.mediapipe_elbow_joint_angle(frame,mediapipe_landmarks,settings_colors["elbow_joint_angle"][1])
-                        
-                    if(settings_colors["flexion_foot"][0]):
-                        left_value,right_value=drawing_object.mediapipe_flexion_foot(frame,mediapipe_landmarks,settings_colors["flexion_foot"][1])
-
-                    if(settings_colors["forearm_x_axis"][0]):
-                        left_value,right_value=drawing_object.mediapipe_forearm_x_axis(frame,mediapipe_landmarks,settings_colors["forearm_x_axis"][1])
-                    
-                    if(settings_colors["shin_x_axis"][0]):
-                        left_value,right_value=drawing_object.mediapipe_shin_x_axis(frame,mediapipe_landmarks,settings_colors["shin_x_axis"][1])
-
-                    if(settings_colors["thigh_x_axis"][0]):
-                        left_value,right_value=drawing_object.mediapipe_thigh_x_axis(frame,mediapipe_landmarks,settings_colors["thigh_x_axis"][1])
-
-                    if(settings_colors["ear_hip_x_axis"][0]):
-                        value=drawing_object.mediapipe_ear_hip_x_axis(frame,mediapipe_landmarks,settings_colors["ear_hip_x_axis"][1])
-
-                    if(settings_colors["distance_knee"][0]):
-                        value=drawing_object.mediapipe_distance_knee(frame,mediapipe_landmarks,settings_colors["distance_knee"][1],scale_factor)
-
-                    if(settings_colors["distance_heel_hip"][0]):
-                        left_value,right_value=drawing_object.mediapipe_distance_heel_hip(frame,mediapipe_landmarks,settings_colors["distance_heel_hip"][1],scale_factor)
-
-                    if(settings_colors["distance_wrist_hip"][0]):
-                        left_value,right_value=drawing_object.mediapipe_distance_wrist_hip(frame,mediapipe_landmarks,settings_colors["distance_wrist_hip"][1],scale_factor)
-
-                    if(settings_colors['ear_nose_x_axis'][0]):
-                        value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
-                        
-        out.write(frame)
-        # cv2.imshow('frame', frame)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
-    cap.release()
-    out.release()
-    return("Analysis Done")
+        # Define the codec and create VideoWriter object
+        counter=0
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
+        write_file_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
+        while os.path.exists(f'{write_file_name}.mp4'):
+            counter+=1
+            write_file_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
+        
+        out = cv2.VideoWriter(f'{write_file_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+                            (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))  # Output file
+        
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            # Run yolo model
+            yolo_landmarkss,bounding_boxs = drawing_object.yolo_landmark_detection(frame)
+            if len(bounding_boxs)!=0:
+                w,y,x,h=bounding_boxs[0][:4]
+                scale_factor = float(height_runner)/float(h-y)
+            else:
+                scale_factor = 0.0
+            if selectModel == 'yolo':
+                    for yolo_landmarks in yolo_landmarkss:
+                        if len(yolo_landmarks)>0:
+                            if settings_colors['knee_joint_angle'][0]:
+                                left_value,right_value = drawing_object.yolo_knee_joint_angle(frame, yolo_landmarks, settings_colors['knee_joint_angle'][1])
+                            if settings_colors['between_thigh_angle'][0]:
+                                value = drawing_object.yolo_between_thigh_angle(frame, yolo_landmarks, settings_colors['between_thigh_angle'][1])
+                            if settings_colors['elbow_joint_angle'][0]:
+                                left_value,right_value = drawing_object.yolo_elbow_joint_angle(frame, yolo_landmarks, settings_colors['elbow_joint_angle'][1])
+                            if settings_colors['forearm_x_axis'][0]:
+                                left_value,right_value = drawing_object.yolo_forearm_x_axis(frame, yolo_landmarks, settings_colors['forearm_x_axis'][1])
+                            if settings_colors['shin_x_axis'][0]:
+                                left_value,right_value = drawing_object.yolo_shin_x_axis(frame, yolo_landmarks, settings_colors['shin_x_axis'][1])
+                            if settings_colors['thigh_x_axis'][0]:
+                                left_value,right_value = drawing_object.yolo_thigh_x_axis(frame, yolo_landmarks, settings_colors['thigh_x_axis'][1])
+                            if settings_colors['ear_hip_x_axis'][0]:
+                                value = drawing_object.yolo_ear_hip_x_axis(frame, yolo_landmarks, settings_colors['ear_hip_x_axis'][1])
+                            if settings_colors['distance_knee'][0]:
+                                value = drawing_object.yolo_distance_knee(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1],scale_factor)
+                            if settings_colors['distance_wrist_hip'][0]:
+                                left_value,right_value = drawing_object.yolo_distance_wrist_hip(frame, yolo_landmarks, settings_colors['distance_wrist_hip'][1],scale_factor)
+                            if settings_colors['ear_nose_x_axis'][0]:
+                                value = drawing_object.yolo_ear_nose_x_axis(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1])
+            
+            elif selectModel == 'mediapipe':
+                mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
+                if (len(mediapipe_landmarks)>0):
+                        if(settings_colors["foot_ground_angle"][0]):
+                            left_value,right_value=drawing_object.foot_ground_angle_mediapipe(frame,mediapipe_landmarks,settings_colors["foot_ground_angle"][1])
+                        if(settings_colors["knee_joint_angle"][0]):
+                            left_value,right_value=drawing_object.mediapipe_knee_joint_angle(frame,mediapipe_landmarks,settings_colors["knee_joint_angle"][1])
+                        if(settings_colors["between_thigh_angle"][0]):
+                            value=drawing_object.mediapipe_between_thigh_angle(frame,mediapipe_landmarks,settings_colors["between_thigh_angle"][1])
+                        if(settings_colors["knee_toe_angle"][0]):
+                            left_value,right_value=drawing_object.mediapipe_knee_toe_angle(frame,mediapipe_landmarks,settings_colors["knee_toe_angle"][1])
+                        if(settings_colors["elbow_joint_angle"][0]):
+                            left_value,right_value=drawing_object.mediapipe_elbow_joint_angle(frame,mediapipe_landmarks,settings_colors["elbow_joint_angle"][1])
+                        if(settings_colors["flexion_foot"][0]):
+                            left_value,right_value=drawing_object.mediapipe_flexion_foot(frame,mediapipe_landmarks,settings_colors["flexion_foot"][1])
+                        if(settings_colors["forearm_x_axis"][0]):
+                            left_value,right_value=drawing_object.mediapipe_forearm_x_axis(frame,mediapipe_landmarks,settings_colors["forearm_x_axis"][1])
+                        if(settings_colors["shin_x_axis"][0]):
+                            left_value,right_value=drawing_object.mediapipe_shin_x_axis(frame,mediapipe_landmarks,settings_colors["shin_x_axis"][1])
+                        if(settings_colors["thigh_x_axis"][0]):
+                            left_value,right_value=drawing_object.mediapipe_thigh_x_axis(frame,mediapipe_landmarks,settings_colors["thigh_x_axis"][1])
+                        if(settings_colors["ear_hip_x_axis"][0]):
+                            value=drawing_object.mediapipe_ear_hip_x_axis(frame,mediapipe_landmarks,settings_colors["ear_hip_x_axis"][1])
+                        if(settings_colors["distance_knee"][0]):
+                            value=drawing_object.mediapipe_distance_knee(frame,mediapipe_landmarks,settings_colors["distance_knee"][1],scale_factor)
+                        if(settings_colors["distance_heel_hip"][0]):
+                            left_value,right_value=drawing_object.mediapipe_distance_heel_hip(frame,mediapipe_landmarks,settings_colors["distance_heel_hip"][1],scale_factor)
+                        if(settings_colors["distance_wrist_hip"][0]):
+                            left_value,right_value=drawing_object.mediapipe_distance_wrist_hip(frame,mediapipe_landmarks,settings_colors["distance_wrist_hip"][1],scale_factor)
+                        if(settings_colors['ear_nose_x_axis'][0]):
+                            value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
+            out.write(frame)
+            # cv2.imshow('frame', frame)
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
+        cap.release()
+        out.release()
+        return("Analysis Done",True,write_file_name)
+    except Exception as e:
+        print(f"Error: {e}")
+        return(f"Error: {e}",False,"")
 
 
 if __name__ == '__main__':

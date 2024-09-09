@@ -586,6 +586,10 @@ function sendData(event) {
   // Get usrname from usernameeDisplay span
   const username = document.getElementById('usernameDisplay').innerText;
 
+  // Get active section
+  const active_section = document.getElementById('result');
+  //Get result video preview
+  const resultVideoPreview = document.getElementById('resultVideoPreview');
   // Manually add the selected checkboxes and colors to the formData
   const settings_colors = {};
 
@@ -609,15 +613,24 @@ function sendData(event) {
     .then(data => {
       console.log('Success:', data);
       if (data.response) {
-        alert('Data sent successfully');
+        // alert('Data sent successfully and Model is running');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
+        //Show reslut video
+        active_section.style.display = 'block';
+        resultVideoPreview.style.display = 'block';      
+        resultVideoPreview.src = data.link;
+        console.log(data.link);
+        resultVideoPreview.load();
+        resultVideoPreview.play();
       } else {
         alert('Data sent failed');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
+        active_section.style.display = 'none';
+        resultVideoPreview.style.display = 'none';
       }
     })
     .catch(error => {
@@ -626,6 +639,8 @@ function sendData(event) {
       // Hide the loading GIF
       loading.style.display = 'none';
       loading2.style.display = 'none';
+      active_section.style.display = 'none';
+      resultVideoPreview.style.display = 'none';
     });
 }
 
@@ -643,6 +658,7 @@ function check_yolo(checkbox, text) {
     checkbox.checked = false
   }
 }
+
 function check_radio() {
   if (document.querySelector('input[name="model"]:checked').value == 'yolo') {
     let set1 = document.getElementById("setting1");

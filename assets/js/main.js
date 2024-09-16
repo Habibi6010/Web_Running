@@ -619,11 +619,24 @@ function sendData(event) {
         loading2.style.display = 'none';
         //Show reslut video
         active_section.style.display = 'block';
-        resultVideoPreview.style.display = 'block';      
-        resultVideoPreview.src = data.link;
+        resultVideoPreview.style.display = 'block';
         console.log(data.link);
+        resultVideoPreview.src = data.link;
         resultVideoPreview.load();
         resultVideoPreview.play();
+
+        // Download result video link
+        downloadLink = document.getElementById('downloadResultVideo');
+        downloadLink.href = data.link;
+        downloadLink.download = data.link.split('/').pop(); // Extract file name from path
+        downloadLink.style.display = 'inline-block'; // Show the download link
+
+        // Download the CSV file link
+        downloadLink = document.getElementById('downloadResultCSV');
+        downloadLink.href = data.csvaddress;
+        downloadLink.download = data.csvaddress.split('/').pop(); // Extract file name from path
+        downloadLink.style.display = 'inline-block'; // Show the download link
+
       } else {
         alert('Data sent failed');
         // Hide the loading GIF

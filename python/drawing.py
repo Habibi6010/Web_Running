@@ -28,7 +28,7 @@ class drawing:
         if landmarks:
             # draw landmarks in frame
             mediapipe_landmarks = [
-                [landmark.x, landmark.y, landmark.z] for landmark in landmarks]
+                [landmark.x, landmark.y, landmark.z,landmark.visibility] for landmark in landmarks]
         else:
             mediapipe_landmarks = []
         return mediapipe_landmarks

@@ -5,6 +5,8 @@ from drawing import drawing
 import cv2
 import threading
 import os
+import pandas as pd
+from Analysis_Landmarks_Pusture import Analysis_Landmarks
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
@@ -105,18 +107,28 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         # Define the codec and create VideoWriter object
         counter=0
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
-        write_file_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
-        while os.path.exists(f'{write_file_name}.mp4'):
+        write_folder_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
+        while os.path.exists(f'{write_folder_name}'):
             counter+=1
-            write_file_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
+            write_folder_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}_{selectModel}_{video_name.split(".")[0]}_{counter}'
         
-        out = cv2.VideoWriter(f'{write_file_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
-                            (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))  # Output file
-        
+        # create new folder for save analyzed video
+        os.makedirs(write_folder_name)
+        write_file_name = write_folder_name.split("/")[1]
+        width=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        out = cv2.VideoWriter(f'{write_folder_name}/{write_file_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+                            (width,height))  # Output file
+        df_toe_off = pd.DataFrame()
+        df_full_flight = pd.DataFrame()
+        df_touch_down = pd.DataFrame()
+        df_full_support = pd.DataFrame()
+        frame_number=0
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
+            frame_number+=1
             # Run yolo model
             yolo_landmarkss,bounding_boxs = drawing_object.yolo_landmark_detection(frame)
             if len(bounding_boxs)!=0:
@@ -147,7 +159,27 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
                                 left_value,right_value = drawing_object.yolo_distance_wrist_hip(frame, yolo_landmarks, settings_colors['distance_wrist_hip'][1],scale_factor)
                             if settings_colors['ear_nose_x_axis'][0]:
                                 value = drawing_object.yolo_ear_nose_x_axis(frame, yolo_landmarks, settings_colors['ear_nose_x_axis'][1])
-            
+                            # Extract Features for posture analysis
+                            dic={}
+                            dic = Analysis_Landmarks.yolo_toe_off(yolo_landmarks,scale_factor)
+                            dic['frame'] = frame_number
+                            df_temp = pd.DataFrame([dic])
+                            df_toe_off = pd.concat([df_toe_off,df_temp],ignore_index=True)
+                            dic={}
+                            dic = Analysis_Landmarks.yolo_full_flight(yolo_landmarks,scale_factor)
+                            dic['frame'] = frame_number
+                            df_temp = pd.DataFrame([dic])
+                            df_full_flight = pd.concat([df_full_flight,df_temp],ignore_index=True)
+                            dic={}
+                            dic=Analysis_Landmarks.yolo_touch_down(yolo_landmarks)
+                            dic['frame']=frame_number
+                            df_temp = pd.DataFrame([dic])
+                            df_touch_down = pd.concat([df_touch_down,df_temp],ignore_index=True)
+                            dic={}
+                            dic=Analysis_Landmarks.yolo_full_support(yolo_landmarks,scale_factor)
+                            dic['frame']=frame_number
+                            df_temp = pd.DataFrame([dic])
+                            df_full_support = pd.concat([df_full_support,df_temp],ignore_index=True)
             elif selectModel == 'mediapipe':
                 mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
                 if (len(mediapipe_landmarks)>0):
@@ -179,13 +211,38 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
                             left_value,right_value=drawing_object.mediapipe_distance_wrist_hip(frame,mediapipe_landmarks,settings_colors["distance_wrist_hip"][1],scale_factor)
                         if(settings_colors['ear_nose_x_axis'][0]):
                             value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
+                        # Extract Features for posture analysis
+                        dic={}
+                        dic=Analysis_Landmarks.mediapipe_toe_off(mediapipe_landmarks,width,height,scale_factor)
+                        dic['frame']=frame_number
+                        df = pd.DataFrame([dic])
+                        df_toe_off = pd.concat([df_toe_off,df],ignore_index=True)
+                        dic={}
+                        dic = Analysis_Landmarks.mediapipe_full_flight(mediapipe_landmarks,width,height,scale_factor)
+                        dic['frame']=frame_number
+                        df = pd.DataFrame([dic])
+                        df_full_flight = pd.concat([df_full_flight,df],ignore_index=True)
+                        dic={}
+                        dic = Analysis_Landmarks.mediapipe_touch_down(mediapipe_landmarks,width,height)
+                        dic['frame']=frame_number
+                        df = pd.DataFrame([dic])
+                        df_touch_down = pd.concat([df_touch_down,df],ignore_index=True)
+                        dic={}
+                        dic = Analysis_Landmarks.mediapipe_full_support(mediapipe_landmarks,width,height,scale_factor)
+                        dic['frame']=frame_number
+                        df = pd.DataFrame([dic])
+                        df_full_support = pd.concat([df_full_support,df],ignore_index=True)
             out.write(frame)
+            df_toe_off.to_csv(f'{write_folder_name}/toe_off.csv',index=False)
+            df_full_support.to_csv(f'{write_folder_name}/full_support.csv',index=False)
+            df_full_flight.to_csv(f'{write_folder_name}/full_flight.csv',index=False)
+            df_touch_down.to_csv(f'{write_folder_name}/touch_down.csv',index=False)
             # cv2.imshow('frame', frame)
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         cap.release()
         out.release()
-        return("Analysis Done",True,write_file_name)
+        return("Analysis Done",True,f'{write_folder_name}/{write_file_name}')
     except Exception as e:
         print(f"Error: {e}")
         return(f"Error: {e}",False,"")

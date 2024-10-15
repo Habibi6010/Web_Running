@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -22,8 +22,8 @@ def video_list():
 
 
 @app.route('/')
-def index():
-    return jsonify({"message": "Mostafa's API"})
+def home():
+    return render_template('index.html')
 
 
 @app.route('/login', methods=['POST'])
@@ -252,4 +252,4 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         return(f"Error: {e}",False,"")
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host="0.0.0.0",port=5000,debug=False)

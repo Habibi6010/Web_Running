@@ -7,7 +7,7 @@ import threading
 import os
 import pandas as pd
 from Analysis_Landmarks_Pusture import Analysis_Landmarks
-app = Flask(__name__)
+app = Flask(__name__,static_folder='static',template_folder='templates')
 CORS(app)  # Enable CORS for all routes
 
 @app.route('/video_list', methods=['POST'])

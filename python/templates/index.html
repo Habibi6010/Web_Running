@@ -8,9 +8,11 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
+  <link rel="stylesheet" media="all" href="{{ url_for('static', filename='css_image/asdf.css')}}">
+
   <!-- Favicons -->
-  <link href="./assets/img/favi.png" rel="icon">
-  <link href="./assets/img/logo.png" rel="apple-touch-icon">
+  <link href="{{ url_for('static', filename='/img/favi.png')}}" rel="icon">
+  <link href="{{ url_for('static', filename='img/logo.png')}}" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">

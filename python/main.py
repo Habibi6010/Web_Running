@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -122,10 +122,8 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         out = cv2.VideoWriter(f'{write_folder_name}/{write_file_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                             (width,height))  # Output file
-        df_toe_off = pd.DataFrame()
-        df_full_flight = pd.DataFrame()
-        df_touch_down = pd.DataFrame()
-        df_full_support = pd.DataFrame()
+        
+        df_posture_features = pd.DataFrame()
         df_all_data = pd.DataFrame()
         frame_number=0
         while True:
@@ -180,25 +178,10 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
                             df_all_data = pd.concat([df_all_data,df_temp],ignore_index=True)
                             
                             dic={}
-                            dic = Analysis_Landmarks.yolo_toe_off(yolo_landmarks,scale_factor)
+                            dic = Analysis_Landmarks.yolo_feature_selection(yolo_landmarks,scale_factor)
                             dic['frame'] = frame_number
                             df_temp = pd.DataFrame([dic])
-                            df_toe_off = pd.concat([df_toe_off,df_temp],ignore_index=True)
-                            dic={}
-                            dic = Analysis_Landmarks.yolo_full_flight(yolo_landmarks,scale_factor)
-                            dic['frame'] = frame_number
-                            df_temp = pd.DataFrame([dic])
-                            df_full_flight = pd.concat([df_full_flight,df_temp],ignore_index=True)
-                            dic={}
-                            dic=Analysis_Landmarks.yolo_touch_down(yolo_landmarks)
-                            dic['frame']=frame_number
-                            df_temp = pd.DataFrame([dic])
-                            df_touch_down = pd.concat([df_touch_down,df_temp],ignore_index=True)
-                            dic={}
-                            dic=Analysis_Landmarks.yolo_full_support(yolo_landmarks,scale_factor)
-                            dic['frame']=frame_number
-                            df_temp = pd.DataFrame([dic])
-                            df_full_support = pd.concat([df_full_support,df_temp],ignore_index=True)
+                            df_posture_features = pd.concat([df_posture_features,df_temp],ignore_index=True)
             elif selectModel == 'mediapipe':
                 mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
                 if (len(mediapipe_landmarks)>0):
@@ -248,38 +231,21 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
                         dic_all_data['frame'] = frame_number
                         df_temp=pd.DataFrame([dic_all_data])
                         df_all_data = pd.concat([df_all_data,df_temp],ignore_index=True)
-                        
-                        dic={}
-                        dic=Analysis_Landmarks.mediapipe_toe_off(mediapipe_landmarks,width,height,scale_factor)
-                        dic['frame']=frame_number
-                        df = pd.DataFrame([dic])
-                        df_toe_off = pd.concat([df_toe_off,df],ignore_index=True)
-                        dic={}
-                        dic = Analysis_Landmarks.mediapipe_full_flight(mediapipe_landmarks,width,height,scale_factor)
-                        dic['frame']=frame_number
-                        df = pd.DataFrame([dic])
-                        df_full_flight = pd.concat([df_full_flight,df],ignore_index=True)
-                        dic={}
-                        dic = Analysis_Landmarks.mediapipe_touch_down(mediapipe_landmarks,width,height)
-                        dic['frame']=frame_number
-                        df = pd.DataFrame([dic])
-                        df_touch_down = pd.concat([df_touch_down,df],ignore_index=True)
-                        dic={}
-                        dic = Analysis_Landmarks.mediapipe_full_support(mediapipe_landmarks,width,height,scale_factor)
-                        dic['frame']=frame_number
-                        df = pd.DataFrame([dic])
-                        df_full_support = pd.concat([df_full_support,df],ignore_index=True)
+                        dic = {}
+                        dic = Analysis_Landmarks.mediapipe_feature_selection(mediapipe_landmarks,width,height,scale_factor)
+                        dic['frame'] = frame_number
+                        df_temp = pd.DataFrame([dic])
+                        df_posture_features = pd.concat([df_posture_features,df_temp],ignore_index=True)
             out.write(frame)
-            df_toe_off.to_csv(f'{write_folder_name}/toe_off.csv',index=False)
-            df_full_support.to_csv(f'{write_folder_name}/full_support.csv',index=False)
-            df_full_flight.to_csv(f'{write_folder_name}/full_flight.csv',index=False)
-            df_touch_down.to_csv(f'{write_folder_name}/touch_down.csv',index=False)
             df_all_data.to_csv(f'{write_folder_name}/all_data.csv',index=False)
+            df_posture_features.to_csv(f'{write_folder_name}/posture_features.csv',index=False)
+            
             # cv2.imshow('frame', frame)
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         cap.release()
         out.release()
+        
         return("Analysis Done",True,f'{write_folder_name}/{write_file_name}')
     except Exception as e:
         print(f"Error: {e}")

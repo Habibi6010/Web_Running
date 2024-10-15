@@ -276,7 +276,7 @@ function handelSigninButton(event) {
     email,
     password
   }
-  fetch('http://localhost:5001/login', {
+  fetch('http://127.0.0.1:5001/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -294,7 +294,7 @@ function handelSigninButton(event) {
       }
     })
     .catch(error => {
-      alert("Server Error");
+      alert("Server Error"+error.message);
     });
 }
 
@@ -349,7 +349,7 @@ function handelContactUsButton(event) {
     subject,
     message
   }
-  fetch('http://localhost:5001/contact_us', {
+  fetch('http://127.0.0.1:5001/contact_us', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -605,7 +605,7 @@ function sendData(event) {
   formData.append('username', username);
   
   // Send the data to the server
-  fetch('http://localhost:5001/run_analysis', {
+  fetch('http://127.0.0.1:5001/run_analysis', {
     method: 'POST',
     body: formData
   })
@@ -648,7 +648,7 @@ function sendData(event) {
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('Data sent failed');
+      alert("Data sent failed".error.message);
       // Hide the loading GIF
       loading.style.display = 'none';
       loading2.style.display = 'none';

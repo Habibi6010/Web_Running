@@ -276,7 +276,7 @@ function handelSigninButton(event) {
     email,
     password
   }
-  fetch('http://localhost:5000/login', {
+  fetch('http://localhost:5001/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -349,7 +349,7 @@ function handelContactUsButton(event) {
     subject,
     message
   }
-  fetch('http://localhost:5000/contact_us', {
+  fetch('http://localhost:5001/contact_us', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -605,7 +605,7 @@ function sendData(event) {
   formData.append('username', username);
   
   // Send the data to the server
-  fetch('http://localhost:5000/run_analysis', {
+  fetch('http://localhost:5001/run_analysis', {
     method: 'POST',
     body: formData
   })

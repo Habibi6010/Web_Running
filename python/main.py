@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template,send_from_directory
+from flask import Flask, jsonify, request, render_template,send_file
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -21,10 +21,50 @@ def video_list():
     return jsonify({"video_list": video_list})
 
 
-@app.route('/video/<path:filename>')
+@app.route('/video/<path:filename>', methods=['GET'])
 def serve_video(filename):
-    video_folder = '/home/ubuntu/Web_Running/python/video'
-    return send_from_directory(video_folder, filename)
+    file_path = os.path.join(VIDEO_FOLDER, filename)
+
+    if not os.path.exists(file_path):
+        return abort(404)
+
+    # Get the range header from the request
+    range_header = request.headers.get('Range', None)
+
+    if range_header:
+        # Parse the range
+        range_match = re.search(r'bytes=(\d+)-(\d*)', range_header)
+        if range_match:
+            start, end = range_match.groups()
+            start = int(start)
+            if end:
+                end = int(end)
+            else:
+                end = os.path.getsize(file_path) - 1  # Set end to file size
+
+            # Ensure the end does not exceed the file size
+            end = min(end, os.path.getsize(file_path) - 1)
+
+            # Calculate the length of the content to send
+            length = end - start + 1
+            with open(file_path, 'rb') as f:
+                f.seek(start)
+                data = f.read(length)
+            # Return the data with 206 Partial Content status
+            response = send_file(
+                file_path,
+                as_attachment=False,
+                conditional=True,
+                add_etags=False,
+                cache_timeout=0,
+                mimetype='video/mp4'
+            )
+            response.status_code = 206  # Partial Content
+            response.headers['Content-Range'] = f'bytes {start}-{end}/{os.path.getsize(file_path)}'
+            return response
+
+    # If no range header, serve the full file
+    return send_file(file_path)
 
 @app.route('/')
 def home():

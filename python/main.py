@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template,send_from_directory
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -20,6 +20,11 @@ def video_list():
             video_list.append(file)
     return jsonify({"video_list": video_list})
 
+
+@app.route('/video/<path:filename>')
+def serve_video(filename):
+    video_folder = '/home/ubuntu/Web_Running/python/video'
+    return send_from_directory(video_folder, filename)
 
 @app.route('/')
 def home():

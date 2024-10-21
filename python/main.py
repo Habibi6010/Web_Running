@@ -20,7 +20,7 @@ def video_list():
             video_list.append(file)
     return jsonify({"video_list": video_list})
 
-
+VIDEO_FOLDER = '/home/ubuntu/Web_Running/python/video'
 @app.route('/video/<path:filename>', methods=['GET'])
 def serve_video(filename):
     file_path = os.path.join(VIDEO_FOLDER, filename)

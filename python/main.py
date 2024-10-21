@@ -23,7 +23,7 @@ def video_list():
 
 @app.route('/video/<path:filename>')
 def serve_video(filename):
-    video_folder = '/home/ubuntu/Web_Running/python/video'
+    video_folder = '/home/ubuntu/Web_Running/python/video/'
     print(f"{video_folder}{filename}")
     return send_from_directory(video_folder, filename)
 

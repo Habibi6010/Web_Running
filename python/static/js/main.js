@@ -276,7 +276,7 @@ function handelSigninButton(event) {
     email,
     password
   }
-  fetch('http://18.117.96.107:5001/login', {
+  fetch('http://3.139.68.203:5001/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -287,7 +287,7 @@ function handelSigninButton(event) {
     .then(data => {
       if (data.accsess) {
         alert('Login successful: \n' + email);
-        window.location.href = `http://18.117.96.107:5001/dashboard?username=${encodeURIComponent(email)}`;
+        window.location.href = `http://3.139.68.203:5001/dashboard?username=${encodeURIComponent(email)}`;
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');
@@ -349,7 +349,7 @@ function handelContactUsButton(event) {
     subject,
     message
   }
-  fetch('http://18.117.96.107:5001/contact_us', {
+  fetch('http://3.139.68.203:5001/contact_us', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -605,7 +605,7 @@ function sendData(event) {
   formData.append('username', username);
   
   // Send the data to the server
-  fetch('http://18.117.96.107:5001/run_analysis', {
+  fetch('http://3.139.68.203:5001/run_analysis', {
     method: 'POST',
     body: formData
   })

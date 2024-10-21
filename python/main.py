@@ -25,6 +25,11 @@ def video_list():
 def home():
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -36,6 +41,7 @@ def login():
         return jsonify({"accsess": True})
     else:
         return jsonify({"accsess": False})
+
 
 
 @app.route('/contact_us', methods=['POST'])

@@ -287,7 +287,7 @@ function handelSigninButton(event) {
     .then(data => {
       if (data.accsess) {
         alert('Login successful: \n' + email);
-        window.location.href = `dashboard.html?username=${encodeURIComponent(email)}`;
+        window.location.href = `http://18.117.96.107:5001/dashboard?username=${encodeURIComponent(email)}`;
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');

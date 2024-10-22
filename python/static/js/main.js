@@ -627,14 +627,14 @@ function sendData(event) {
 
         // Download result video link
         downloadLink = document.getElementById('downloadResultVideo');
-        downloadLink.href = "{{ url_for('download_video/',filename = "+data.videoaddress+")}}";
-        //downloadLink.download = data.link.split('/').pop(); // Extract file name from path
+        downloadLink.href = "download_video/"+data.videoaddress;
+        //downloadLink.download = data.link.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 
         // Download the CSV file link
         downloadLink = document.getElementById('downloadResultCSV');
-        downloadLink.href = "{{ url_for('download_csv/',filename = "+data.csvaddress+")}}";
-        // downloadLink.download = data.csvaddress.split('/').pop(); // Extract file name from path
+        downloadLink.href = "download_csv/"+data.csvaddress;
+        // downloadLink.download = data.csvaddress.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 
       } else {

@@ -21,9 +21,12 @@ def video_list():
             video_list.append(file)
     return jsonify({"video_list": video_list})
 
+@app.route('/index.html')
+def home():
+    return render_template('index.html')
 
 @app.route('/')
-def home():
+def root():
     return render_template('index.html')
 
 @app.route('/dashboard')

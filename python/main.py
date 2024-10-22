@@ -6,6 +6,7 @@ import cv2
 import threading
 import os
 import pandas as pd
+import urllib.parse
 from Analysis_Landmarks_Pusture import Analysis_Landmarks
 app = Flask(__name__,static_folder='static',template_folder='templates')
 CORS(app)  # Enable CORS for all routes
@@ -20,12 +21,6 @@ def video_list():
             video_list.append(file)
     return jsonify({"video_list": video_list})
 
-
-@app.route('/video/<path:filename>')
-def serve_video(filename):
-    video_folder = '/home/ubuntu/Web_Running/python/video/'
-    print(f"{video_folder}{filename}")
-    return send_from_directory(video_folder, filename)
 
 @app.route('/')
 def home():
@@ -64,7 +59,7 @@ def contact_us():
 
 
 # Define a directory to save the video files
-VIDEO_SAVE_PATH = './received_videos/'
+VIDEO_SAVE_PATH = 'received_videos/'
 
 
 @app.route('/run_analysis', methods=['POST'])
@@ -77,6 +72,11 @@ def run_analysis():
     settings_colors = request.form.get('settings_colors')
     settings_colors = json.loads(settings_colors) if settings_colors else {}
     print(height_runner, selectedModel, settings_colors)
+    if not os.path.exists(VIDEO_SAVE_PATH):
+        os.makedirs(VIDEO_SAVE_PATH)
+        print(f"Folder created: {VIDEO_SAVE_PATH}")
+    else:
+        print(f"Folder already exists: {VIDEO_SAVE_PATH}")
     # get the uploaded video file
     if video_file:
         video_file.save(f'{VIDEO_SAVE_PATH}{username}_{video_file.filename}')
@@ -88,14 +88,9 @@ def run_analysis():
     text=""
     text,response,write_file_name=running_model(height_runner, selectedModel,
                  settings_colors,video_file.filename,username)
-    print(text)
-    print(response)
-    print("file: "+os.path.abspath(write_file_name)+".mp4")
- 
-    csvaddress = write_file_name.rsplit('/',1)[0]+"/all_data.csv"
-    print(f'csv file: {csvaddress}')
+    print(f'file: {write_file_name}')
     # threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
-    return jsonify({"response": response, "message": text,"link":os.path.abspath(write_file_name)+".mp4","csvaddress":csvaddress})
+    return jsonify({"response": response, "message": text,"videoaddress":write_file_name,"csvaddress":write_file_name})
 
 
 def background_analysis(height_runner, selected_model, settings_colors, video_name,username):
@@ -105,6 +100,19 @@ def background_analysis(height_runner, selected_model, settings_colors, video_na
     print(response)
     # Here you can add any additional logic such as notifying users via a webhook or other mechanisms.
 
+@app.route('/download_csv/<filename>', methods=['GET'])
+def download_csv_file(filename):
+    # Decode the filename as Flask encodes URLs.
+    decoded_filename = urllib.parse.unquote(filename)
+    print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
+    return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "all_data.csv")
+
+@app.route('/download_video/<filename>', methods=['GET'])
+def download_video_file(filename):
+    # Decode the filename as Flask encodes URLs.
+    decoded_filename = urllib.parse.unquote(filename)
+    print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
+    return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "video_output.mp4")
 
 
 # Define a directory to save the video files after analysis
@@ -129,10 +137,9 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         
         # create new folder for save analyzed video
         os.makedirs(write_folder_name)
-        write_file_name = write_folder_name.split("/")[1]
         width=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        out = cv2.VideoWriter(f'{write_folder_name}/{write_file_name}.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+        out = cv2.VideoWriter(f'{write_folder_name}/video_output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                             (width,height))  # Output file
         
         df_posture_features = pd.DataFrame()
@@ -258,7 +265,7 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         cap.release()
         out.release()
         
-        return("Analysis Done",True,f'{write_folder_name}/{write_file_name}')
+        return("Analysis Done",True,write_folder_name.split("/")[-1])
     except Exception as e:
         print(f"Error: {e}")
         return(f"Error: {e}",False,"")

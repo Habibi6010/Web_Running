@@ -8,6 +8,17 @@ import os
 import pandas as pd
 import urllib.parse
 from Analysis_Landmarks_Pusture import Analysis_Landmarks
+from supabase import create_client, Client
+import datetime
+
+# supabase api infroamtion
+SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
+SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
+
+# Create a supabase api connection and clinet
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 app = Flask(__name__,static_folder='static',template_folder='templates')
 CORS(app)  # Enable CORS for all routes
 
@@ -29,11 +40,14 @@ def home():
 def root():
     return render_template('index.html')
 
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
 
-
+@app.route('/profile')
+def porfile():
+    return render_template('profile.html')
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -45,7 +59,6 @@ def login():
         return jsonify({"accsess": True})
     else:
         return jsonify({"accsess": False})
-
 
 
 @app.route('/contact_us', methods=['POST'])
@@ -272,6 +285,27 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
     except Exception as e:
         print(f"Error: {e}")
         return(f"Error: {e}",False,"")
+
+
+# ChaBot using chatGPT API and RAG system
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    message = data.get('message')
+    system_answer = {"answer": "Hello, I am ChaBot. How can I help you?"}
+
+
+    username = message[0]["username"]
+    datetime_chat = message[0]["dateTime"]
+    text = [
+        {"role": "user", "message": message[0]["content"]},
+        {"role": "system", "message": system_answer["answer"]}]
+    supabase.table("chat_history").insert([{"username": username, "datetime": datetime_chat, "message": text}]).execute()
+    print("Chat history saved successfully.")
+    return jsonify(system_answer)
+
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=False)

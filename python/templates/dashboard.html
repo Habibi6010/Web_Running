@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
 
   <!-- Vendor CSS Files -->
@@ -66,13 +66,32 @@
             <i class="bi bi-person-circle"></i> <span id="usernameDisplay">Profile</span>
           </button>
           <div class="dropdown-menu">
-            <a href="profile.html" id="viweprofileLink">View Profile</a>
-            <a href="index.html">Logout</a>
+            <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">View Profile </button>
+            <button class="profile-button" id="logoutButton" onclick="handelLogoutButton()">Logout</button>
           </div>
         </div>
       </div>
     </div><!-- End Page Title -->
 
+    <section id="chatbot">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Chat Bot </h2>
+      </div>
+      <div class="container_checkbox">
+        <h4>Ask your question:</h4>
+        
+        <div id="chat-container" style="margin: 0 auto;">
+          <div id="chat-box">
+            <div class="chat-message bot-message">Hello! How can I help you?</div>
+          </div>
+          <div id="input-area">
+            <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKeyPressChatBot(event)">
+            <button onclick="handleChatBotButton()">Send</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
 
     <section id="upload">
       <div class="container section-title" data-aos="fade-up">

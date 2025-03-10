@@ -257,6 +257,16 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById("usernameDisplay").innerText = username;
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  // extract username from url
+  const urlParams = new URLSearchParams(window.location.search);
+  const username = urlParams.get('username') || 'Profile';
+  // Set the link to pass username as a query parameter
+  document.getElementById("viewProfileLink").href = `profile.html?username=${encodeURIComponent(username)}`;
+});
+
+// fetch_address = "18.116.29.76"
+fetch_address = "127.0.0.1"
 // submit signin form
 function handelSigninButton(event) {
   event.preventDefault();
@@ -276,7 +286,8 @@ function handelSigninButton(event) {
     email,
     password
   }
-  fetch('http://18.116.29.76:5001/login', {
+  
+  fetch('http://'+fetch_address+':5001/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -287,7 +298,7 @@ function handelSigninButton(event) {
     .then(data => {
       if (data.accsess) {
         alert('Login successful: \n' + email);
-        window.location.href = `http://18.116.29.76:5001/dashboard?username=${encodeURIComponent(email)}`;
+        window.location.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(email)}`;
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');
@@ -605,7 +616,7 @@ function sendData(event) {
   formData.append('username', username);
   
   // Send the data to the server
-  fetch('http://18.116.29.76:5001/run_analysis', {
+  fetch('http://'+fetch_address+':5001/run_analysis', {
     method: 'POST',
     body: formData
   })
@@ -688,12 +699,6 @@ function check_radio() {
   }
 }
 
-// add listener to view profile click and send username to profile page
-document.getElementById("videprofileLink").addEventListener("click", function (event) {
-  event.preventDefault();
-  const username = document.getElementById('usernameDisplay').innerText;
-  window.location.href = `profile.html?username=${encodeURIComponent(username)}`;
-});
 
 // add listener to profile page to get user details when page load
 document.addEventListener('DOMContentLoaded', function () {
@@ -703,3 +708,80 @@ document.addEventListener('DOMContentLoaded', function () {
   // Update span for show username
   document.getElementById("usernameDisplay").innerText = username;
 });
+
+function handelViewProfileButton(event) {
+  const username = document.getElementById('usernameDisplay').innerText;
+  console.log(username);
+  window.location.href = `http://${fetch_address}:5001/profile?username=${encodeURIComponent(username)}`;
+}
+
+// handeler for logout button
+function handelLogoutButton(){
+  window.location.href = `http://${fetch_address}:5001/`;
+  // Clear the local storage
+  localStorage.clear();
+  // Clear the session storage
+  sessionStorage.clear();
+}
+
+
+async function handleChatBotButton(event){
+  let userInput = document.getElementById("user-input").value.trim();
+  // Check if the input is empty
+  if (userInput === "") {
+    // alert("Please enter a message.");
+    return;
+  }
+
+  // Get username and current date and time
+  const username = document.getElementById("usernameDisplay").innerText;
+  const dateTime = new Date().toLocaleString();
+
+  // Make conversation history
+  let conversationMessage = [];
+  conversationMessage.push({ role: "user", content: userInput, username: username, dateTime: dateTime });
+
+  let chatBox = document.getElementById("chat-box");
+
+  // Add user message to chat
+  let userMessage = document.createElement("div");
+  userMessage.classList.add("chat-message", "user-message");
+  userMessage.textContent = userInput;
+  chatBox.appendChild(userMessage);
+  // Simulated bot response
+  let botMessage = document.createElement("div");
+  botMessage.classList.add("chat-message", "bot-message");
+  botMessage.textContent = "Thinking...";
+  chatBox.appendChild(botMessage);
+
+  // Clear input field
+  document.getElementById("user-input").value = "";
+
+  // Scroll to the latest message
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Send user input to server and get response
+  try {
+    // Set timeout to wait for 5 seconds
+    const response = await Promise.race([
+        fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: conversationMessage}),
+        }).then(res => res.json()),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+    ]);
+
+      botMessage.textContent = response.answer; // Show response from Python
+  } catch (error) {
+      botMessage.textContent = "Server timeout."; // If timeout occurs
+  }
+  // Scroll to the latest message
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function handleKeyPressChatBot(event) {
+  if (event.key === 'Enter') {
+    handleChatBotButton();
+  }
+}

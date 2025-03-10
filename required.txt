@@ -5,3 +5,5 @@ opencv-python
 tk
 ultralytics
 mediapipe
+flask
+flask-cors

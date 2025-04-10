@@ -360,7 +360,7 @@ function handelContactUsButton(event) {
     subject,
     message
   }
-  fetch('http://18.116.29.76:5001/contact_us', {
+  fetch('http://'+fetch_address+':5001/contact_us', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -759,23 +759,38 @@ async function handleChatBotButton(event){
 
   // Scroll to the latest message
   chatBox.scrollTop = chatBox.scrollHeight;
-
   // Send user input to server and get response
-  try {
-    // Set timeout to wait for 5 seconds
-    const response = await Promise.race([
-        fetch("/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: conversationMessage}),
-        }).then(res => res.json()),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
-    ]);
+  fetch('http://' + fetch_address + ':5001/chat', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: conversationMessage }),
+})
+.then(async response => {
+    const contentType = response.headers.get("content-type");
 
-      botMessage.textContent = response.answer; // Show response from Python
-  } catch (error) {
-      botMessage.textContent = "Server timeout."; // If timeout occurs
-  }
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text(); // This is likely HTML
+        throw new Error(`Expected JSON, got HTML: ${text.slice(0, 100)}...`);
+    }
+
+    return response.json();
+})
+.then(data => {
+    botMessage.textContent = data.answer;
+})
+.catch(error => {
+    console.error("Error during fetch:", error);
+    if (error.message.includes("JSON") || error.message.includes("<!doctype")) {
+        botMessage.textContent = "Server error: Response is not valid JSON.";
+    } else {
+        botMessage.textContent = error.message === "timeout" ? "Server timeout." : "Unable to connect to the server.";
+    }
+});
+
   // Scroll to the latest message
   chatBox.scrollTop = chatBox.scrollHeight;
 }

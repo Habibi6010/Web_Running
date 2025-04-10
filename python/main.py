@@ -10,7 +10,7 @@ import urllib.parse
 from Analysis_Landmarks_Pusture import Analysis_Landmarks
 from supabase import create_client, Client
 import datetime
-
+import requests
 # supabase api infroamtion
 SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
 SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
@@ -293,14 +293,20 @@ def chat():
     data = request.json
     message = data.get('message')
     system_answer = {"answer": "Hello, I am ChaBot. How can I help you?"}
-
+    url = f'http://localhost:5678/webhook-test/chatbot?chatInput={message}&sessionId={1234}'
+    response = requests.get(url)
+    data = response.json()
+    print(data.get('output'))
+    system_answer["answer"] = data.get('output')
+    # n8n_response = response.get('output')
+    # print(n8n_response)
 
     username = message[0]["username"]
     datetime_chat = message[0]["dateTime"]
     text = [
         {"role": "user", "message": message[0]["content"]},
         {"role": "system", "message": system_answer["answer"]}]
-    supabase.table("chat_history").insert([{"username": username, "datetime": datetime_chat, "message": text}]).execute()
+    # supabase.table("chat_history").insert([{"username": username, "datetime": datetime_chat, "message": text}]).execute()
     print("Chat history saved successfully.")
     return jsonify(system_answer)
 

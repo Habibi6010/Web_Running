@@ -152,6 +152,7 @@ def download_video_file(foldername):
 from flask import Flask, Response, request, send_file
 import os
 
+import re
 @app.route('/view_video/<path:foldername>')
 def view_video_file(foldername):
     decoded_foldername = urllib.parse.unquote(foldername)

@@ -149,7 +149,7 @@ def download_video_file(foldername):
     return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
 @app.route('/view_video/<path:foldername>', methods=['GET'])
-def download_video_file(foldername):
+def view_video_file(foldername):
     decoded_foldername = urllib.parse.unquote(foldername)
 
     # Full path to the subfolder

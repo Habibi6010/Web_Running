@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template,send_from_directory
+from flask import Flask, jsonify, request, render_template,send_from_directory, Response
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -161,8 +161,26 @@ def view_video_file(foldername):
     if not os.path.exists(video_file_path):
         return f"File not found: {video_file_path}", 404
 
-    print(f"Serving video from {video_file_path}")
-    return send_from_directory(abs_dir, video_filename, as_attachment=False)
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        return send_from_directory(abs_dir, video_filename, as_attachment=False)
+
+    size = os.path.getsize(video_file_path)
+    byte_range = range_header.strip().split('=')[1]
+    start, end = byte_range.split('-')
+    start = int(start)
+    end = int(end) if end else size - 1
+
+    chunk_size = end - start + 1
+    with open(video_file_path, 'rb') as f:
+        f.seek(start)
+        data = f.read(chunk_size)
+
+    response = Response(data, 206, mimetype='video/mp4', content_type='video/mp4')
+    response.headers.add('Content-Range', f'bytes {start}-{end}/{size}')
+    response.headers.add('Accept-Ranges', 'bytes')
+    response.headers.add('Content-Length', str(chunk_size))
+    return response
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = 'video/'

@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("viewProfileLink").href = `profile.html?username=${encodeURIComponent(username)}`;
 });
 
-fetch_address = "3.17.128.186"
+fetch_address = "3.138.246.13"
 // fetch_address = "127.0.0.1"
 // submit signin form
 function handelSigninButton(event) {

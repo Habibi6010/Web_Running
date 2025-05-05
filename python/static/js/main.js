@@ -632,19 +632,23 @@ function sendData(event) {
         active_section.style.display = 'block';
         resultVideoPreview.style.display = 'block';
         console.log(data.link);
-        resultVideoPreview.src = data.link;
+
+        const videoViewURL = "http://" + fetch_address + ":5001/view_video/" + encodeURIComponent(data.videoaddress);
+
+
+        resultVideoPreview.src = videoViewURL;
         resultVideoPreview.load();
         resultVideoPreview.play();
 
         // Download result video link
         downloadLink = document.getElementById('downloadResultVideo');
-        downloadLink.href = "download_video/"+data.videoaddress;
+        downloadLink.href = "http://" + fetch_address + ":5001/download_video/"+data.videoaddress;
         //downloadLink.download = data.link.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 
         // Download the CSV file link
         downloadLink = document.getElementById('downloadResultCSV');
-        downloadLink.href = "download_csv/"+data.csvaddress;
+        downloadLink.href = "http://" + fetch_address + ":5001/download_csv/"+data.csvaddress;
         // downloadLink.download = data.csvaddress.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 

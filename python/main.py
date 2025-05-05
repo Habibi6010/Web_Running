@@ -149,6 +149,21 @@ def download_video_file(foldername):
     return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
 
+@app.route('/view_video/<path:foldername>', methods=['GET'])
+def view_video_file(foldername):
+    decoded_foldername = urllib.parse.unquote(foldername)
+
+    # Full path to the subfolder
+    abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
+
+    video_filename = "video_output.mp4"  # video file inside the folder
+    video_file_path = os.path.join(abs_dir, video_filename)
+
+    if not os.path.exists(video_file_path):
+        return f"File not found: {video_file_path}", 404
+
+    print(f"Serving video from {video_file_path}")
+    return send_from_directory(abs_dir, video_filename, as_attachment=False)
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = 'video/'

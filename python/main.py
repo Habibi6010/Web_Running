@@ -131,12 +131,10 @@ def download_csv_file(filename):
 #     return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "video_output.mp4")
 
 
-from werkzeug.utils import secure_filename
 
 @app.route('/download_video/<path:foldername>', methods=['GET'])
 def download_video_file(foldername):
     decoded_foldername = urllib.parse.unquote(foldername)
-    decoded_foldername = secure_filename(decoded_foldername)  # prevent path traversal
 
     # Full path to the subfolder
     abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))

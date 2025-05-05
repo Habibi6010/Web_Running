@@ -633,7 +633,7 @@ function sendData(event) {
         resultVideoPreview.style.display = 'block';
         console.log(data.link);
 
-        const videoViewURL = "http://" + fetch_address + ":5001/view_video/" + encodeURIComponent(data.videoaddress);
+        const videoViewURL = "http://" + fetch_address + ":5001/view_video/" + data.videoaddress;
 
 
         resultVideoPreview.src = videoViewURL;

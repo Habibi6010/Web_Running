@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template,send_from_directory, Response
+from flask import Flask, jsonify, request, render_template,send_from_directory
 from flask_cors import CORS
 import json
 from drawing import drawing
@@ -123,23 +123,12 @@ def download_csv_file(filename):
     print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
     return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "all_data.csv")
 
-# @app.route('/download_video/<filename>', methods=['GET'])
-# def download_video_file(filename):
-#     # Decode the filename as Flask encodes URLs.
-#     decoded_filename = urllib.parse.unquote(filename)
-#     print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
-#     return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "video_output.mp4")
-
-
-
 @app.route('/download_video/<path:foldername>', methods=['GET'])
 def download_video_file(foldername):
-    decoded_foldername = urllib.parse.unquote(foldername)
-
-    # Full path to the subfolder
+    decoded_foldername = urllib.parse.unquote(foldername)  # KEEP @ character
     abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
 
-    video_filename = "video_output.mp4"  # video file inside the folder
+    video_filename = "video_output.mp4"
     video_file_path = os.path.join(abs_dir, video_filename)
 
     if not os.path.exists(video_file_path):
@@ -148,39 +137,6 @@ def download_video_file(foldername):
     print(f"Serving video from {video_file_path}")
     return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
-@app.route('/view_video/<path:foldername>', methods=['GET'])
-def view_video_file(foldername):
-    decoded_foldername = urllib.parse.unquote(foldername)
-
-    # Full path to the subfolder
-    abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
-
-    video_filename = "video_output.mp4"  # video file inside the folder
-    video_file_path = os.path.join(abs_dir, video_filename)
-
-    if not os.path.exists(video_file_path):
-        return f"File not found: {video_file_path}", 404
-
-    range_header = request.headers.get('Range', None)
-    if not range_header:
-        return send_from_directory(abs_dir, video_filename, as_attachment=False)
-
-    size = os.path.getsize(video_file_path)
-    byte_range = range_header.strip().split('=')[1]
-    start, end = byte_range.split('-')
-    start = int(start)
-    end = int(end) if end else size - 1
-
-    chunk_size = end - start + 1
-    with open(video_file_path, 'rb') as f:
-        f.seek(start)
-        data = f.read(chunk_size)
-
-    response = Response(data, 206, mimetype='video/mp4', content_type='video/mp4')
-    response.headers.add('Content-Range', f'bytes {start}-{end}/{size}')
-    response.headers.add('Accept-Ranges', 'bytes')
-    response.headers.add('Content-Length', str(chunk_size))
-    return response
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = 'video/'

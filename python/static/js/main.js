@@ -265,8 +265,8 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("viewProfileLink").href = `profile.html?username=${encodeURIComponent(username)}`;
 });
 
-fetch_address = "13.59.211.224"
-// fetch_address = "127.0.0.1"
+// fetch_address = "13.59.211.224"
+fetch_address = "127.0.0.1"
 // submit signin form
 function handelSigninButton(event) {
   event.preventDefault();
@@ -572,6 +572,7 @@ function select_checkbox() {
 
 // Send and receive data from server and work with API
 function sendData(event) {
+
   event.preventDefault(); // Stop form from submitting the traditional way
   check_radio();
   if (document.getElementById('videoUpload').files.length == 0) {
@@ -593,13 +594,13 @@ function sendData(event) {
   const height_runner = document.getElementById('numberInput').value;
   // Get selected AI model (radio buttons)
   const selectedModel = document.querySelector('input[name="model"]:checked').value;
-  // Get username from usernameDisplay span
+  // Get usrname from usernameeDisplay span
   const username = document.getElementById('usernameDisplay').innerText;
 
   // Get active section
   const active_section = document.getElementById('result');
-  // Get result video preview
-  const resultVideoPreview = document.getElementById('resultVideoPreview');
+  //Get result video preview
+  // const resultVideoPreview = document.getElementById('resultVideoPreview');
   // Manually add the selected checkboxes and colors to the formData
   const settings_colors = {};
 
@@ -608,14 +609,14 @@ function sendData(event) {
     const colorInput = document.getElementById(`colorSetting${i}`);
     settings_colors[document.getElementById(`setting${i}`).value] = [checkbox.checked, hexToRgb(colorInput.value)];
   }
-  // Append the height_runner, selectedModel, and settings_colors to the formData
+  //Append the height_runner, selectedModel, and settings_colors to the formData
   formData.append('height_runner', height_runner);
   formData.append('selectedModel', selectedModel);
   formData.append('settings_colors', JSON.stringify(settings_colors));
   formData.append('username', username);
-
+  
   // Send the data to the server
-  fetch('http://' + fetch_address + ':5001/run_analysis', {
+  fetch('http://'+fetch_address+':5001/run_analysis', {
     method: 'POST',
     body: formData
   })
@@ -623,48 +624,47 @@ function sendData(event) {
     .then(data => {
       console.log('Success:', data);
       if (data.response) {
+        // alert('Data sent successfully and Model is running');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
-        // Show result video
+        //Show reslut video
         active_section.style.display = 'block';
-        resultVideoPreview.style.display = 'block';
-
-        if (data.videoaddress) {
-          resultVideoPreview.src = `http://${fetch_address}:5001/view_video/${data.videoaddress}`;
-          resultVideoPreview.load();
-          resultVideoPreview.play();
-        } else {
-          console.error("Video address is undefined.");
-          alert("Error: Video address is undefined.");
-        }
+        // resultVideoPreview.style.display = 'block';
+        console.log(data.link);
+        // resultVideoPreview.src = "download_video/"+data.videoaddress;
+        // resultVideoPreview.load();
+        // resultVideoPreview.play();
 
         // Download result video link
-        const downloadLink = document.getElementById('downloadResultVideo');
-        downloadLink.href = `http://${fetch_address}:5001/download_video/${data.videoaddress}`;
+        downloadLink = document.getElementById('downloadResultVideo');
+        downloadLink.href = "download_video/"+data.videoaddress;
+        //downloadLink.download = data.link.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 
         // Download the CSV file link
-        const csvDownloadLink = document.getElementById('downloadResultCSV');
-        csvDownloadLink.href = `http://${fetch_address}:5001/download_csv/${data.csvaddress}`;
-        csvDownloadLink.style.display = 'inline-block'; // Show the download link
+        downloadLink = document.getElementById('downloadResultCSV');
+        downloadLink.href = "download_csv/"+data.csvaddress;
+        // downloadLink.download = data.csvaddress.split('/').pop(); //Extract file name from path
+        downloadLink.style.display = 'inline-block'; // Show the download link
+
       } else {
         alert('Data sent failed');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
         active_section.style.display = 'none';
-        resultVideoPreview.style.display = 'none';
+        // resultVideoPreview.style.display = 'none';
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      alert("Data sent failed: " + error.message);
+      alert("Data sent failed".error.message);
       // Hide the loading GIF
       loading.style.display = 'none';
       loading2.style.display = 'none';
       active_section.style.display = 'none';
-      resultVideoPreview.style.display = 'none';
+      // resultVideoPreview.style.display = 'none';
     });
 }
 

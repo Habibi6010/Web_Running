@@ -149,21 +149,52 @@ def download_video_file(foldername):
     return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
 
-@app.route('/view_video/<path:foldername>', methods=['GET'])
+from flask import Flask, Response, request, send_file
+import os
+
+@app.route('/view_video/<path:foldername>')
 def view_video_file(foldername):
     decoded_foldername = urllib.parse.unquote(foldername)
-
-    # Full path to the subfolder
     abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
+    video_filename = "video_output.mp4"
+    video_path = os.path.join(abs_dir, video_filename)
 
-    video_filename = "video_output.mp4"  # video file inside the folder
-    video_file_path = os.path.join(abs_dir, video_filename)
+    if not os.path.exists(video_path):
+        return "Video not found", 404
 
-    if not os.path.exists(video_file_path):
-        return f"File not found: {video_file_path}", 404
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        # No range requested → send full file
+        return send_file(video_path, mimetype='video/mp4')
 
-    print(f"Serving video from {video_file_path}")
-    return send_from_directory(abs_dir, video_filename, as_attachment=False)
+    # Parse the range header
+    size = os.path.getsize(video_path)
+    byte1, byte2 = 0, None
+
+    m = re.search(r'bytes=(\d+)-(\d*)', range_header)
+    if m:
+        byte1 = int(m.group(1))
+        if m.group(2):
+            byte2 = int(m.group(2))
+
+    byte2 = byte2 if byte2 is not None else size - 1
+    length = byte2 - byte1 + 1
+
+    with open(video_path, 'rb') as f:
+        f.seek(byte1)
+        data = f.read(length)
+
+    rv = Response(data,
+                  206,
+                  mimetype='video/mp4',
+                  content_type='video/mp4',
+                  direct_passthrough=True)
+    rv.headers.add('Content-Range', f'bytes {byte1}-{byte2}/{size}')
+    rv.headers.add('Accept-Ranges', 'bytes')
+    rv.headers.add('Content-Length', str(length))
+
+    return rv
+
 
 # Define a directory to save the video files after analysis
 ANALYZED_VIDEO_SAVE_PATH = 'video/'

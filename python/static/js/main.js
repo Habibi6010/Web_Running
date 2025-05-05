@@ -632,17 +632,15 @@ function sendData(event) {
         active_section.style.display = 'block';
         resultVideoPreview.style.display = 'block';
         console.log(data.link);
+        console.log(data.videoaddress);
 
-        const videoViewURL = "http://" + fetch_address + ":5001/view_video/" + data.videoaddress;
-
-
-        resultVideoPreview.src = videoViewURL;
+        resultVideoPreview.src = "http://" + fetch_address + ":5001/view_video/" + data.videoaddress;
         resultVideoPreview.load();
         resultVideoPreview.play();
 
         // Download result video link
         downloadLink = document.getElementById('downloadResultVideo');
-        downloadLink.href = "http://" + fetch_address + ":5001/download_video/"+data.videoaddress;
+        downloadLink.href = "http://" + fetch_address + ":5001/download_video/" + data.videoaddress;
         //downloadLink.download = data.link.split('/').pop(); //Extract file name from path
         downloadLink.style.display = 'inline-block'; // Show the download link
 

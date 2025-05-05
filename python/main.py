@@ -123,12 +123,23 @@ def download_csv_file(filename):
     print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
     return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "all_data.csv")
 
+# @app.route('/download_video/<filename>', methods=['GET'])
+# def download_video_file(filename):
+#     # Decode the filename as Flask encodes URLs.
+#     decoded_filename = urllib.parse.unquote(filename)
+#     print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
+#     return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "video_output.mp4")
+
+from flask import send_from_directory
+import os
+import urllib.parse
+
 @app.route('/download_video/<filename>', methods=['GET'])
 def download_video_file(filename):
-    # Decode the filename as Flask encodes URLs.
     decoded_filename = urllib.parse.unquote(filename)
-    print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
-    return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "video_output.mp4")
+    abs_dir = os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)
+    print(f"Download file from: {abs_dir}/{decoded_filename}")
+    return send_from_directory(abs_dir, decoded_filename, as_attachment=True)
 
 
 # Define a directory to save the video files after analysis

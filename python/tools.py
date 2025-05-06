@@ -3,6 +3,10 @@ import math
 import cv2
 import fpdf
 import PIL.Image
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 class tools:
     
@@ -282,4 +286,34 @@ class tools:
                 tools.add_text_to_image(image,text)
             cv2.imwrite(f'{save_path}mediapipe\{i}.jpg',images[0])
             cv2.imwrite(f'{save_path}yolo\{i}.jpg',images[1])
-            i=i+1  
+            i=i+1
+
+    def send_email(receiver_email, video_link, csv_link):
+        # Email configuration
+        sender_email = "mo.habibideh990@gmail.com"  # Your Gmail address
+        app_password = "zdha iqsm wkrc ivcw"  # Replace with your App Password
+
+        # Email content
+        subject = "Processed Video and CSV Links"
+        body = f"Hello \n\n Here are your links:\n\nVideo: {video_link}\nCSV: {csv_link}"
+
+        # Create the email
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = receiver_email
+        message["Subject"] = subject
+        message.attach(MIMEText(body, "plain"))
+
+        try:
+            # Connect to Gmail's SMTP server
+            server = smtplib.SMTP("smtp.gmail.com", 587)  # Use Gmail's SMTP server and port
+            server.starttls()  # Upgrade the connection to secure
+            server.login(sender_email, app_password)  # Log in with App Password
+            server.sendmail(sender_email, receiver_email, message.as_string())  # Send the email
+            print("Email sent successfully!")
+            return True
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+        finally:
+            server.close()  # Close the connection to the server

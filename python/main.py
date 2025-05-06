@@ -11,6 +11,7 @@ from Analysis_Landmarks_Pusture import Analysis_Landmarks
 from supabase import create_client, Client
 import datetime
 import requests
+from tools import tools
 # supabase api infroamtion
 SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
 SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
@@ -55,7 +56,7 @@ def login():
     email = data.get('email')
     password = data.get('password')
     # Need to Connect to Database to check the email and password
-    if email == 'test@gmail.com' and password == '123':
+    if email == 'habibi6010@gmail.com' and password == '123':
         return jsonify({"accsess": True})
     else:
         return jsonify({"accsess": False})
@@ -77,7 +78,8 @@ def contact_us():
 # Define a directory to save the video files
 VIDEO_SAVE_PATH = 'received_videos/'
 
-
+# fetch_address = "13.59.211.224"
+fetch_address = "127.0.0.1"
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
 
@@ -105,6 +107,18 @@ def run_analysis():
     text,response,write_file_name=running_model(height_runner, selectedModel,
                  settings_colors,video_file.filename,username)
     print(f'file: {write_file_name}')
+    # send email to user with the link of the video and csv file
+
+    file_link = f"http://{fetch_address}:5001/download_video/{write_file_name}"
+    csv_link = f"http://{fetch_address}:5001/download_csv/{write_file_name}"
+    print(f"file_link: {file_link}")
+    print(f"csv_link: {csv_link}")
+    i = 0
+    while i < 3:
+        if (tools.send_email(username,file_link,csv_link)):
+            break
+        else:
+            i += 1
     # threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
     return jsonify({"response": response, "message": text,"videoaddress":write_file_name,"csvaddress":write_file_name})
 

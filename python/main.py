@@ -56,7 +56,7 @@ def login():
     email = data.get('email')
     password = data.get('password')
     # Need to Connect to Database to check the email and password
-    if email == 'habibi6010@gmail.com' and password == '123':
+    if (email == 'habibi6010@gmail.com' and password == '123') or (email == 'nourani@utdallas.edu' and password == '1234'):
         return jsonify({"accsess": True})
     else:
         return jsonify({"accsess": False})

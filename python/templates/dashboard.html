@@ -32,9 +32,7 @@
 
 <body class="service-details-page">
 
-  <header id="header" class="header d-flex flex-column justify-content-center">
-
-    <i class="header-toggle d-xl-none bi bi-list"></i>
+  <header id="header" class="header d-flex flex-column justify-content-center" style="position:fixed; top:0; left:0; width:100%; z-index:1000; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
 
     <nav id="navmenu" class="navmenu">
       <ul>
@@ -45,7 +43,6 @@
         <li><a href="index.html#contact"><i class="bi bi-envelope navicon"></i><span>Contact</span></a></li>
       </ul>
     </nav>
-
   </header>
 
   <main class="main">
@@ -73,26 +70,6 @@
       </div>
     </div><!-- End Page Title -->
 
-    <section id="chatbot">
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Chat Bot </h2>
-      </div>
-      <div class="container_checkbox">
-        <h4>Ask your question:</h4>
-        
-        <div id="chat-container" style="margin: 0 auto;">
-          <div id="chat-box">
-            <div class="chat-message bot-message">Hello! How can I help you?</div>
-          </div>
-          <div id="input-area">
-            <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKeyPressChatBot(event)">
-            <button onclick="handleChatBotButton()">Send</button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
     <section id="upload">
       <div class="container section-title" data-aos="fade-up">
         <h2>Upload File </h2>
@@ -100,6 +77,14 @@
       <div class="container_checkbox">
         <h4>Upload Your File</h4>
         <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
+          <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height of Runner:</label>
+            <input type="number" id="heightFeet" name="heightFeet" min="0" max="8" step="1" style="width: 80px;" placeholder="Feet" required>
+            <span>ft</span>
+            <input type="number" id="heightInches" name="heightInches" min="0" max="11" step="1" style="width: 80px;" placeholder="Inches" required>
+            <span>in</span>
+          </div>
+          
           <div class="form-group" style="margin-bottom: 20px;">
             <label for="videoUpload" style="display: block; margin-bottom: 10px;">Select Video File:</label>
             <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
@@ -112,7 +97,7 @@
       <div class="container section-title" data-aos="fade-up">
         <h2>Aanlysis Settings </h2>
       </div>
-      <div class="container_checkbox">
+      <!-- <div class="container_checkbox">
         <h4>Select AI Model</h4>
         <div class="form-group">
           <div class="checkbox-group">
@@ -120,7 +105,7 @@
             <label><input type="radio" name="model" value="yolo" onchange="check_radio()"> YOLO</label>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <div class="container_checkbox">
         <h4>Select Analysis Settings and Colors</h4>
@@ -138,8 +123,6 @@
 
         <div class="form-group">
           <div class="checkbox-group">
-            <label> Height of Runner (Meter): </label>
-            <input type="number" id="numberInput" name="numberInput" min="0" max="3" step="0.1" style="width: 100px;">
             <label> </label>
             <label> </label>
             <label> Settings</label>
@@ -147,59 +130,143 @@
 
             <label><input type="checkbox" id="setting1" name="setting" value="foot_ground_angle" onchange="check_yolo(this,'Angle of foot with ground')"> 1-Angle of foot with
               ground.</label>
-            <input type="color" id="colorSetting1" name="colorSetting1" value="#ff0000">
+            <select id="colorSetting1" name="colorSetting1">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting2" name="setting" value="knee_joint_angle"> 2-Angle of knee
               (shin-thigh) joint.</label>
-            <input type="color" id="colorSetting2" name="colorSetting2" value="#ff0000">
+            <select id="colorSetting2" name="colorSetting2">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting3" name="setting" value="between_thigh_angle"> 3-Angle between
               thighs.</label>
-            <input type="color" id="colorSetting3" name="colorSetting3" value="#ff0000">
+            <select id="colorSetting3" name="colorSetting3">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting4" name="setting" value="knee_toe_angle"> 4-Angle of foot line with
               x-axis.</label>
-            <input type="color" id="colorSetting4" name="colorSetting4" value="#ff0000">
+            <select id="colorSetting4" name="colorSetting4">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting5" name="setting" value="elbow_joint_angle"> 5-Angle of elbow
               joint.</label>
-            <input type="color" id="colorSetting5" name="colorSetting5" value="#ff0000">
+            <select id="colorSetting5" name="colorSetting5">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting6" name="setting" value="flexion_foot"> 6-Angle of ankle
               (toe-heel-shin) joint.</label>
-            <input type="color" id="colorSetting6" name="colorSetting6" value="#ff0000">
+            <select id="colorSetting6" name="colorSetting6">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting7" name="setting" value="forearm_x_axis"> 7-Angle of forearm with
               x-axis.</label>
-            <input type="color" id="colorSetting7" name="colorSetting7" value="#ff0000">
+            <select id="colorSetting7" name="colorSetting7">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting8" name="setting" value="shin_x_axis"> 8-Angle of shins with
               x-axis.</label>
-            <input type="color" id="colorSetting8" name="colorSetting8" value="#ff0000">
+            <select id="colorSetting8" name="colorSetting8">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting9" name="setting" value="thigh_x_axis"> 9-Angle of thighs with
               x-axis.</label>
-            <input type="color" id="colorSetting9" name="colorSetting9" value="#ff0000">
+            <select id="colorSetting9" name="colorSetting9">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting10" name="setting" value="ear_nose_x_axis"> 10-Angle of ear-nose
               line with x-axis.</label>
-            <input type="color" id="colorSetting10" name="colorSetting10" value="#ff0000">
+            <select id="colorSetting10" name="colorSetting10">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting11" name="setting" value="ear_hip_x_axis"> 11-Angle of ear-hip line
               with the x-axis.</label>
-            <input type="color" id="colorSetting11" name="colorSetting11" value="#ff0000">
+            <select id="colorSetting11" name="colorSetting11">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;">Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting12" name="setting" value="distance_knee"> 12-Distance between
               knees.</label>
-            <input type="color" id="colorSetting12" name="colorSetting12" value="#00ff00">
+            <select id="colorSetting12" name="colorSetting12">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting13" name="setting" value="distance_heel_hip"> 13-Distance of hip to
               heel.</label>
-            <input type="color" id="colorSetting13" name="colorSetting13" value="#00ff00">
+            <select id="colorSetting13" name="colorSetting13">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
 
             <label><input type="checkbox" id="setting14" name="setting" value="distance_wrist_hip"> 14-Distance of hip
               to wrist.</label>
-            <input type="color" id="colorSetting14" name="colorSetting14" value="#00ff00">
+            <select id="colorSetting14" name="colorSetting14">
+              <option value="#ff0000" style="color:#ff0000;">Red</option>
+              <option value="#0563bb" style="color:#0563bb;">Blue</option>
+              <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
+              <option value="#ffa500" style="color:#ffa500;">Orange</option>
+              <option value="#800080" style="color:#800080;">Purple</option>
+            </select>
           </div>
         </div>
 
@@ -227,6 +294,26 @@
         <a id="downloadResultCSV">Download CSV file</a>
       </div>
     </section>
+
+    <!-- <section id="chatbot">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Chat Bot </h2>
+      </div>
+      <div class="container_checkbox">
+        <h4>Ask your question:</h4>
+        
+        <div id="chat-container" style="margin: 0 auto;">
+          <div id="chat-box">
+            <div class="chat-message bot-message">Hello! How can I help you?</div>
+          </div>
+          <div id="input-area">
+            <input type="text" id="user-input" placeholder="Type your question..." onkeypress="handleKeyPressChatBot(event)">
+            <button onclick="handleChatBotButton()">Send</button>
+          </div>
+        </div>
+
+      </div>
+    </section> -->
   </main>
   </div>
   
@@ -277,7 +364,51 @@
 
   <!-- Main JS File -->
   <script src="{{ url_for('static', filename='js/main.js')}}"></script>
+  <script>
+// List of all color select IDs
+const colorSelectIds = [
+  'colorSetting1','colorSetting2','colorSetting3','colorSetting4','colorSetting5','colorSetting6','colorSetting7','colorSetting8','colorSetting9','colorSetting10','colorSetting11','colorSetting12','colorSetting13','colorSetting14'
+];
 
+function hexToRgba(hex, alpha) {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  // Parse r, g, b
+  let bigint = parseInt(hex, 16);
+  let r, g, b;
+  if (hex.length === 6) {
+    r = (bigint >> 16) & 255;
+    g = (bigint >> 8) & 255;
+    b = bigint & 255;
+  } else if (hex.length === 3) {
+    r = (bigint >> 8) & 15; r = r * 17;
+    g = (bigint >> 4) & 15; g = g * 17;
+    b = bigint & 15; b = b * 17;
+  } else {
+    return hex;
+  }
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function updateSelectColor(select) {
+  const color = select.value;
+  select.style.backgroundColor = hexToRgba(color, 0.2);
+  // Set text color for contrast (white for dark, black for light backgrounds)
+  let textColor = '#fff';
+  if (color === '#ffa500' || color === '#ff0000' || color === '#00ff00') textColor = '#222';
+  if (color === '#0563bb' || color === '#800080') textColor = '#fff';
+  select.style.color = textColor;
+}
+
+colorSelectIds.forEach(id => {
+  const select = document.getElementById(id);
+  if (select) {
+    updateSelectColor(select); // Set initial color
+    select.addEventListener('change', function() {
+      updateSelectColor(this);
+    });
+  }
+});
+</script>
 </body>
-
 </html>

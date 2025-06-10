@@ -19,7 +19,10 @@
     headerToggleBtn.classList.toggle('bi-list');
     headerToggleBtn.classList.toggle('bi-x');
   }
-  headerToggleBtn.addEventListener('click', headerToggle);
+  // Only add event listener if headerToggleBtn exists
+  if (headerToggleBtn) {
+    headerToggleBtn.addEventListener('click', headerToggle);
+  }
 
   /**
    * Hide mobile nav on same-page/hash links
@@ -416,137 +419,144 @@ let touch_down = true;
 let full_support = true;
 let clear = true;
 
+function setButtonActiveState(buttonId, isActive) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  if (isActive) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
 function toe_off_click(settingNumbers) {
   const button = document.getElementById('toe_off');
   if (toe_off) {
     toe_off = false;
-    button.style.backgroundColor = 'green';
+    setButtonActiveState('toe_off', true);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = true; // Check specific settings
+      document.getElementById(`setting${number}`).checked = true;
     });
   } else {
     toe_off = true;
-    button.style.backgroundColor = '#007BFF';
+    setButtonActiveState('toe_off', false);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = false; // Check specific settings
+      document.getElementById(`setting${number}`).checked = false;
     });
     clear = true;
-    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    setButtonActiveState('clear', false);
     document.getElementById("clear").innerText = "Select All";
   }
   select_button_check();
   select_checkbox();
-  check_radio();
-
 }
+
 function full_flight_click(settingNumbers) {
   const button = document.getElementById('full_flight');
   if (full_flight) {
     full_flight = false;
-    button.style.backgroundColor = 'green';
+    setButtonActiveState('full_flight', true);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = true; // Check specific settings
+      document.getElementById(`setting${number}`).checked = true;
     });
   } else {
     full_flight = true;
-    button.style.backgroundColor = '#007BFF';
+    setButtonActiveState('full_flight', false);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = false; // Check specific settings
+      document.getElementById(`setting${number}`).checked = false;
     });
     clear = true;
-    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    setButtonActiveState('clear', false);
     document.getElementById("clear").innerText = "Select All";
   }
   select_button_check();
   select_checkbox();
-  check_radio();
 }
+
 function touch_down_click(settingNumbers) {
   const button = document.getElementById('touch_down');
   if (touch_down) {
     touch_down = false;
-    button.style.backgroundColor = 'green';
+    setButtonActiveState('touch_down', true);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = true; // Check specific settings
+      document.getElementById(`setting${number}`).checked = true;
     });
   } else {
     touch_down = true;
-    button.style.backgroundColor = '#007BFF';
+    setButtonActiveState('touch_down', false);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = false; // Check specific settings
+      document.getElementById(`setting${number}`).checked = false;
     });
     clear = true;
-    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    setButtonActiveState('clear', false);
     document.getElementById("clear").innerText = "Select All";
   }
   select_button_check();
   select_checkbox();
-  check_radio();
 }
 
 function full_support_click(settingNumbers) {
   const button = document.getElementById('full_support');
   if (full_support) {
     full_support = false;
-    button.style.backgroundColor = 'green';
+    setButtonActiveState('full_support', true);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = true; // Check specific settings
+      document.getElementById(`setting${number}`).checked = true;
     });
   } else {
     full_support = true;
-    button.style.backgroundColor = '#007BFF';
+    setButtonActiveState('full_support', false);
     settingNumbers.forEach(number => {
-      document.getElementById(`setting${number}`).checked = false; // Check specific settings
+      document.getElementById(`setting${number}`).checked = false;
     });
     clear = true;
-    document.getElementById('clear').style.backgroundColor = '#007BFF';
+    setButtonActiveState('clear', false);
     document.getElementById("clear").innerText = "Select All";
   }
   select_button_check();
   select_checkbox();
-  check_radio();
 }
+
 function clear_click() {
-  
   const button = document.getElementById('clear');
   const settings = document.querySelectorAll('input[type="checkbox"]');
   if (clear) {
     clear = false;
-    button.style.backgroundColor = 'green';
+    setButtonActiveState('clear', true);
     settings.forEach(setting => {
       setting.checked = true;
     });
     document.getElementById("clear").innerText = "Clear All";
     full_support = false;
-    document.getElementById('full_support').style.backgroundColor = 'green';
+    setButtonActiveState('full_support', true);
     full_flight = false;
-    document.getElementById('full_flight').style.backgroundColor = 'green';
+    setButtonActiveState('full_flight', true);
     touch_down = false;
-    document.getElementById('touch_down').style.backgroundColor = 'green';
+    setButtonActiveState('touch_down', true);
     toe_off = false;
-    document.getElementById('toe_off').style.backgroundColor = 'green';
+    setButtonActiveState('toe_off', true);
   } else {
     clear = true;
-    button.style.backgroundColor = '#007BFF';
+    setButtonActiveState('clear', false);
     settings.forEach(setting => {
       setting.checked = false;
     });
     document.getElementById("clear").innerText = "Select All";
     full_support = true;
-    document.getElementById('full_support').style.backgroundColor = '#007BFF';
+    setButtonActiveState('full_support', false);
     full_flight = true;
-    document.getElementById('full_flight').style.backgroundColor = '#007BFF';
+    setButtonActiveState('full_flight', false);
     touch_down = true;
-    document.getElementById('touch_down').style.backgroundColor = '#007BFF';
+    setButtonActiveState('touch_down', false);
     toe_off = true;
-    document.getElementById('toe_off').style.backgroundColor = '#007BFF';
+    setButtonActiveState('toe_off', false);
   }
-  check_radio();
+  // check_radio();
 }
 
 function select_button_check() {
   if (!(toe_off || full_flight || touch_down || full_support)) {
-    document.getElementById('clear').style.backgroundColor = 'green';
+    setButtonActiveState('clear', true);
     document.getElementById("clear").innerText = "Clear All";
     clear = false;
   }
@@ -574,7 +584,7 @@ function select_checkbox() {
 function sendData(event) {
 
   event.preventDefault(); // Stop form from submitting the traditional way
-  check_radio();
+  // check_radio();
   if (document.getElementById('videoUpload').files.length == 0) {
     alert("You didn't upload video.");
     return;
@@ -590,10 +600,21 @@ function sendData(event) {
   const form = document.getElementById('uploadForm');
   // Create a new FormData object
   const formData = new FormData(form);
-  // Get height_runner from the input field
-  const height_runner = document.getElementById('numberInput').value;
+  // Get height_runner from the input fields (feet and inches)
+  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+  const inches = parseInt(document.getElementById('heightInches').value) || 0;
+  // Convert to total inches for backend, or you can convert to meters if needed
+  const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
+  // Check if height_runner is valid
+  if (isNaN(height_runner) || height_runner <= 0) {
+    alert("Please enter a valid height.");
+    loading.style.display = 'none';
+    loading2.style.display = 'none';
+    return;
+  }
   // Get selected AI model (radio buttons)
-  const selectedModel = document.querySelector('input[name="model"]:checked').value;
+  // const selectedModel = document.querySelector('input[name="model"]:checked').value;
+  const selectedModel = "mediapipe";
   // Get usrname from usernameeDisplay span
   const username = document.getElementById('usernameDisplay').innerText;
 

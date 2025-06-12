@@ -1517,14 +1517,38 @@ section,
   display: grid;
   grid-template-columns: 1fr 1fr; /* 2-column layout */
   gap: 5px; /* space between the columns */
-  align-items: center;
+  align-items: start;
+  position: relative;
 }
 
 .checkbox-group label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   margin-bottom: 20px;
+  position: relative; /* Make label a positioning context */
+
 }
+
+/* Hover image hidden by default */
+.hover-image {
+  display: none;
+  position: absolute;
+  top:0; /* Below the label */
+  left:50%;
+  margin-top: 5px;
+  max-width: 200px;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 4px;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Show image when hovering label */
+label:hover + .hover-image {
+  display: block;
+}
+
 .checkbox-group input[type="checkbox"] {
   margin-right: 20px; /* Add more space between checkbox and text */
 }
@@ -1542,12 +1566,10 @@ section,
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin: 0 auto; /* Centers the container horizontally */
 }
-/* .control-buttons {
-  margin-bottom: 20px;
-} */
+
 
 button {
-  background-color: #ccc; /* Default gray */
+  background-color: rgba(204, 204, 204, 0.2);/* Default gray */
   color: var(--nav-color);
   font-family: var(--nav-font);
   border-radius: 50px;
@@ -1578,11 +1600,42 @@ button:active:hover {
   color: var(--nav-hover-color);
 }
 
-
-.parent-container {
-  position: relative; /* Ensure the parent is the reference point */
-  height: 400px; /* Example height for the container */
+/* New/Adjusted styles for the button wrappers and info boxes */
+.control-buttons {
+    display: flex; /* Arranges buttons in a row */
+    gap: 10px; /* Adds space between buttons */
+    flex-wrap: wrap; /* Allows buttons to wrap to the next line if space runs out */
+    justify-content: center; /* Centers buttons horizontally */
 }
+
+.button-wrapper {
+    position: relative; /* Crucial for positioning the info-box relative to this wrapper */
+    display: inline-block; /* Ensures wrapper only takes up necessary width */
+}
+
+.info-box {
+    position: absolute;
+    bottom: -60px; /* Position under the button (adjust as needed for spacing) */
+    left: 50%;
+    transform: translateX(-50%); /* Center the box horizontally */
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    white-space: nowrap; /* Prevents text from wrapping */
+    opacity: 0; /* Initially hidden */
+    visibility: hidden; /* Initially hidden */
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth transition for appearance */
+    z-index: 10; /* Ensure it appears above other content if any */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: add a subtle shadow */
+}
+
+/* Show the info-box when the button-wrapper is hovered */
+.button-wrapper:hover .info-box {
+    opacity: 1; /* Make it visible */
+    visibility: visible; /* Make it visible */
+}
+
 
 #chat-container {
   width: 400px;

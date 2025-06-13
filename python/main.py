@@ -12,6 +12,8 @@ from supabase import create_client, Client
 import datetime
 import requests
 from tools import tools
+import math
+
 # supabase api infroamtion
 SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
 SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
@@ -188,14 +190,12 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
                 break
             frame_number+=1
             dic_all_data = {}
-            # Run yolo model
-            yolo_landmarkss,bounding_boxs = drawing_object.yolo_landmark_detection(frame)
-            if len(bounding_boxs)!=0:
-                w,y,x,h=bounding_boxs[0][:4]
-                scale_factor = float(height_runner)/float(h-y)
-            else:
-                scale_factor = 0.0
+            scale_factor = 0.0
             if selectModel == 'yolo':
+                    yolo_landmarkss,bounding_boxs = drawing_object.yolo_landmark_detection(frame)
+                    if len(bounding_boxs)!=0:
+                        w,y,x,h = bounding_boxs[0][:4]
+                        scale_factor = float(height_runner)/float(h-y)
                     for yolo_landmarks in yolo_landmarkss:
                         if len(yolo_landmarks)>0:
                             if settings_colors['knee_joint_angle'][0]:
@@ -241,57 +241,59 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
             elif selectModel == 'mediapipe':
                 mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
                 if (len(mediapipe_landmarks)>0):
-                        if(settings_colors["foot_ground_angle"][0]):
-                            left_value,right_value=drawing_object.foot_ground_angle_mediapipe(frame,mediapipe_landmarks,settings_colors["foot_ground_angle"][1])
-                            dic_all_data['Angle of foot with ground.'] = [int(left_value),int(right_value)]
-                        if(settings_colors["knee_joint_angle"][0]):
-                            left_value,right_value=drawing_object.mediapipe_knee_joint_angle(frame,mediapipe_landmarks,settings_colors["knee_joint_angle"][1])
-                            dic_all_data['Angle of knee (shin-thigh) joint.'] = [int(left_value),int(right_value)]
-                        if(settings_colors["between_thigh_angle"][0]):
-                            value=drawing_object.mediapipe_between_thigh_angle(frame,mediapipe_landmarks,settings_colors["between_thigh_angle"][1])
-                            dic_all_data['Angle between thighs.'] = int(value)
-                        if(settings_colors["knee_toe_angle"][0]):
-                            left_value,right_value=drawing_object.mediapipe_knee_toe_angle(frame,mediapipe_landmarks,settings_colors["knee_toe_angle"][1])
-                            dic_all_data['Angle of foot line with x-axis.']=[int(left_value),int(right_value)]
-                        if(settings_colors["elbow_joint_angle"][0]):
-                            left_value,right_value=drawing_object.mediapipe_elbow_joint_angle(frame,mediapipe_landmarks,settings_colors["elbow_joint_angle"][1])
-                            dic_all_data['Angle of elbow joint.']=[int(left_value),int(right_value)]
-                        if(settings_colors["flexion_foot"][0]):
-                            left_value,right_value=drawing_object.mediapipe_flexion_foot(frame,mediapipe_landmarks,settings_colors["flexion_foot"][1])
-                            dic_all_data['Angle of ankle (toe-heel-shin) joint.']=[int(left_value),int(right_value)]
-                        if(settings_colors["forearm_x_axis"][0]):
-                            left_value,right_value=drawing_object.mediapipe_forearm_x_axis(frame,mediapipe_landmarks,settings_colors["forearm_x_axis"][1])
-                            dic_all_data['Angle of forearm with x-axis.']=[int(left_value),int(right_value)]
-                        if(settings_colors["shin_x_axis"][0]):
-                            left_value,right_value=drawing_object.mediapipe_shin_x_axis(frame,mediapipe_landmarks,settings_colors["shin_x_axis"][1])
-                            dic_all_data['Angle of shin with x-axis.']=[int(left_value),int(right_value)]
-                        if(settings_colors["thigh_x_axis"][0]):
-                            left_value,right_value=drawing_object.mediapipe_thigh_x_axis(frame,mediapipe_landmarks,settings_colors["thigh_x_axis"][1])
-                            dic_all_data['Angle of thigh with x-axis.']=[int(left_value),int(right_value)]
-                        if(settings_colors["ear_hip_x_axis"][0]):
-                            value=drawing_object.mediapipe_ear_hip_x_axis(frame,mediapipe_landmarks,settings_colors["ear_hip_x_axis"][1])
-                            dic_all_data['Angle of ear-hip line with the x-axis.'] = int(value)
-                        if(settings_colors["distance_knee"][0]):
-                            value=drawing_object.mediapipe_distance_knee(frame,mediapipe_landmarks,settings_colors["distance_knee"][1],scale_factor)
-                            dic_all_data['Distance between knees.'] = round(value,3)
-                        if(settings_colors["distance_heel_hip"][0]):
-                            left_value,right_value=drawing_object.mediapipe_distance_heel_hip(frame,mediapipe_landmarks,settings_colors["distance_heel_hip"][1],scale_factor)
-                            dic_all_data['Distance of hip to heel.']=[round(left_value,3),round(right_value,3)]
-                        if(settings_colors["distance_wrist_hip"][0]):
-                            left_value,right_value=drawing_object.mediapipe_distance_wrist_hip(frame,mediapipe_landmarks,settings_colors["distance_wrist_hip"][1],scale_factor)
-                            dic_all_data['Distance of hip to wrist.']=[round(left_value,3),round(right_value,3)]
-                        if(settings_colors['ear_nose_x_axis'][0]):
-                            value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
-                            dic_all_data['Angle of ear-nose line with the x-axis.'] = int(value)
-                        # Extract Features for posture analysis
-                        dic_all_data['frame'] = frame_number
-                        df_temp=pd.DataFrame([dic_all_data])
-                        df_all_data = pd.concat([df_all_data,df_temp],ignore_index=True)
-                        dic = {}
-                        dic = Analysis_Landmarks.mediapipe_feature_selection(mediapipe_landmarks,width,height,scale_factor)
-                        dic['frame'] = frame_number
-                        df_temp = pd.DataFrame([dic])
-                        df_posture_features = pd.concat([df_posture_features,df_temp],ignore_index=True)
+                    scale_factor = get_scale_factor_mediapipe(mediapipe_landmarks, float(height_runner), height, width)     
+                    print(f"scale_factor: {scale_factor}")  
+                    if(settings_colors["foot_ground_angle"][0]):
+                        left_value,right_value=drawing_object.foot_ground_angle_mediapipe(frame,mediapipe_landmarks,settings_colors["foot_ground_angle"][1])
+                        dic_all_data['Angle of foot with ground.'] = [int(left_value),int(right_value)]
+                    if(settings_colors["knee_joint_angle"][0]):
+                        left_value,right_value=drawing_object.mediapipe_knee_joint_angle(frame,mediapipe_landmarks,settings_colors["knee_joint_angle"][1])
+                        dic_all_data['Angle of knee (shin-thigh) joint.'] = [int(left_value),int(right_value)]
+                    if(settings_colors["between_thigh_angle"][0]):
+                        value=drawing_object.mediapipe_between_thigh_angle(frame,mediapipe_landmarks,settings_colors["between_thigh_angle"][1])
+                        dic_all_data['Angle between thighs.'] = int(value)
+                    if(settings_colors["knee_toe_angle"][0]):
+                        left_value,right_value=drawing_object.mediapipe_knee_toe_angle(frame,mediapipe_landmarks,settings_colors["knee_toe_angle"][1])
+                        dic_all_data['Angle of foot line with x-axis.']=[int(left_value),int(right_value)]
+                    if(settings_colors["elbow_joint_angle"][0]):
+                        left_value,right_value=drawing_object.mediapipe_elbow_joint_angle(frame,mediapipe_landmarks,settings_colors["elbow_joint_angle"][1])
+                        dic_all_data['Angle of elbow joint.']=[int(left_value),int(right_value)]
+                    if(settings_colors["flexion_foot"][0]):
+                        left_value,right_value=drawing_object.mediapipe_flexion_foot(frame,mediapipe_landmarks,settings_colors["flexion_foot"][1])
+                        dic_all_data['Angle of ankle (toe-heel-shin) joint.']=[int(left_value),int(right_value)]
+                    if(settings_colors["forearm_x_axis"][0]):
+                        left_value,right_value=drawing_object.mediapipe_forearm_x_axis(frame,mediapipe_landmarks,settings_colors["forearm_x_axis"][1])
+                        dic_all_data['Angle of forearm with x-axis.']=[int(left_value),int(right_value)]
+                    if(settings_colors["shin_x_axis"][0]):
+                        left_value,right_value=drawing_object.mediapipe_shin_x_axis(frame,mediapipe_landmarks,settings_colors["shin_x_axis"][1])
+                        dic_all_data['Angle of shin with x-axis.']=[int(left_value),int(right_value)]
+                    if(settings_colors["thigh_x_axis"][0]):
+                        left_value,right_value=drawing_object.mediapipe_thigh_x_axis(frame,mediapipe_landmarks,settings_colors["thigh_x_axis"][1])
+                        dic_all_data['Angle of thigh with x-axis.']=[int(left_value),int(right_value)]
+                    if(settings_colors["ear_hip_x_axis"][0]):
+                        value=drawing_object.mediapipe_ear_hip_x_axis(frame,mediapipe_landmarks,settings_colors["ear_hip_x_axis"][1])
+                        dic_all_data['Angle of ear-hip line with the x-axis.'] = int(value)
+                    if(settings_colors["distance_knee"][0]):
+                        value=drawing_object.mediapipe_distance_knee(frame,mediapipe_landmarks,settings_colors["distance_knee"][1],scale_factor)
+                        dic_all_data['Distance between knees.'] = round(value,3)
+                    if(settings_colors["distance_heel_hip"][0]):
+                        left_value,right_value=drawing_object.mediapipe_distance_heel_hip(frame,mediapipe_landmarks,settings_colors["distance_heel_hip"][1],scale_factor)
+                        dic_all_data['Distance of hip to heel.']=[round(left_value,3),round(right_value,3)]
+                    if(settings_colors["distance_wrist_hip"][0]):
+                        left_value,right_value=drawing_object.mediapipe_distance_wrist_hip(frame,mediapipe_landmarks,settings_colors["distance_wrist_hip"][1],scale_factor)
+                        dic_all_data['Distance of hip to wrist.']=[round(left_value,3),round(right_value,3)]
+                    if(settings_colors['ear_nose_x_axis'][0]):
+                        value=drawing_object.mediapipe_ear_nose_x_axis(frame,mediapipe_landmarks,settings_colors['ear_nose_x_axis'][1])
+                        dic_all_data['Angle of ear-nose line with the x-axis.'] = int(value)
+                    # Extract Features for posture analysis
+                    dic_all_data['frame'] = frame_number
+                    df_temp=pd.DataFrame([dic_all_data])
+                    df_all_data = pd.concat([df_all_data,df_temp],ignore_index=True)
+                    dic = {}
+                    dic = Analysis_Landmarks.mediapipe_feature_selection(mediapipe_landmarks,width,height,scale_factor)
+                    dic['frame'] = frame_number
+                    df_temp = pd.DataFrame([dic])
+                    df_posture_features = pd.concat([df_posture_features,df_temp],ignore_index=True)
             out.write(frame)
             df_all_data.to_csv(f'{write_folder_name}/all_data.csv',index=False)
             df_posture_features.to_csv(f'{write_folder_name}/posture_features.csv',index=False)
@@ -307,6 +309,29 @@ def running_model(height_runner, selectModel, settings_colors, video_name,userna
         print(f"Error: {e}")
         return(f"Error: {e}",False,"")
 
+def get_scale_factor_mediapipe(landmarks, height_runner,image_height,image_width):
+    top = {'x':landmarks[0][0],'y':landmarks[0][1]}  # Nose
+    ankle_left = {'x':landmarks[27][0],'y':landmarks[27][1]}  # Left ankle
+    ankle_right = {'x':landmarks[28][0],'y':landmarks[28][1]}  # Right ankle
+
+    # Convert to pixel coordinates
+    x_top, y_top = int(top['x'] * image_width), int(top['y'] * image_height)
+    x_ankle_l, y_ankle_l = int(ankle_left['x'] * image_width), int(ankle_left['y'] * image_height)
+    x_ankle_r, y_ankle_r = int(ankle_right['x'] * image_width), int(ankle_right['y'] * image_height)
+
+    # Average ankle position
+    x_ankle = (x_ankle_l + x_ankle_r) / 2
+    y_ankle = (y_ankle_l + y_ankle_r) / 2
+
+    # Pixel height between head and ankles
+    pixel_height = math.sqrt((x_ankle - x_top) ** 2 + (y_ankle - y_top) ** 2)
+
+    if pixel_height == 0:
+        return 0  # Avoid division by zero
+
+    # Calculate scale factor (cm per pixel)
+    scale_factor = height_runner / pixel_height
+    return scale_factor
 
 # ChaBot using chatGPT API and RAG system
 @app.route('/chat', methods=['POST'])

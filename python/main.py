@@ -84,6 +84,66 @@ VIDEO_SAVE_PATH = 'received_videos/'
 fetch_address = "127.0.0.1"
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
+    video_file = request.files.get('videoUpload')
+    username = request.form.get('username')
+    height_runner = request.form.get('height_runner')
+    selectedModel = request.form.get('selectedModel')
+    print(height_runner, selectedModel)
+    # Create Recived Video Folder
+    if not os.path.exists(VIDEO_SAVE_PATH):
+        os.makedirs(VIDEO_SAVE_PATH)
+        print(f"Folder created: {VIDEO_SAVE_PATH}")
+    else:
+        print(f"Folder already exists: {VIDEO_SAVE_PATH}")
+    # get the uploaded video file
+    if video_file:
+        video_file.save(f'{VIDEO_SAVE_PATH}{username}_{video_file.filename}')
+        print('Video file saved successfully')
+    else:
+        print('No video file uploaded')
+        return jsonify({"response": False, "message": "No video file uploaded"})
+    video_address = f'{VIDEO_SAVE_PATH}{username}_{video_file.filename}'
+    print(f"video file address: {video_address}")
+    # threading.Thread(target=background_analysis, args=(selectedModel,video_address)).start()
+    background_analysis(selectedModel, video_address)
+    return jsonify({"response": True,"message":" Video is being analyzed in the background"})
+
+def background_analysis(selected_model, video_address):   
+    cap = cv2.VideoCapture(video_address)
+    drawing_object = drawing()
+    frame_landmarks = []
+    frame_number = 0
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame_number += 1
+        landmarks = None
+        if selected_model == 'yolo':
+            yolo_landmarks, _ = drawing_object.yolo_landmark_detection(frame)
+            if yolo_landmarks and len(yolo_landmarks) > 0:
+                # If multiple people, take the first
+                landmarks = yolo_landmarks[0]
+        elif selected_model == 'mediapipe':
+            mediapipe_landmarks = drawing_object.mediapipe_landmark_detection(frame)
+            if mediapipe_landmarks and len(mediapipe_landmarks) > 0:
+                landmarks = mediapipe_landmarks
+        # Store landmarks or None
+        frame_landmarks.append({
+            'frame': frame_number,
+            'landmarks': landmarks if landmarks is not None else None
+        })
+    cap.release()
+    # Save to DataFrame and CSV
+    df = pd.DataFrame(frame_landmarks)
+    output_csv = video_address + '_landmarks.csv'
+    df.to_csv(output_csv, index=False)
+    print(f"Saved landmarks for each frame to {output_csv}")
+    
+
+
+def run_analysis_orginal():
 
     video_file = request.files.get('videoUpload')
     username = request.form.get('username')
@@ -121,16 +181,9 @@ def run_analysis():
             break
         else:
             i += 1
-    # threading.Thread(target=background_analysis, args=(height_runner, selectedModel, settings_colors, video_file.filename,username)).start()
     return jsonify({"response": response, "message": text,"videoaddress":write_file_name,"csvaddress":write_file_name})
 
 
-def background_analysis(height_runner, selected_model, settings_colors, video_name,username):
-    # Running model analysis in the background
-    result_text,response = running_model(height_runner, selected_model, settings_colors, video_name,username)
-    print(result_text)
-    print(response)
-    # Here you can add any additional logic such as notifying users via a webhook or other mechanisms.
 
 @app.route('/download_csv/<filename>', methods=['GET'])
 def download_csv_file(filename):

@@ -26,12 +26,9 @@ class drawing:
         else:
             landmarks = 0
         if landmarks:
-            # draw landmarks in frame
-            mediapipe_landmarks = [
-                [landmark.x, landmark.y, landmark.z,landmark.visibility] for landmark in landmarks]
+            return landmarks
         else:
-            mediapipe_landmarks = []
-        return mediapipe_landmarks
+            return None
 
     def yolo_landmark_detection(self, frame):
 

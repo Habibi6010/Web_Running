@@ -689,6 +689,97 @@ function sendData(event) {
     });
 }
 
+let uploaded_video_name = null;
+
+// Send and receive data from server and work with API
+function SendVideo_height(event) {
+
+  event.preventDefault(); // Stop form from submitting the traditional way
+  // check_radio();
+  if (document.getElementById('videoUpload').files.length == 0) {
+    alert("You didn't upload video.");
+    uploaded_video_name = null;
+    return;
+  }
+  const loading = document.getElementById('parent-container-uploadvideo');
+  const loading2 = document.getElementById('loading-uploadvideo');
+  // Get the form element
+  const form = document.getElementById('uploadForm');
+  // Create a new FormData object
+  const formData = new FormData(form);
+  // Get height_runner from the input fields (feet and inches)
+  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+  const inches = parseInt(document.getElementById('heightInches').value) || 0;
+  // Convert to total inches for backend, or you can convert to meters if needed
+  const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
+  // Check if height_runner is valid
+  if (isNaN(height_runner) || height_runner <= 0) {
+    alert("Please enter a valid height.");
+    loading.style.display = 'none';
+    loading2.style.display = 'none';
+    uploaded_video_name = null;
+    return;
+  }
+  // Get selected AI model (radio buttons)
+  // const selectedModel = document.querySelector('input[name="model"]:checked').value;
+  const selectedModel = "mediapipe";
+  // Get usrname from usernameeDisplay span
+  const username = document.getElementById('usernameDisplay').innerText;
+
+  //Append the height_runner, selectedModel, and settings_colors to the formData
+  formData.append('height_runner', height_runner);
+  formData.append('selectedModel', selectedModel);
+  // formData.append('settings_colors', JSON.stringify(settings_colors));
+  formData.append('username', username);
+
+  // Show the loading GIF
+  loading.style.display = 'block';
+  loading2.style.display = 'block';
+  // Get upload and analysis sections id
+  const upload_section = document.getElementById('upload-section');
+  const analysis_section = document.getElementById('analysis-section');
+  
+  // Send the data to the server
+  fetch('http://'+fetch_address+':5001/run_analysis', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response) {
+        // alert('Data sent successfully and Model is running');
+        // Hide the loading GIF
+        loading.style.display = 'none';
+        loading2.style.display = 'none';
+        uploaded_video_name = data.videoaddress; // Store the uploaded video name
+        // Hide upload section and show analysis section
+        upload_section.style.display = 'none';
+        analysis_section.style.display = 'block';
+        //Show reslut video
+        console.log(data.message);
+      } else {
+        alert('Data sent failed');
+        console.log(data.message);
+        // Hide the loading GIF
+        loading.style.display = 'none';
+        loading2.style.display = 'none';
+        upload_section.style.display = 'block';
+        analysis_section.style.display = 'none';
+        // resultVideoPreview.style.display = 'none';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Hide the loading GIF
+      loading.style.display = 'none';
+      loading2.style.display = 'none';
+      upload_section.style.display = 'block';
+      analysis_section.style.display = 'none';
+    });
+}
+
+
 function check_yolo(checkbox, text) {
   let radios = document.getElementsByName('model');
   let modelType = "";

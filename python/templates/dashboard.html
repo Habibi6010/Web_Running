@@ -103,7 +103,7 @@
       </div>
     </section>
 
-    <section id="analysis-section" style="display: none;">
+    <section id="analysis-section" style="display: block;">
       <div class="container section-title" data-aos="fade-up">
         <h2>Aanlysis Settings </h2>
       </div>
@@ -160,183 +160,329 @@
           </div>
 
           <div class="form-group">
-            <div class="checkbox-group">
-              <label> </label>
-              <label> </label>
-              <label> Settings</label>
-              <label>Color of each parameter</label>
+            <div class="checkbox-group" >
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="tedt" name="tet" value="test" style="display:block;" disabled>
+                </div>
+                <div class="col-setting">
+                  <label> Settings</label>
+                </div>
+                <div class="col-sample">
+                  <label> Sample</label>
+                </div>
+                <div class="col-color">
+                  <label>Color of each parameter</label>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting1" name="setting" value="foot_ground_angle" > 
-                1-Angle of foot with ground.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="1Preview">
-              
-              <select id="colorSetting1" name="colorSetting1">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting1" name="setting" value="foot_ground_angle">
+                </div>
+                <div class="col-setting">
+                  <label for="setting1">1-Angle of foot with ground.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img1" ><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img1" alt="1Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting1" name="colorSetting1" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting2" name="setting" value="knee_joint_angle">
-                 2-Angle of knee (shin-thigh) joint.</label>
-                <img src="./static/img/bg.jpg" class="hover-image" alt="2Preview">
-              
-              <select id="colorSetting2" name="colorSetting2">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting2" name="setting" value="knee_joint_angle">
+                </div>
+                <div class="col-setting">
+                  <label for="setting2">2-Angle of knee (shin-thigh) joint.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img2"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/bg.jpg" class="setting-image" id="img2" alt="2Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting2" name="colorSetting2" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting3" name="setting" value="between_thigh_angle">
-                3-Angle between thighs.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="3Preview">
-              <select id="colorSetting3" name="colorSetting3">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting3" name="setting" value="between_thigh_angle">
+                </div>
+                <div class="col-setting">
+                  <label for="setting3">3-Angle between thighs.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img3"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img3" alt="3Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting3" name="colorSetting3" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting4" name="setting" value="knee_toe_angle">
-                4-Angle of foot line with x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              
-              <select id="colorSetting4" name="colorSetting4">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting4" name="setting" value="knee_toe_angle">
+                </div>
+                <div class="col-setting">
+                  <label for="setting4">4-Angle of foot line with x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img4"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img4" alt="4Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting4" name="colorSetting4" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting5" name="setting" value="elbow_joint_angle">
-                5-Angle of elbow joint.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting5" name="colorSetting5">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting5" name="setting" value="elbow_joint_angle">
+                </div>
+                <div class="col-setting">
+                  <label for="setting5">5-Angle of elbow joint.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img5"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img5" alt="5Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting5" name="colorSetting5" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting6" name="setting" value="flexion_foot">
-                6-Angle of ankle (toe-heel-shin) joint.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting6" name="colorSetting6">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting6" name="setting" value="flexion_foot">
+                </div>
+                <div class="col-setting">
+                  <label for="setting6">6-Angle of ankle (toe-heel-shin) joint.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img6"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img6" alt="6Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting6" name="colorSetting6" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting7" name="setting" value="forearm_x_axis">
-                7-Angle of forearm with x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting7" name="colorSetting7">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting7" name="setting" value="forearm_x_axis">
+                </div>
+                <div class="col-setting">
+                  <label for="setting7">7-Angle of forearm with x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img7"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img7" alt="7Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting7" name="colorSetting7" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting8" name="setting" value="shin_x_axis">
-                8-Angle of shins with x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting8" name="colorSetting8">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting8" name="setting" value="shin_x_axis">
+                </div>
+                <div class="col-setting">
+                  <label for="setting8">8-Angle of shins with x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img8"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img8" alt="8Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting8" name="colorSetting8" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting9" name="setting" value="thigh_x_axis">
-                9-Angle of thighs with x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting9" name="colorSetting9">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting9" name="setting" value="thigh_x_axis">
+                </div>
+                <div class="col-setting">
+                  <label for="setting9">9-Angle of thighs with x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img9"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img9" alt="9Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting9" name="colorSetting9" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting10" name="setting" value="ear_nose_x_axis">
-                10-Angle of ear-nose line with x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting10" name="setting" value="ear_nose_x_axis">
+                </div>
+                <div class="col-setting">
+                  <label for="setting10">10-Angle of ear-nose line with x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img10"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img10" alt="10Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting10" name="colorSetting10" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <select id="colorSetting10" name="colorSetting10">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting11" name="setting" value="ear_hip_x_axis">
+                </div>
+                <div class="col-setting">
+                  <label for="setting11">11-Angle of ear-hip line with the x-axis.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img11"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img11" alt="11Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting11" name="colorSetting11" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00">Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting11" name="setting" value="ear_hip_x_axis">
-                11-Angle of ear-hip line with the x-axis.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting11" name="colorSetting11">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;">Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting12" name="setting" value="distance_knee">
+                </div>
+                <div class="col-setting">
+                  <label for="setting12">12-Distance between knees.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img12"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img12" alt="12Preview" style="display:none;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting12" name="colorSetting12" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00" selected>Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting12" name="setting" value="distance_knee">
-                12-Distance between knees.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting12" name="colorSetting12">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting13" name="setting" value="distance_heel_hip">
+                </div>
+                <div class="col-setting">
+                  <label for="setting13">13-Distance of hip to heel.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img13"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img13" alt="13Preview" style="display:none; max-height: 50px;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting13" name="colorSetting13" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00" selected>Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080">Purple</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>
-                <input type="checkbox" id="setting13" name="setting" value="distance_heel_hip"> 13-Distance of hip to
-                heel.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting13" name="colorSetting13">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
-
-              <label>
-                <input type="checkbox" id="setting14" name="setting" value="distance_wrist_hip"> 14-Distance of hip
-                to wrist.</label>
-                <img src="./static/img/foot_ground_angle.png" class="hover-image" alt="Preview">
-              <select id="colorSetting14" name="colorSetting14">
-                <option value="#ff0000" style="color:#ff0000;">Red</option>
-                <option value="#0563bb" style="color:#0563bb;">Blue</option>
-                <option value="#00ff00" style="color:#00ff00;" selected>Green</option>
-                <option value="#ffa500" style="color:#ffa500;">Orange</option>
-                <option value="#800080" style="color:#800080;">Purple</option>
-              </select>
+              <div class="settings-row">
+                <div class="col-label">
+                  <input type="checkbox" id="setting14" name="setting" value="distance_wrist_hip">
+                </div>
+                <div class="col-setting">
+                  <label for="setting14">14-Distance of hip to wrist.</label>
+                </div>
+                <div class="col-sample">
+                  <button type="button" class="visibility-btn" data-img="img14"><i class="bi bi-eye"></i></button>
+                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img14" alt="14Preview" style="display:none; max-height: 50px;">
+                </div>
+                <div class="col-color">
+                  <select id="colorSetting14" name="colorSetting14" style="width: 100%;">
+                    <option value="#ff0000">Red</option>
+                    <option value="#0563bb">Blue</option>
+                    <option value="#00ff00" selected>Green</option>
+                    <option value="#ffa500">Orange</option>
+                    <option value="#800080" style="color:#800080;">Purple</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 

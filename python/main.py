@@ -14,6 +14,17 @@ import requests
 from tools import tools
 import math
 
+##### Main Variable for  Address of server and video save path
+# Define a directory to save the video files when user uploads
+VIDEO_SAVE_PATH = 'received_videos/'
+# Define a directory to save the analyzed video files
+ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
+
+# Server fetch address
+# fetch_address = "13.59.211.224"
+fetch_address = "127.0.0.1"
+
+
 # supabase api infroamtion
 SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
 SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
@@ -77,11 +88,7 @@ def contact_us():
     return jsonify({"accsess": True})
 
 
-# Define a directory to save the video files
-VIDEO_SAVE_PATH = 'received_videos/'
 
-# fetch_address = "13.59.211.224"
-fetch_address = "127.0.0.1"
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
     video_file = request.files.get('videoUpload')
@@ -122,7 +129,7 @@ def background_analysis(selected_model, video_address):
         landmarks = None
         if selected_model == 'yolo':
             yolo_landmarks, _ = drawing_object.yolo_landmark_detection(frame)
-            if yolo_landmarks and len(yolo_landmarks) > 0:
+            if len(yolo_landmarks) > 0:
                 # If multiple people, take the first
                 landmarks = yolo_landmarks[0]
         elif selected_model == 'mediapipe':
@@ -137,7 +144,9 @@ def background_analysis(selected_model, video_address):
     cap.release()
     # Save to DataFrame and CSV
     df = pd.DataFrame(frame_landmarks)
-    output_csv = video_address + '_landmarks.csv'
+    # filename = os.path.basename(video_address)  # 'test@gmail.com_test_video.MOV'
+    name_without_ext = os.path.splitext(video_address)[0]  # 'test@gmail.com_test_video'
+    output_csv = name_without_ext + '_landmarks.csv'
     df.to_csv(output_csv, index=False)
     print(f"Saved landmarks for each frame to {output_csv}")
     
@@ -207,8 +216,6 @@ def download_video_file(foldername):
     return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
 
-# Define a directory to save the video files after analysis
-ANALYZED_VIDEO_SAVE_PATH = 'video/'
 def running_model(height_runner, selectModel, settings_colors, video_name,username):
     drawing_object = drawing()
     cap = cv2.VideoCapture(f'{VIDEO_SAVE_PATH}{username}_{video_name}')

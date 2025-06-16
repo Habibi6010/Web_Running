@@ -1515,7 +1515,7 @@ section,
 
 .checkbox-group {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2-column layout */
+  grid-template-columns: 1fr; /* 3-column layout */
   gap: 5px; /* space between the columns */
   align-items: start;
   position: relative;
@@ -1693,16 +1693,70 @@ button:active:hover {
   outline: none;
 }
 
-/* button {
-  padding: 8px 12px;
-  margin-left: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+
+.settings-row {
+  position: relative; /* Key for proper absolute positioning */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.col-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10%;
+}
+.col-setting {
+  display: flex;
+  align-items: center;
+width: 50%;
+}
+.col-sample {
+  display: flex;
+  align-items: center;
+  width: 10%;
+  overflow: visible;
+  position: relative;
+}
+.col-color {
+  display: flex;
+  align-items: center;
+  width: 30%;
+}
+.checkbox-group label {
+  margin-bottom: 0 !important;
+  vertical-align: middle !important;
+}
+.settings-row label {
+  margin-bottom: 0 !important;
+  vertical-align: middle !important;
 }
 
-button:hover {
-  background-color: #0056b3;
-} */
+
+/* Highlight active visibility button */
+.visibility-btn.active-btn {
+  background-color: #0563bb; /* Blue highlight */
+  color: white;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+
+.setting-image {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 999;
+  display: none;
+
+  width: 150px; /* Fixed width */
+  height: 300px; /* Fixed height */
+  
+
+  padding: 6px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}

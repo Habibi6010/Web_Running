@@ -912,3 +912,51 @@ function handleKeyPressChatBot(event) {
     handleChatBotButton();
   }
 }
+
+
+let currentlyVisibleImg = null;
+let currentlyActiveBtn = null;
+
+function hideAllSettingImages() {
+  document.querySelectorAll('.setting-image').forEach(img => img.style.display = 'none');
+  document.querySelectorAll('.visibility-btn').forEach(btn => btn.classList.remove('active-btn'));
+  currentlyVisibleImg = null;
+  currentlyActiveBtn = null;
+}
+
+document.querySelectorAll('.visibility-btn').forEach(button => {
+  button.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const imgId = this.getAttribute('data-img');
+    const img = document.getElementById(imgId);
+
+    if (currentlyVisibleImg && currentlyVisibleImg !== img) {
+      hideAllSettingImages();
+    }
+
+    if (img.style.display === 'block') {
+      img.style.display = 'none';
+      this.classList.remove('active-btn');
+      currentlyVisibleImg = null;
+    } else {
+      hideAllSettingImages();
+
+      // Position popup near button
+      const rect = this.getBoundingClientRect();
+      img.style.top = `${this.offsetTop + 35}px`;  // below the button
+      img.style.left = `${this.offsetLeft}px`;
+      img.style.display = 'block';
+
+      this.classList.add('active-btn');
+      currentlyVisibleImg = img;
+    }
+  });
+});
+
+// Hide if clicking outside
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.visibility-btn') && !e.target.classList.contains('setting-image')) {
+    hideAllSettingImages();
+  }
+});
+

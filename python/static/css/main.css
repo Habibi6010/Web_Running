@@ -1739,7 +1739,7 @@ width: 50%;
   background-color: #0563bb; /* Blue highlight */
   color: white;
   border-radius: 4px;
-  padding: 4px 8px;
+  /* padding: 4px 8px;  */
 }
 
 
@@ -1759,4 +1759,11 @@ width: 50%;
   border: 1px solid #ccc;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
+}
+
+#video-player {
+    display: none;
+    width: 640px;
+    height: 360px;
+    margin-top: 20px;
 }

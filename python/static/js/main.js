@@ -581,14 +581,10 @@ function select_checkbox() {
 }
 
 // Send and receive data from server and work with API
-function sendData(event) {
+function SendDrawData(event) {
 
   event.preventDefault(); // Stop form from submitting the traditional way
-  // check_radio();
-  if (document.getElementById('videoUpload').files.length == 0) {
-    alert("You didn't upload video.");
-    return;
-  }
+
   const loading = document.getElementById('parent-container');
   const loading2 = document.getElementById('loading');
 
@@ -596,33 +592,6 @@ function sendData(event) {
   loading.style.display = 'block';
   loading2.style.display = 'block';
 
-  // Get the form element
-  const form = document.getElementById('uploadForm');
-  // Create a new FormData object
-  const formData = new FormData(form);
-  // Get height_runner from the input fields (feet and inches)
-  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
-  const inches = parseInt(document.getElementById('heightInches').value) || 0;
-  // Convert to total inches for backend, or you can convert to meters if needed
-  const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
-  // Check if height_runner is valid
-  if (isNaN(height_runner) || height_runner <= 0) {
-    alert("Please enter a valid height.");
-    loading.style.display = 'none';
-    loading2.style.display = 'none';
-    return;
-  }
-  // Get selected AI model (radio buttons)
-  // const selectedModel = document.querySelector('input[name="model"]:checked').value;
-  const selectedModel = "mediapipe";
-  // Get usrname from usernameeDisplay span
-  const username = document.getElementById('usernameDisplay').innerText;
-
-  // Get active section
-  const active_section = document.getElementById('result');
-  //Get result video preview
-  // const resultVideoPreview = document.getElementById('resultVideoPreview');
-  // Manually add the selected checkboxes and colors to the formData
   const settings_colors = {};
 
   for (let i = 1; i <= 14; i++) {
@@ -630,52 +599,32 @@ function sendData(event) {
     const colorInput = document.getElementById(`colorSetting${i}`);
     settings_colors[document.getElementById(`setting${i}`).value] = [checkbox.checked, hexToRgb(colorInput.value)];
   }
-  //Append the height_runner, selectedModel, and settings_colors to the formData
-  formData.append('height_runner', height_runner);
-  formData.append('selectedModel', selectedModel);
-  formData.append('settings_colors', JSON.stringify(settings_colors));
-  formData.append('username', username);
   
   // Send the data to the server
-  fetch('http://'+fetch_address+':5001/run_analysis', {
+  fetch('http://'+fetch_address+':5001/draw_analysis', {
     method: 'POST',
-    body: formData
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ settings_colors })
   })
     .then(response => response.json())
     .then(data => {
       console.log('Success:', data);
       if (data.response) {
-        // alert('Data sent successfully and Model is running');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
         //Show reslut video
-        active_section.style.display = 'block';
-        // resultVideoPreview.style.display = 'block';
-        console.log(data.link);
-        // resultVideoPreview.src = "download_video/"+data.videoaddress;
-        // resultVideoPreview.load();
-        // resultVideoPreview.play();
-
-        // Download result video link
-        downloadLink = document.getElementById('downloadResultVideo');
-        downloadLink.href = "download_video/"+data.videoaddress;
-        //downloadLink.download = data.link.split('/').pop(); //Extract file name from path
-        downloadLink.style.display = 'inline-block'; // Show the download link
-
-        // Download the CSV file link
-        downloadLink = document.getElementById('downloadResultCSV');
-        downloadLink.href = "download_csv/"+data.csvaddress;
-        // downloadLink.download = data.csvaddress.split('/').pop(); //Extract file name from path
-        downloadLink.style.display = 'inline-block'; // Show the download link
-
+        const video = document.getElementById('video-player');
+        const source = document.getElementById('video-source');
+        source.src = "video/test.mp4"; // Set the video source to the received address
+        video.load();
+        video.style.display = 'block';
+        video.play();
       } else {
         alert('Data sent failed');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
-        active_section.style.display = 'none';
-        // resultVideoPreview.style.display = 'none';
       }
     })
     .catch(error => {
@@ -684,8 +633,6 @@ function sendData(event) {
       // Hide the loading GIF
       loading.style.display = 'none';
       loading2.style.display = 'none';
-      active_section.style.display = 'none';
-      // resultVideoPreview.style.display = 'none';
     });
 }
 

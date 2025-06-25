@@ -258,6 +258,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const username = urlParams.get('username') || 'Profile';
   // Update span for show username
   document.getElementById("usernameDisplay").innerText = username;
+  // Set the link to dashboard links
+  const dashboardLink1 = document.getElementById("doshboardlink1");
+  if (dashboardLink1) {
+    dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}`;
+  }
+  const dashboardLink2 = document.getElementById("dashboardlink2");
+  if (dashboardLink2) {
+    dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}`;
+  }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -300,8 +309,8 @@ function handelSigninButton(event) {
     .then(response => response.json())
     .then(data => {
       if (data.accsess) {
-        alert('Login successful: \n' + email);
         window.location.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(email)}`;
+        console.log('Login successful: \n' + email);
       }
       else {
         alert('Login failed: \n' + 'Invalid email or password');

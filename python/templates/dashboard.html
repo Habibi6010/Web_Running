@@ -90,12 +90,12 @@
             <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
             <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
           </div>
-
+          
           <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
 
           <div id="parent-container-uploadvideo" style="display: none;">
               <h2>Uploading and Processing. Please wait </h2>
-              <div id="loading-uploadvideo" style="display: none; width: 100%; height: 50px; position: relative;">
+              <div id="loading-uploadvideo" style="display: none; width: 100%; height: 50px; position: relative;margin-top: 50px;">
                 <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
               </div>
           </div>
@@ -103,7 +103,7 @@
       </div>
     </section>
 
-    <section id="analysis-section" style="display: block;">
+    <section id="analysis-section" style="display: none;">
       <div class="container section-title" data-aos="fade-up">
         <h2>Aanlysis Settings </h2>
       </div>
@@ -485,6 +485,8 @@
               </div>
             </div>
           </div>
+          
+          <button type="submit" onclick="UplaodNewVideo()" class="btn btn-primary" style="margin-top: 20px;">Upload New Video</button>
 
           <button type="submit" onclick="SendDrawData(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
 
@@ -494,11 +496,6 @@
               <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
             </div>
           </div>
-
-          <video id="video-player" controls>
-            <source id="video-source" src="" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
       </div>
     </section>
 
@@ -514,6 +511,11 @@
         <!-- <video id="resultVideoPreview" controls style="display:none; width: 100%; margin-top: 20px;" type="video/mp4"></video> -->
         <label for="resultVideo" style="display: block; margin-top:20px;font-size: 20px;">CSV File:</label>
         <a id="downloadResultCSV">Download CSV file</a>
+        
+        <video id="video-player" controls>
+            <source id="video-source" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
       </div>
     </section>
 

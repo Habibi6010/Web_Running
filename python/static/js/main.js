@@ -584,6 +584,18 @@ function select_checkbox() {
 function SendDrawData(event) {
 
   event.preventDefault(); // Stop form from submitting the traditional way
+  const resultSection = document.getElementById('result');
+  const video = document.getElementById('video-player');
+  const source = document.getElementById('video-source');
+  const downoadvideolink = document.getElementById('downloadResultVideo');
+  const downloadcsvlink = document.getElementById('downloadResultCSV');
+
+
+  resultSection.style.display = 'none'; // Hide the result section initially
+  video.style.display = 'none'; // Hide the video player initially
+  source.src = ""; // Clear the video source
+  downoadvideolink.href = ""; // Clear the download link for the video
+  downloadcsvlink.href = ""; // Clear the download link for the CSV
 
   const loading = document.getElementById('parent-container');
   const loading2 = document.getElementById('loading');
@@ -613,10 +625,13 @@ function SendDrawData(event) {
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
-        //Show reslut video
-        const video = document.getElementById('video-player');
-        const source = document.getElementById('video-source');
-        source.src = "video/test.mp4"; // Set the video source to the received address
+
+        resultSection.style.display = 'block'; // Show the result section
+        downoadvideolink.href = "download_video/"+data.videoaddress; // Set the download link for the video
+        downloadcsvlink.href = "download_csv/"+data.csvaddress; // Set the download link
+
+        //Show reslut videos
+        source.src = "video/"+data.videoaddress; // Set the video source to the received address
         video.load();
         video.style.display = 'block';
         video.play();
@@ -625,6 +640,9 @@ function SendDrawData(event) {
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
+        resultSection.style.display = 'none'; // Hide the result section
+        downoadvideolink.href = ""; // Clear the download link for the video
+        downloadcsvlink.href = ""; // Clear the download link for the CSV
       }
     })
     .catch(error => {
@@ -633,6 +651,9 @@ function SendDrawData(event) {
       // Hide the loading GIF
       loading.style.display = 'none';
       loading2.style.display = 'none';
+      resultSection.style.display = 'none'; // Hide the result section
+      downloadcsvlink.href = ""; // Clear the download link for the CSV
+      downoadvideolink.href = ""; // Clear the download link for the video
     });
 }
 
@@ -906,4 +927,58 @@ document.addEventListener('click', function (e) {
     hideAllSettingImages();
   }
 });
+
+function UplaodNewVideo() {
+  // Reset all checkboxes
+  for (let i = 1; i <= 11; i++) {
+    const checkbox = document.getElementById(`setting${i}`);
+    if (checkbox) checkbox.checked = false;
+    const colorInput = document.getElementById(`colorSetting${i}`);
+    if (colorInput) 
+      {
+        colorInput.selectedIndex = 0; // Reset to default color
+        colorInput.style.backgroundColor = 'rgba(255, 0, 0, 0.2)'; // Reset color to default
+        // colorInput.value = '#ff0000'; // Reset value to default
+      }
+  }
+  for (let i = 12; i <= 14; i++) {
+    const checkbox = document.getElementById(`setting${i}`);
+    if (checkbox) checkbox.checked = false;
+    const colorInput = document.getElementById(`colorSetting${i}`);
+    if (colorInput)
+      {
+        // colorInput.value = '#00ff00'; // or your default color
+        colorInput.style.backgroundColor = 'rgba(0, 255, 0, 0.2)'; // Reset color to default
+        colorInput.selectedIndex = 2; // Reset to default color
+      }
+  }
+
+  // Reset upload form
+  const form = document.getElementById('uploadForm');
+  if (form) form.reset();
+
+  // Hide analysis/result sections, show upload section
+  const upload_section = document.getElementById('upload-section');
+  const analysis_section = document.getElementById('analysis-section');
+  const result_section = document.getElementById('result');
+  if (upload_section) upload_section.style.display = 'block';
+  if (analysis_section) analysis_section.style.display = 'none';
+  if (result_section) result_section.style.display = 'none';
+
+  // Hide video preview if present
+  const videoPreview = document.getElementById('videoPreview');
+  if (videoPreview) {
+    videoPreview.src = '';
+    videoPreview.style.display = 'none';
+  }
+
+  // Reset any global state variables if needed
+  uploaded_video_name = null;
+}
+
+// // Attach to button
+// const uploadNewVideoBtn = document.getElementById('UplaodNewVideo');
+// if (uploadNewVideoBtn) {
+//   uploadNewVideoBtn.addEventListener('click', UplaodNewVideo);
+// }
 

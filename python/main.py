@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template,send_from_directory
+from flask import Flask, jsonify, request, render_template,send_from_directory,send_file
 from flask_cors import CORS
 from drawing import drawing
 import cv2
@@ -13,13 +13,17 @@ import requests
 from tools import tools
 import math
 import datetime
-import shutil
+# import shutil
+import subprocess
+
+
 ##### Main Variable for  Address of server and video save path
 # Define a directory to save the video files when user uploads
 VIDEO_SAVE_PATH = 'received_videos/'
 # Define a directory to save the analyzed video files
 ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
-
+# Definfe ffmpeg path
+ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
 # Server fetch address
 # fetch_address = "13.59.211.224"
 fetch_address = "127.0.0.1"
@@ -167,31 +171,43 @@ def run_model_get_landmarks(selected_model, video_address):
     df = pd.DataFrame(frame_landmarks)
     return df
 
-@app.route('/download_csv/<filename>', methods=['GET'])
-def download_csv_file(filename):
+@app.route('/download_csv/<path:filepath>', methods=['GET'])
+def download_csv_file(filepath):
+    video_path=os.path.dirname(filepath)
+    video_filename = os.path.basename(filepath)
+    print(f"Serving CSV from {video_path} / {video_filename}")
+    return send_from_directory(video_path, video_filename, as_attachment=True)
     # Decode the filename as Flask encodes URLs.
-    decoded_filename = urllib.parse.unquote(filename)
-    print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
-    return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "all_data.csv")
+    # decoded_filename = urllib.parse.unquote(filename)
+    # print(f"Download file: {os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)}/{decoded_filename}")
+    # return send_from_directory(os.path.abspath(ANALYZED_VIDEO_SAVE_PATH)+"/"+decoded_filename, "all_data.csv")
 
-@app.route('/download_video/<path:foldername>', methods=['GET'])
-def download_video_file(foldername):
-    decoded_foldername = urllib.parse.unquote(foldername)  # KEEP @ character
-    abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
+@app.route('/download_video/<path:filepath>', methods=['GET'])
+def download_video_file(filepath):
+    video_path=os.path.dirname(filepath)
+    video_filename = os.path.basename(filepath)
+    print(f"Serving video from {video_path} / {video_filename}")
+    return send_from_directory(video_path, video_filename, as_attachment=True)
+    # decoded_foldername = urllib.parse.unquote(foldername)  # KEEP @ character
+    # abs_dir = os.path.abspath(os.path.join(ANALYZED_VIDEO_SAVE_PATH, decoded_foldername))
 
-    video_filename = "video_output.mp4"
-    video_file_path = os.path.join(abs_dir, video_filename)
+    # video_filename = "video_output.mp4"
+    # video_file_path = os.path.join(abs_dir, video_filename)
 
-    if not os.path.exists(video_file_path):
-        return f"File not found: {video_file_path}", 404
+    # if not os.path.exists(video_file_path):
+    #     return f"File not found: {video_file_path}", 404
 
-    print(f"Serving video from {video_file_path}")
-    return send_from_directory(abs_dir, video_filename, as_attachment=True)
+    # print(f"Serving video from {video_file_path}")
+    # return send_from_directory(abs_dir, video_filename, as_attachment=True)
 
-@app.route('/video/<filename>')
+
+
+@app.route('/video/<path:filename>')
 def video(filename):
-    print(f"Serving video: {filename}")
-    return send_from_directory('static/videos/', filename)
+    # video_dir = os.path.join(app.root_path, 'static', 'videos')
+    print(f"Serving video:{filename}")
+    return send_file(filename, mimetype='video/mp4')
+    # return send_from_directory(filename)
 
 
 @app.route('/draw_analysis', methods=['POST'])
@@ -221,7 +237,7 @@ def draw_analysis():
     print(f"settings_colors: {setting_colors}")
     message,response,write_folder_name= drawing_on_video()
 
-    output_video_address = write_folder_name + '/video_output.mp4'
+    output_video_address = write_folder_name + '/fixed_output.mp4'
     print(f"Output video address URL: {output_video_address}")
     output_video_csv = write_folder_name + '/all_data.csv'
     print(f"Output video csv address URL: {output_video_csv}") 
@@ -267,6 +283,7 @@ def drawing_on_video():
         # Define the codec and create VideoWriter object
         counter=0
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for mp4
+        # fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Codec for mp4
         write_folder_name = f'{ANALYZED_VIDEO_SAVE_PATH}{username}/{timestamp}_{input_video_name}_{counter}'
         while os.path.exists(f'{write_folder_name}'):
             counter+=1
@@ -403,7 +420,15 @@ def drawing_on_video():
             #     break
         cap.release()
         out.release()
-        shutil.copy(f'{write_folder_name}/video_output.mp4', 'static/videos/test.mp4')
+        # shutil.copy(f'{write_folder_name}/video_output.mp4', 'static/videos/test.mp4')
+        input_path = f"{write_folder_name}/video_output.mp4"
+        output_path = f"{write_folder_name}/fixed_output.mp4"
+
+        subprocess.run([
+            ffmpeg_path, '-y','-i', input_path,
+            '-c:v', 'libx264', '-c:a', 'aac', '-strict', 'experimental',
+            output_path
+        ])
         return("Analysis Done",True,write_folder_name)
     except Exception as e:
         print(f"Error: {e}")

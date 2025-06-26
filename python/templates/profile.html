@@ -85,12 +85,20 @@
       </div><!-- End Section Title -->
 
       <div class="container_checkbox">
-        <div class="form-group">
-          <div class="checkbox-group">
-            <label>Original Video uploaded</label>
-            <label> Analysis Video</label>
-          </div>
-        </div>
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Video Name</th>
+              <th>Upload Date</th>
+              <th>Original Video</th>
+              <th>Analysis</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- History entries will be dynamically inserted here -->
+          </tbody>
+        </table>
       </div>
     </section><!-- /Starter Section Section -->
 

@@ -267,14 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (dashboardLink2) {
     dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}`;
   }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // extract username from url
-  const urlParams = new URLSearchParams(window.location.search);
-  const username = urlParams.get('username') || 'Profile';
-  // Set the link to pass username as a query parameter
-  document.getElementById("viewProfileLink").href = `profile.html?username=${encodeURIComponent(username)}`;
+  FillHistoryTable(username);
 });
 
 // fetch_address = "13.59.211.224"
@@ -991,3 +984,92 @@ function UplaodNewVideo() {
 //   uploadNewVideoBtn.addEventListener('click', UplaodNewVideo);
 // }
 
+function FillHistoryTable(username){
+  console.log("FillHistoryTable");
+  const tableBody = document.getElementById('historyTableBody');
+  // Clear existing rows
+  tableBody.innerHTML = '';
+  fetch('http://'+fetch_address+':5001/get_user_history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response)
+      {
+        if (Array.isArray(data.history) && data.history.length > 0) {
+          populateVideoTable(data.history, tableBody);
+        } else {
+          alert('You do not have any history yet.');
+          return;
+        }
+      }else{
+        console.log(data.message);
+        alert('You do not have any history yet.');
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+
+function populateVideoTable(videoList, tableBody) {
+  // Clear the table body first
+  tableBody.innerHTML = '';
+
+  videoList.forEach(item => {
+    const row = document.createElement("tr");
+
+    // Video Name
+    const nameCell = document.createElement("td");
+    nameCell.textContent = item.video_name;
+    row.appendChild(nameCell);
+
+    // Timestamp
+    const timeCell = document.createElement("td");
+    timeCell.textContent = item.timestamp;
+    row.appendChild(timeCell);
+
+    // Original Video Link
+    const videoLinkCell = document.createElement("td");
+    const videoLink = document.createElement("a");
+    videoLink.href = '/' + item.video_link;
+    videoLink.textContent = "Download";
+    videoLink.target = "_blank";
+    videoLinkCell.appendChild(videoLink);
+    row.appendChild(videoLinkCell);
+
+    // Analyzed Result Links
+    const resultCell = document.createElement("td");
+    if (item.result_link && item.result_link.length > 0) {
+      const ul = document.createElement("ul");
+      item.result_link.forEach(link => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = '/' + link;
+        a.textContent = "Run " + (item.result_link.indexOf(link) + 1);
+        a.target = "_blank";
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      resultCell.appendChild(ul);
+    } else {
+      resultCell.textContent = "No results yet";
+    }
+    row.appendChild(resultCell);
+
+    // Action Button Column
+    const actionCell = document.createElement("td");
+    const actionBtn = document.createElement("button");
+    actionBtn.textContent = "Re-Run";
+    actionBtn.onclick = () => handleRunAction(item); // call your function with item
+    actionCell.appendChild(actionBtn);
+    row.appendChild(actionCell);
+
+    // Append the row to the table body
+    tableBody.appendChild(row);
+  });
+}

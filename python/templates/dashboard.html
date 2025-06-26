@@ -72,10 +72,10 @@
 
     <section id="upload-section" style="display: block;">
       <div class="container section-title" data-aos="fade-up">
-        <h2>Upload File </h2>
+        <h2>Runner's Information</h2>
       </div>
       <div class="container_checkbox">
-        <h4>Upload Your File</h4>
+        <!-- <h4>Upload Your File</h4> -->
         <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
           <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
             <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height of Runner:</label>
@@ -86,7 +86,7 @@
           </div>
             
           <div class="form-group" style="margin-bottom: 20px;">
-            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Select Video File:</label>
+            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Upload Video File:</label>
             <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
             <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
           </div>
@@ -105,7 +105,7 @@
 
     <section id="analysis-section" style="display: none;">
       <div class="container section-title" data-aos="fade-up">
-        <h2>Aanlysis Settings </h2>
+        <h2>Settings and Colors</h2>
       </div>
       <!-- <div class="container_checkbox">
         <h4>Select AI Model</h4>
@@ -118,9 +118,9 @@
       </div> -->
 
       <div class="container_checkbox">
-          <h4>Select Analysis Settings and Colors</h4>
+          <!-- <h4>Select Analysis Settings and Colors</h4> -->
           <div class="container_checkbox">
-              <h5>Control Buttons</h5>
+              <h5>Select Postures</h5>
               <div class="control-buttons">
                   <div class="button-wrapper">
                       <button type="button" id="toe_off" onclick="toe_off_click([1, 2, 3, 4,5,6,7,8,9])">Toe-Off</button>
@@ -169,7 +169,7 @@
                   <label> Settings</label>
                 </div>
                 <div class="col-sample">
-                  <label> Sample</label>
+                  <label> Info.</label>
                 </div>
                 <div class="col-color">
                   <label>Color of each parameter</label>
@@ -486,7 +486,7 @@
             </div>
           </div>
           
-          <button type="submit" onclick="UplaodNewVideo()" class="btn btn-primary" style="margin-top: 20px;">Upload New Video</button>
+          <button type="submit" onclick="UplaodNewVideo()" class="btn btn-primary" style="margin-top: 20px;"> Return</button>
 
           <button type="submit" onclick="SendDrawData(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
 

@@ -255,9 +255,6 @@ def draw_analysis():
     # return jsonify({"response": response, "message": text,"videoaddress":write_file_name,"csvaddress":write_file_name})
     return jsonify({"response": response, "message": message, "videoaddress": output_video_address, "csvaddress": output_video_csv})
 
-
-
-
 def drawing_on_video():
     drawing_object = drawing()
     username = page_data_dic['username']
@@ -482,7 +479,52 @@ def chat():
     return jsonify(system_answer)
 
 
+# User history
+@app.route('/get_user_history', methods=['POST'])
+def get_user_history():
+    data = request.json
+    username = data.get('username')
+    print(f"Username:{username}")
+    user_video_path = f"{VIDEO_SAVE_PATH}{username}"
+    analyzed_user_video_path = f"{ANALYZED_VIDEO_SAVE_PATH}{username}"
+    if not os.path.exists(user_video_path):
+        print(f"User video folder does not exist: {user_video_path}")
+        return jsonify({"response": False, "message": "No video history found.", "history": []})
+    video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
+    video_files = [f for f in os.listdir(user_video_path) if f.lower().endswith(video_extensions)]
+    # print(f"Found {len(video_files)} video files for user {username}.")
+    # print(f"Video files: {video_files}")
+    uploaded_videos = []
+    for video_file in video_files:
+            parts = video_file.split('_',1)
+            video_name = parts[1] if len(parts) > 1 else video_file
+            timestamp_str = parts[0]
+            try:
+                timestamp = datetime.datetime.strptime(timestamp_str, "%Y%m%d%H%M%S")
+                formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                formatted_time = "Unknown"
+            
+            # print(f"Processing video file: {video_file} with timestamp: {formatted_time} and name: {video_name}")
+            video_link = f"download_video/{user_video_path}/{video_file}"
+            # print(f"User video path: {video_link}")
 
+            result_folders = os.listdir(analyzed_user_video_path)
+            result_link = []
+            for folder in result_folders:
+                if video_file in folder:
+                    result_path = analyzed_user_video_path + "/" + folder
+                    result_link.append(f"download_video/{result_path}/fixed_output.mp4")
+
+            uploaded_videos.append({
+                'video_name': video_name,
+                'timestamp': formatted_time,
+                'video_link': video_link,
+                'result_link': result_link
+            })
+            
+    # print(f"Uploaded videos data: {uploaded_videos}")
+    return jsonify({"response": True, "message": "Video history found.", "history": uploaded_videos})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=False)

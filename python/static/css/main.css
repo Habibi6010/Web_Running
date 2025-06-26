@@ -1767,3 +1767,16 @@ width: 50%;
     height: 360px;
     margin-top: 20px;
 }
+
+table {
+  max-width: 800px;
+  width: 100%;
+  border:#060606 1px solid;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+th, td {
+  border: #060606 1px solid;
+  padding: 8px;
+  text-align: left;
+}

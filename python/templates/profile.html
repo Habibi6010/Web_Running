@@ -88,8 +88,8 @@
         <table id="historyTable">
           <thead>
             <tr>
-              <th>Video Name</th>
-              <th>Upload Date</th>
+              <th onclick="sortTable(0)" class>Video Name</th>
+              <th onclick="sortTable(1)" class>Upload Date</th>
               <th>Original Video</th>
               <th>Analysis</th>
               <th>Action</th>
@@ -150,6 +150,72 @@
   <!-- Main JS File -->
   <script src="{{ url_for('static', filename='js/main.js')}}"></script>
 
-</body>
 
+  <script>
+    let sortDirections = []; // to toggle asc/desc
+
+    
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("historyTable");
+        const tbody = table.tBodies[0];
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        
+        // toggle sort direction
+        sortDirections[columnIndex] = !sortDirections[columnIndex];
+
+        rows.sort((a, b) => {
+            const aText = a.children[columnIndex].textContent.trim();
+            const bText = b.children[columnIndex].textContent.trim();
+            
+            // check if date
+            if (columnIndex === 1) {
+                const aDate = new Date(aText);
+                const bDate = new Date(bText);
+                if (!isNaN(aDate) && !isNaN(bDate)) {
+                    return sortDirections[columnIndex] ? aDate - bDate : bDate - aDate;
+                }
+            }
+            // detect if number
+            const aNum = parseFloat(aText);
+            const bNum = parseFloat(bText);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return sortDirections[columnIndex] ? aNum - bNum : bNum - aNum;
+            } else {
+                return sortDirections[columnIndex] 
+                    ? aText.localeCompare(bText) 
+                    : bText.localeCompare(aText);
+            }
+        });
+
+        // remove old rows
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+
+        // add sorted rows
+        tbody.append(...rows);
+
+        // update header style
+        // Clear dynamic sort classes
+        table.querySelectorAll("th").forEach((th, idx) => {
+            th.classList.remove("sort-asc", "sort-desc");
+        });
+
+        // Always keep ▼ on first two columns
+        table.querySelectorAll("th")[0].classList.add("fixed-desc");
+        table.querySelectorAll("th")[1].classList.add("fixed-desc");
+
+        // Update sorted column arrow
+        table.querySelectorAll("th")[columnIndex].classList.remove("fixed-desc");
+        table.querySelectorAll("th")[columnIndex].classList.add(
+            sortDirections[columnIndex] ? "sort-asc" : "sort-desc"
+        );
+    }
+    // sort by first
+    window.onload = () => {
+        sortTable(1);
+    };
+  </script>
+</body>
 </html>

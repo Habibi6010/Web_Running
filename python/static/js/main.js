@@ -671,12 +671,31 @@ function SendVideo_height(event) {
     uploaded_video_name = null;
     return;
   }
+
+
   const loading = document.getElementById('parent-container-uploadvideo');
   const loading2 = document.getElementById('loading-uploadvideo');
+  
   // Get the form element
   const form = document.getElementById('uploadForm');
   // Create a new FormData object
   const formData = new FormData(form);
+  // Get runnerName from input field
+  const runnerName = document.getElementById('runnerName').value.trim();
+  // Check if runnerName is valid
+  if (runnerName === "") {
+    alert("Please enter a valid runner name.");
+    loading.style.display = 'none';
+    loading2.style.display = 'none';
+    uploaded_video_name = null;
+    return;
+  }
+  // Append the runnerName to the formData
+  formData.append('runnerName', runnerName);
+  // Get the runnerGender from the select field
+  const runnerGender = document.querySelector('input[name="runnerGender"]:checked').value;
+  // Append the runnerGender to the formData
+  formData.append('runnerGender', runnerGender);
   // Get height_runner from the input fields (feet and inches)
   const feet = parseInt(document.getElementById('heightFeet').value) || 0;
   const inches = parseInt(document.getElementById('heightInches').value) || 0;
@@ -695,7 +714,7 @@ function SendVideo_height(event) {
   const selectedModel = "mediapipe";
   // Get usrname from usernameeDisplay span
   const username = document.getElementById('usernameDisplay').innerText;
-
+  
   //Append the height_runner, selectedModel, and settings_colors to the formData
   formData.append('height_runner', height_runner);
   formData.append('selectedModel', selectedModel);

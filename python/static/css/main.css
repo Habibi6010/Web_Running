@@ -1775,8 +1775,21 @@ table {
   border-collapse: collapse;
   margin-top: 20px;
 }
+th {
+  cursor: pointer;
+  background: #f2f2f2;
+}
 th, td {
   border: #060606 1px solid;
   padding: 8px;
   text-align: left;
+}
+th.sort-asc::after {
+  content: " ▲";
+}
+th.sort-desc::after {
+  content: " ▼";
+}
+th.fixed-desc::after {
+  content: " ▲";
 }

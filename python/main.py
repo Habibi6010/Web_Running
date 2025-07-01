@@ -105,7 +105,11 @@ def run_analysis():
     page_data_dic['height_runner'] = height_runner
     selectedModel = request.form.get('selectedModel')
     page_data_dic['selectedModel'] = selectedModel
-    print(height_runner, selectedModel)
+    runnerName = request.form.get('runnerName')
+    page_data_dic['runnerName'] = runnerName
+    runnerGender = request.form.get('runnerGender')
+    page_data_dic['runnerGender'] = runnerGender
+    print(height_runner, selectedModel, runnerName, runnerGender)
     # Create Recived Video Folder
     if not os.path.exists(VIDEO_SAVE_PATH):
         os.makedirs(VIDEO_SAVE_PATH)
@@ -122,7 +126,7 @@ def run_analysis():
     # get the uploaded video file
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S") # YYYYMMDDHHMMSS
     page_data_dic['timestamp'] = timestamp
-    video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{video_file.filename}'
+    video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{runnerName}_{runnerGender}'
     if video_file:
         video_file.save(video_address)
         print('Video file saved successfully')

@@ -78,6 +78,13 @@
         <!-- <h4>Upload Your File</h4> -->
         <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
           <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <label for="runnerName" style="margin-bottom: 0; min-width: 130px;">Runner's Name:</label>
+            <input type="text" id="runnerName" name="runnerName" style="width: 200px;" placeholder="Runner's Name" required>
+            <label for="runnerGender" style="margin-bottom: 0; min-width: 130px;">Runner's Gender:</label>
+            <label></label><input type="radio" name="runnerGender" value="Male" checked>Male</label>
+            <label></label><input type="radio" name="runnerGender" value="Female">Female</label>
+          </div>
+          <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
             <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height of Runner:</label>
             <input type="number" id="heightFeet" name="heightFeet" min="0" max="8" step="1" style="width: 80px;" placeholder="Feet" required>
             <span>ft</span>
@@ -185,7 +192,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img1" ><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img1" alt="1Preview" style="display:none;">
+                  <img src="./static/img/Setting1.jpg" class="setting-image" id="img1" alt="1Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting1" name="colorSetting1" style="width: 100%;">
@@ -207,7 +214,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img2"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/bg.jpg" class="setting-image" id="img2" alt="2Preview" style="display:none;">
+                  <img src="./static/img/Setting2.jpg" class="setting-image" id="img2" alt="2Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting2" name="colorSetting2" style="width: 100%;">
@@ -229,7 +236,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img3"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img3" alt="3Preview" style="display:none;">
+                  <img src="./static/img/Setting3.jpg" class="setting-image" id="img3" alt="3Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting3" name="colorSetting3" style="width: 100%;">
@@ -251,7 +258,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img4"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img4" alt="4Preview" style="display:none;">
+                  <img src="./static/img/Setting4.jpg" class="setting-image" id="img4" alt="4Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting4" name="colorSetting4" style="width: 100%;">
@@ -273,7 +280,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img5"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img5" alt="5Preview" style="display:none;">
+                  <img src="./static/img/Setting5.jpg" class="setting-image" id="img5" alt="5Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting5" name="colorSetting5" style="width: 100%;">
@@ -295,7 +302,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img6"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img6" alt="6Preview" style="display:none;">
+                  <img src="./static/img/Setting6.jpg" class="setting-image" id="img6" alt="6Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting6" name="colorSetting6" style="width: 100%;">
@@ -317,7 +324,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img7"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img7" alt="7Preview" style="display:none;">
+                  <img src="./static/img/Setting7.jpg" class="setting-image" id="img7" alt="7Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting7" name="colorSetting7" style="width: 100%;">
@@ -339,7 +346,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img8"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img8" alt="8Preview" style="display:none;">
+                  <img src="./static/img/Setting8.jpg" class="setting-image" id="img8" alt="8Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting8" name="colorSetting8" style="width: 100%;">
@@ -361,7 +368,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img9"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img9" alt="9Preview" style="display:none;">
+                  <img src="./static/img/Setting9.jpg" class="setting-image" id="img9" alt="9Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting9" name="colorSetting9" style="width: 100%;">
@@ -383,7 +390,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img10"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img10" alt="10Preview" style="display:none;">
+                  <img src="./static/img/Setting10.jpg" class="setting-image" id="img10" alt="10Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting10" name="colorSetting10" style="width: 100%;">
@@ -405,7 +412,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img11"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img11" alt="11Preview" style="display:none;">
+                  <img src="./static/img/Setting11.jpg" class="setting-image" id="img11" alt="11Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting11" name="colorSetting11" style="width: 100%;">
@@ -427,7 +434,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img12"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img12" alt="12Preview" style="display:none;">
+                  <img src="./static/img/Setting12.jpg" class="setting-image" id="img12" alt="12Preview" style="display:none;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting12" name="colorSetting12" style="width: 100%;">
@@ -449,7 +456,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img13"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img13" alt="13Preview" style="display:none; max-height: 50px;">
+                  <img src="./static/img/Setting13.jpg" class="setting-image" id="img13" alt="13Preview" style="display:none; max-height: 50px;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting13" name="colorSetting13" style="width: 100%;">
@@ -471,7 +478,7 @@
                 </div>
                 <div class="col-sample">
                   <button type="button" class="visibility-btn" data-img="img14"><i class="bi bi-eye"></i></button>
-                  <img src="./static/img/foot_ground_angle.png" class="setting-image" id="img14" alt="14Preview" style="display:none; max-height: 50px;">
+                  <img src="./static/img/Setting14.jpg" class="setting-image" id="img14" alt="14Preview" style="display:none; max-height: 50px;">
                 </div>
                 <div class="col-color">
                   <select id="colorSetting14" name="colorSetting14" style="width: 100%;">

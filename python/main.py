@@ -126,7 +126,8 @@ def run_analysis():
     # get the uploaded video file
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S") # YYYYMMDDHHMMSS
     page_data_dic['timestamp'] = timestamp
-    video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{runnerName}_{runnerGender}'
+    # video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{runnerName}_{runnerGender}'
+    video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{video_file.filename}'
     if video_file:
         video_file.save(video_address)
         print('Video file saved successfully')

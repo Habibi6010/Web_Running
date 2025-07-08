@@ -1092,3 +1092,18 @@ function populateVideoTable(videoList, tableBody) {
     tableBody.appendChild(row);
   });
 }
+
+// Manage Tabs
+function openTab(tabId) {
+      // Hide all tab contents
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(content => content.classList.remove('active'));
+
+      // Remove active class from all buttons
+      const buttons = document.querySelectorAll('.tab-buttons button');
+      buttons.forEach(button => button.classList.remove('active'));
+
+      // Show selected tab content and mark button as active
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`.tab-buttons button[onclick="openTab('${tabId}')"]`).classList.add('active');
+}

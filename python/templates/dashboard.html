@@ -78,27 +78,43 @@
         <!-- <h4>Upload Your File</h4> -->
         <form id="uploadForm" action="/submit" method="POST" enctype="multipart/form-data">
           <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-            <label for="runnerName" style="margin-bottom: 0; min-width: 130px;">Runner's Name:</label>
+            <label for="runnerName" style="margin-bottom: 0; min-width: 130px;">Name:</label>
             <input type="text" id="runnerName" name="runnerName" style="width: 200px;" placeholder="Runner's Name" required>
-            <label for="runnerGender" style="margin-bottom: 0; min-width: 130px;">Runner's Gender:</label>
-            <label></label><input type="radio" name="runnerGender" value="Male" checked>Male</label>
-            <label></label><input type="radio" name="runnerGender" value="Female">Female</label>
           </div>
           <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-            <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height of Runner:</label>
+            <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height:</label>
             <input type="number" id="heightFeet" name="heightFeet" min="0" max="8" step="1" style="width: 80px;" placeholder="Feet" required>
             <span>ft</span>
             <input type="number" id="heightInches" name="heightInches" min="0" max="11" step="1" style="width: 80px;" placeholder="Inches" required>
             <span>in</span>
           </div>
-            
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Upload Video File:</label>
-            <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
-            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video>
+          <div>
+            <label for="runnerGender" style="margin-bottom: 0; min-width: 130px;">Gender:</label>
+            <label></label><input type="radio" name="runnerGender" value="Male" checked>Male</label>
+            <label></label><input type="radio" name="runnerGender" value="Female">Female</label>
           </div>
           
-          <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
+          <div class="tab-buttons">
+            <button onclick="openTab('tab1')" class="active">Kinematic Analysis</button>
+            <button onclick="openTab('tab2')">Ranking Prediction</button>
+          </div>
+
+          <div id="tab1" class="tab-content active">
+            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Upload Video File:</label>
+            <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
+            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video><br>
+            <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
+          </div>
+
+          <div id="tab2" class="tab-content">
+            <label for="scoreUpload" style="display: block; margin-bottom: 10px;">Upload Score File:</label>
+            <input type="file" id="scoreUpload" name="scoreUpload" accept=".csv" required>
+            <div id="scorePreview" style="display:none; margin-top: 20px;">
+              <h4>Score Preview:</h4>
+              <table id="scoreTable"></table>
+            </div>
+          
+          
 
           <div id="parent-container-uploadvideo" style="display: none;">
               <h2>Uploading and Processing. Please wait </h2>

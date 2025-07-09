@@ -392,15 +392,14 @@ function handelContactUsButton(event) {
 // Show video preview when a file is selected for upload 
 function previewVideo() {
   const fileInput = document.getElementById('videoUpload');
-  const videoPreview = document.getElementById('videoPreview');
-  const file = fileInput.files[0];
+  const video = document.getElementById('videoPreview');
+  const source = document.getElementById('videoSource');
 
-  if (file) {
-    const fileURL = URL.createObjectURL(file);
-    videoPreview.src = fileURL;
-    videoPreview.style.display = 'block';
-  } else {
-    videoPreview.style.display = 'none';
+  if (fileInput.files && fileInput.files[0]) {
+    const fileURL = URL.createObjectURL(fileInput.files[0]);
+    source.src = fileURL;
+    video.style.display = "block";
+    video.load();
   }
 }
 
@@ -1106,4 +1105,21 @@ function openTab(tabId) {
       // Show selected tab content and mark button as active
       document.getElementById(tabId).classList.add('active');
       document.querySelector(`.tab-buttons button[onclick="openTab('${tabId}')"]`).classList.add('active');
+}
+
+function updatecategorylist(selectedEnv){
+    const optionList = document.getElementById("selectcategorizlist");
+    optionList.innerHTML = ""; // clear old options
+      let options = [];
+      if (selectedEnv === "indoor") {
+        options = ["in 1", "in 2", "in 3"];
+      } else if (selectedEnv === "outdoor") {
+        options = ["out 1", "out 2", "out 3"];
+      }
+      options.forEach(opt => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        optionList.appendChild(option);
+      });
 }

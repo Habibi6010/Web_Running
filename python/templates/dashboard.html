@@ -93,7 +93,7 @@
             <label></label><input type="radio" name="runnerGender" value="Male" checked>Male</label>
             <label></label><input type="radio" name="runnerGender" value="Female">Female</label>
           </div>
-          
+          <br><br>
           <div class="tab-buttons">
             <button onclick="openTab('tab1')" class="active">Kinematic Analysis</button>
             <button onclick="openTab('tab2')">Ranking Prediction</button>
@@ -102,17 +102,22 @@
           <div id="tab1" class="tab-content active">
             <label for="videoUpload" style="display: block; margin-bottom: 10px;">Upload Video File:</label>
             <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
-            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;"></video><br>
+            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;">
+              <source id="videoSource" src="">
+            </video><br>
             <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
           </div>
 
           <div id="tab2" class="tab-content">
-            <label for="scoreUpload" style="display: block; margin-bottom: 10px;">Upload Score File:</label>
-            <input type="file" id="scoreUpload" name="scoreUpload" accept=".csv" required>
-            <div id="scorePreview" style="display:none; margin-top: 20px;">
-              <h4>Score Preview:</h4>
-              <table id="scoreTable"></table>
-            </div>
+            <label for="selectwnvironment" style="display: inline-block; margin-bottom: 10px; margin-right: 50px;">Select Environment:</label>
+            <label><input style="margin-left: 10px;" type="radio" name="env" value="indoor" onchange="updatecategorylist(this.value)" checked> Indoor</label>
+            <label><input style="margin-left: 10px;" type="radio" name="env" value="outdoor" onchange="updatecategorylist(this.value)"> Outdoor</label>
+            <br>
+            <label for="selectcategoiz" style="display: inline-block; margin-bottom: 10px;">Select Categorizes Division:</label>
+            <select id="selectcategorizlist" name="selectcategoriz" style="width: 200px;">
+              <!-- Options will be loaded by JS -->
+            </select>  
+          </div>
           
           
 
@@ -656,6 +661,8 @@ colorSelectIds.forEach(id => {
     });
   }
 });
+
+updatecategorylist("indoor"); // Initialize with default environment
 </script>
 </body>
 </html>

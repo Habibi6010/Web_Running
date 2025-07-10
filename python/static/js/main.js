@@ -809,10 +809,10 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById("usernameDisplay").innerText = username;
 });
 
-function handelViewProfileButton(event) {
+function handelVideLogButton(event) {
   const username = document.getElementById('usernameDisplay').innerText;
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/profile?username=${encodeURIComponent(username)}`;
+  window.location.href = `http://${fetch_address}:5001/videolog?username=${encodeURIComponent(username)}`;
 }
 
 // handeler for logout button
@@ -1107,14 +1107,15 @@ function openTab(tabId) {
       document.querySelector(`.tab-buttons button[onclick="openTab('${tabId}')"]`).classList.add('active');
 }
 
+// set the category list based on selected environment
 function updatecategorylist(selectedEnv){
     const optionList = document.getElementById("selectcategorizlist");
     optionList.innerHTML = ""; // clear old options
       let options = [];
       if (selectedEnv === "indoor") {
-        options = ["in 1", "in 2", "in 3"];
+        options = ["NCCA DIV. I", "NCCA DIV. II", "NCCA DIV. III","NAIA","NJCAA","NCCAA"];
       } else if (selectedEnv === "outdoor") {
-        options = ["out 1", "out 2", "out 3"];
+        options = ["NCCA DIV. I", "DIV.I EAST","DIV.I WEST","NCCA DIV. II", "NCCA DIV. III", "NAIA","NJCAA DIV.I","NJCAA DIV.III","NCCAA","NWAC","USCAA"];
       }
       options.forEach(opt => {
         const option = document.createElement("option");
@@ -1122,4 +1123,16 @@ function updatecategorylist(selectedEnv){
         option.textContent = opt;
         optionList.appendChild(option);
       });
+}
+// Add score input field dynamically
+function addScoreInput(){
+  const container = document.getElementById('scoreContainer');
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.name = 'score';
+  input.min = '0';
+  input.step = '0.2';
+  input.style.width = '80px';
+  input.required = true;
+  container.appendChild(input);
 }

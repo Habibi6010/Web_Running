@@ -1,0 +1,11 @@
+The events are grouped into:
+
+Sprints: 100m, 200m, 400m
+Middle Distance: 800m, 1500m
+Long Distance: 5000m, 10,000m
+Hurdles: 110m/100m Hurdles, 400m Hurdles
+Steeplechase: 3000m Steeplechase
+Relays: 4x100m, 4x400m
+Jumps: High Jump (HJ), Pole Vault (PV), Long Jump (LJ), Triple Jump (TJ)
+Throws: Shot Put (SP), Discus (DT), Hammer (HT), Javelin (JT)
+Multi-events: Heptathlon (Hep for women), Decathlon (Dec for men)

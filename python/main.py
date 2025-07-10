@@ -66,9 +66,9 @@ def root():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route('/profile')
+@app.route('/videolog')
 def porfile():
-    return render_template('profile.html')
+    return render_template('VideoLog.html')
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -530,6 +530,13 @@ def get_user_history():
             
     # print(f"Uploaded videos data: {uploaded_videos}")
     return jsonify({"response": True, "message": "Video history found.", "history": uploaded_videos})
+
+#Get user information and scores
+@app.route('/get_user_score', methods=['POST'])
+def get_user_score():
+    data = request.json
+    print(data)
+    return
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=False)

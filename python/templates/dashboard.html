@@ -32,7 +32,7 @@
 
 <body class="service-details-page">
 
-  <header id="header" class="header d-flex flex-column justify-content-center" style="position:fixed; top:0; left:0; width:100%; z-index:1000; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+  <header id="header" class="header d-flex flex-column justify-content-center" style="position:fixed; top:0; left:0; width:100%; z-index:1000; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap: wrap;">
 
     <nav id="navmenu" class="navmenu">
       <ul>
@@ -57,13 +57,15 @@
           </ol>
         </nav>
         <h1>Welcome!</h1>
+        <span id="usernameDisplay">Profile</span>
         <!-- User Profile Dropdown -->
         <div class="user-profile">
           <button class="profile-button" aria-haspopup="true" aria-expanded="false">
-            <i class="bi bi-person-circle"></i> <span id="usernameDisplay">Profile</span>
+            <i class="bi bi-person-circle"></i> <span id="myaccount">My Account ▼</span>
           </button>
           <div class="dropdown-menu">
-            <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">View Profile </button>
+            <button class="profile-button" id="videologebutton" onclick="handelVideLogButton()">Video Log </button>
+            <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">Profile </button>
             <button class="profile-button" id="logoutButton" onclick="handelLogoutButton()">Logout</button>
           </div>
         </div>
@@ -93,30 +95,81 @@
             <label></label><input type="radio" name="runnerGender" value="Male" checked>Male</label>
             <label></label><input type="radio" name="runnerGender" value="Female">Female</label>
           </div>
-          <br><br>
+          <br>
           <div class="tab-buttons">
             <button onclick="openTab('tab1')" class="active">Kinematic Analysis</button>
             <button onclick="openTab('tab2')">Ranking Prediction</button>
           </div>
 
-          <div id="tab1" class="tab-content active">
-            <label for="videoUpload" style="display: block; margin-bottom: 10px;">Upload Video File:</label>
-            <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
-            <video id="videoPreview" controls style="display:none; width: 100%; margin-top: 20px;">
-              <source id="videoSource" src="">
-            </video><br>
-            <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
+          <div id="tab1" class="tab-content active" style="flex-direction: column; gap: 15px;">
+            <!-- Upload video row -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label for="videoUpload" style="width: 200px;">Upload Video File:</label>
+              <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
+            </div>
+            <!-- Video preview row -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="width: 200px;">Preview:</label>
+              <video id="videoPreview" controls style="display:none; width: 100%; max-width: 600px; ">
+                <source id="videoSource" src="">
+              </video>
+            </div>
+
+            <!-- Submit button row -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="width: 200px;"></label>
+              <button type="submit" onclick="SendVideo_height(event)" class="btn btn-primary" style="width: 200px;">Submit</button>
+            </div>
           </div>
 
-          <div id="tab2" class="tab-content">
-            <label for="selectwnvironment" style="display: inline-block; margin-bottom: 10px; margin-right: 50px;">Select Environment:</label>
-            <label><input style="margin-left: 10px;" type="radio" name="env" value="indoor" onchange="updatecategorylist(this.value)" checked> Indoor</label>
-            <label><input style="margin-left: 10px;" type="radio" name="env" value="outdoor" onchange="updatecategorylist(this.value)"> Outdoor</label>
-            <br>
-            <label for="selectcategoiz" style="display: inline-block; margin-bottom: 10px;">Select Categorizes Division:</label>
-            <select id="selectcategorizlist" name="selectcategoriz" style="width: 200px;">
-              <!-- Options will be loaded by JS -->
-            </select>  
+          <div id="tab2" class="tab-content" style="flex-direction: column; gap: 15px;">
+            <!-- Environment and Category Selection -->
+            <div style="display: flex;align-items: left; gap: 20px;">
+              <label for="selectwnvironment" style="display: inline-block; margin-bottom: 10px; margin-right: 50px;">Select Environment:</label>
+              <div>
+                <label><input style="margin-left: 10px;" type="radio" name="env" value="indoor" onchange="updatecategorylist(this.value)" checked> Indoor</label>
+                <label><input style="margin-left: 10px;" type="radio" name="env" value="outdoor" onchange="updatecategorylist(this.value)"> Outdoor</label>
+              </div>
+            </div>
+            <!-- Category Division Selection -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label for="selectcategory" style="width: 200px;">Select Category Division:</label>
+              <select id="selectcategorizlist" name="selectcategory" style="width: 200px; height: 35px;">
+                <!-- Options will be loaded by JS -->
+              </select>
+            </div>
+            <!-- Event Selection -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label for="selectfield" style="width: 200px;">Select Event:</label>
+              <select id="selectrunningfield" name="selectfield" style="width: 200px; height: 35px;">
+                <option value="100m">Sprint 100m</option>
+                <option value="200m">Sprint 200m</option>
+                <option value="400m">Sprint 400m</option>
+                <option value="800m">Middle Distance 800m</option>
+                <option value="1500m">Middle Distance 1,500m</option>
+                <option value="5000m">Long Distance 5,000m</option>
+                <option value="10000m">Long Distance 10,000m</option>
+              </select>
+            </div>
+            <!-- Personal Records Input -->
+            <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+              <label style="width: auto;">Enter Personal Records (At Least 5):</label>
+              <div>
+                <button type="button" id="addScoreButton" onclick="addScoreInput()" style="width: 150px;">+Add Score</button>
+              </div>
+              <div id="scoreContainer" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <input type="number" name="enterscore" min="0" step="0.2" style="width: 80px;" required>
+                <input type="number" name="enterscore" min="0" step="0.2" style="width: 80px;" required>
+                <input type="number" name="enterscore" min="0" step="0.2" style="width: 80px;" required>
+                <input type="number" name="enterscore" min="0" step="0.2" style="width: 80px;" required>
+                <input type="number" name="enterscore" min="0" step="0.2" style="width: 80px;" required>
+              </div>
+            </div>
+            <!-- Submit button row -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="width: 200px;"></label>
+              <button type="submit" onclick="SendScores(event)" class="btn btn-primary" style="width: 200px;">Submit</button>
+            </div>
           </div>
           
           

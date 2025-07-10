@@ -1821,5 +1821,5 @@ th.fixed-desc::after {
 }
 
 .tab-content.active {
-  display: block;
+  display: flex;
 }

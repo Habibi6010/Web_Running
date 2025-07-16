@@ -30,8 +30,8 @@ fetch_address = "127.0.0.1"
 
 
 # supabase api infroamtion
-SUPABASE_URL = "https://cgttxnlppkmiguxcxpvh.supabase.co"
-SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndHR4bmxwcGttaWd1eGN4cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYzOTk5NCwiZXhwIjoyMDU3MjE1OTk0fQ.3DldbLH07uvz_ctAwxXSqJ9fscE5LkgvBZ9SeXLe5fc"
+SUPABASE_URL = "https://rokmmhmgoothqrqbppqo.supabase.co"
+SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJva21taG1nb290aHFycWJwcHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5ODgxNzksImV4cCI6MjA2NzU2NDE3OX0.UlXUhvfSih-cw-QtN6F0looCsvCAnRum352B0xdCLH0"
 
 
 
@@ -75,12 +75,42 @@ def login():
     data = request.json
     email = data.get('email')
     password = data.get('password')
-    # Need to Connect to Database to check the email and password
-    if (email == 'habibi6010@gmail.com' and password == '123') or (email == 'nourani@utdallas.edu' and password == '1234'):
-        return jsonify({"accsess": True})
+
+    response = supabase.table("user").select("*").eq("email", email).execute()
+    if len(response.data) > 0:
+        if response.data[0]['password'] == password and response.data[0]['is_active']:
+            response = supabase.table("user").update({"last_login": str(datetime.datetime.now())}).eq("email", email).execute()
+            if len(response.data) > 0:
+                print("Last login time updated successfully.")
+                return jsonify({"accsess": True,'username':response.data[0]['full_name'],'useremail':response.data[0]['email']})
+            else:
+                print("Failed to update last login time.")
+                return jsonify({"accsess": False})
+        else:
+            print("Incorrect password.")
+            return jsonify({"accsess": False})
     else:
+        print("Email not found.")
         return jsonify({"accsess": False})
 
+
+@app.route('/forget_password', methods=['POST'])
+def forget_password():
+    data = request.json
+    email = data.get('email')
+    response = supabase.table("user").select("*").eq("email", email).execute()
+    if len(response.data) > 0:
+        new_password = tools.generate_strong_password(length=12)
+        if tools.send_forget_password_email(email, new_password):
+            response = supabase.table("user").update({"password": new_password}).eq("email", email).execute()
+            if len(response.data) > 0:
+                return jsonify({"accsess": True,'message':'Email sent successfully. Please check your inbox.'})
+            else:
+                return jsonify({"accsess": False,'message':'Failed to update password. Please try again later.'})
+        else:
+            return jsonify({"accsess": False,'message':'Failed to send email. Please try again later.'})
+    else:
+        return jsonify({"accsess": False,'message':'Email not found. Please check your email address.'})
 
 @app.route('/contact_us', methods=['POST'])
 def contact_us():
@@ -97,40 +127,34 @@ def contact_us():
 page_data_dic={}
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
+    # get data from the request
     video_file = request.files.get('videoUpload')
-    page_data_dic['input_video_name'] = video_file.filename
-    username = request.form.get('username')
-    page_data_dic['username'] = username
-    height_runner = request.form.get('height_runner')
-    page_data_dic['height_runner'] = height_runner
+    userEmail = request.form.get('userEmail')
+    runnerID = request.form.get('runnerID')
     selectedModel = request.form.get('selectedModel')
-    page_data_dic['selectedModel'] = selectedModel
-    runnerName = request.form.get('runnerName')
-    page_data_dic['runnerName'] = runnerName
-    runnerGender = request.form.get('runnerGender')
-    page_data_dic['runnerGender'] = runnerGender
-    print(height_runner, selectedModel, runnerName, runnerGender)
+
     # Create Recived Video Folder
     if not os.path.exists(VIDEO_SAVE_PATH):
         os.makedirs(VIDEO_SAVE_PATH)
         print(f"Folder created: {VIDEO_SAVE_PATH}")
     else:
         print(f"Folder already exists: {VIDEO_SAVE_PATH}")
+    
     # Create User Analyzed Video Folder
-    user_folder = f"{VIDEO_SAVE_PATH}{username}"
+    user_folder = f"{VIDEO_SAVE_PATH}{userEmail}"
     if not os.path.exists(user_folder):
         os.makedirs(user_folder)
         print(f"Folder created: {user_folder}")
     else:
         print(f"Folder already exists: {user_folder}")
+
     # get the uploaded video file
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S") # YYYYMMDDHHMMSS
-    page_data_dic['timestamp'] = timestamp
     # video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{runnerName}_{runnerGender}'
-    video_address = f'{VIDEO_SAVE_PATH}{username}/{timestamp}_{video_file.filename}'
+    video_address = f'{VIDEO_SAVE_PATH}{userEmail}/{timestamp}_{video_file.filename}'
     if video_file:
         video_file.save(video_address)
-        print('Video file saved successfully')
+        # print('Video file saved successfully')
         print(f"video file address: {video_address}")
     else:
         print('No video file uploaded')
@@ -143,7 +167,23 @@ def run_analysis():
     # df.to_csv(output_csv, index=False)
     df.to_pickle(output_csv)
     print(f"Saved landmarks for each frame to {output_csv}")
-    return jsonify({"response": True,"message":" Video is being analyzed in the background"})
+    # Get user information from database
+    response_user = supabase.table("user").select("*").eq("email", userEmail).execute()
+    if len(response_user.data) > 0:
+        response_upload_video = supabase.table("upload_video").insert({
+            "user_id": response_user.data[0]['user_id'],
+            "video_name": video_file.filename,
+            "video_path": video_address,
+            "model_used": selectedModel,
+            "runner_id": runnerID,
+            "landmark_path": output_csv
+        }).execute()
+    else:
+        return jsonify({"response": False, "message": "User email not found in database"})
+    if len(response_upload_video.data) == 0:
+        return jsonify({"response": False, "message": "Failed to log video upload in database"})
+    else:
+        return jsonify({"response": True,"message":" Video is being analyzed in the background","video_ID":response_upload_video.data[0]['video_id']})
 
 def run_model_get_landmarks(selected_model, video_address):   
     cap = cv2.VideoCapture(video_address)
@@ -204,7 +244,6 @@ def download_video_file(filepath):
 
     # print(f"Serving video from {video_file_path}")
     # return send_from_directory(abs_dir, video_filename, as_attachment=True)
-
 
 
 @app.route('/video/<path:filename>')
@@ -538,5 +577,58 @@ def get_user_score():
     print(data)
     return
 
+@app.route('/get_runner_info',methods=['POST'])
+def get_runner_info():
+    # Get runner info from json
+    runner_id=request.json.get('runnerID')
+    useremail=request.json.get('userEmail')
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", useremail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find runner info from DB
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runner_id)).eq("user_id",int(user_id)).execute()
+    # print(f"response_runner: {response_runner.data}")
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "Runner ID not found."})
+    return jsonify({"response": True, "message": "Runner info found successfully.",
+                    "name": response_runner.data[0]['name'],
+                    "heightFeet": response_runner.data[0]['feet'],
+                    "heightInches": response_runner.data[0]['inche'],
+                    "gender": response_runner.data[0]['gender']
+                    })
+
+
+@app.route('/save_runner_info',methods=['POST'])
+def save_runner_info():
+    data = request.form
+    runnerName = data.get('runnerName')
+    runnerGender = data.get('runnerGender')
+    runnerHeightFeet= data.get('ruunerHeightFeet')
+    runnerHeightInche= data.get('ruunerHeightInche')
+    userEmail = data.get('userEmail')
+    runnerID = data.get('runnerID')
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find runner info in DB
+    if runnerID == '':
+        runnerID = -1
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).execute()
+    if len(response_runner.data) == 0:
+        response_runner = supabase.table("runner").select("*").eq("name", runnerName).eq("user_id",int(user_id)).eq("feet",runnerHeightFeet).eq("inche",runnerHeightInche).eq("gender",runnerGender).execute()
+        if len(response_runner.data) == 0:
+            # If runner not found, insert new runner
+            response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender}).execute()  
+            # print(f"Insert response: {response.data}")
+            return jsonify({"response": True, "message": f"Runner info added to DB. Runner ID is {response.data[0]['runner_id']}","runnerID":response.data[0]['runner_id']})
+        else:
+            return jsonify({"response": True, "message": f"Runner with same info was in DB. Runner ID is {response_runner.data[0]['runner_id']}","runnerID":response_runner.data[0]['runner_id']})
+    else:
+        return jsonify({"response": True, "message": "Runner info was in DB.","runnerID":response_runner.data[0]['runner_id']})
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=5001,debug=False)
+    app.run(host="0.0.0.0",port=5001,debug=True)

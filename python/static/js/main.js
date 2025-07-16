@@ -251,23 +251,26 @@
 
 })();
 
-// add listener to user-details page to get user details when page load
+// add listener to VideoLog page to get user details when page load and fill labels and history table
 document.addEventListener('DOMContentLoaded', function () {
   // extract username from url
   const urlParams = new URLSearchParams(window.location.search);
   const username = urlParams.get('username') || 'Profile';
+  const useremail = urlParams.get('useremail') || 'Email';
+
   // Update span for show username
+  document.getElementById("useremailDisplay").innerText = useremail;
   document.getElementById("usernameDisplay").innerText = username;
   // Set the link to dashboard links
   const dashboardLink1 = document.getElementById("doshboardlink1");
   if (dashboardLink1) {
-    dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}`;
+    dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
   }
   const dashboardLink2 = document.getElementById("dashboardlink2");
   if (dashboardLink2) {
-    dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}`;
+    dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
   }
-  FillHistoryTable(username);
+  FillHistoryTable(useremail);
 });
 
 // fetch_address = "13.59.211.224"
@@ -302,11 +305,13 @@ function handelSigninButton(event) {
     .then(response => response.json())
     .then(data => {
       if (data.accsess) {
-        window.location.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(email)}`;
+        let username = data.username;
+        let useremail = data.useremail;
+        window.location.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
         console.log('Login successful: \n' + email);
       }
       else {
-        alert('Login failed: \n' + 'Invalid email or password');
+        alert('Login failed: \n' + 'Invalid email or password.' + '\nYour account may be inactive.');
       }
     })
     .catch(error => {
@@ -324,9 +329,21 @@ function forgotPassword() {
       alert("Please enter a valid email address.");
       return;
     }
-    // Here you can add an AJAX request to send the email to the server
-    // For now, we'll just simulate a password reset request
-    alert("A password reset link has been sent to " + email);
+    data ={email}
+    fetch('http://'+fetch_address+':5001/forget_password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => {
+          alert(data.message);
+      })
+      .catch(error => {
+        alert("Server Error"+error.message);
+      });
   } else {
     alert("Email address is required to reset your password.");
   }
@@ -660,9 +677,8 @@ function SendDrawData(event) {
 
 let uploaded_video_name = null;
 
-// Send and receive data from server and work with API
-function SendVideo_height(event) {
-
+// Send and receive data from server and work with API for sending video and get analysis
+function SendVideo(event) {
   event.preventDefault(); // Stop form from submitting the traditional way
   // check_radio();
   if (document.getElementById('videoUpload').files.length == 0) {
@@ -670,55 +686,18 @@ function SendVideo_height(event) {
     uploaded_video_name = null;
     return;
   }
-
-
   const loading = document.getElementById('parent-container-uploadvideo');
   const loading2 = document.getElementById('loading-uploadvideo');
   
   // Get the form element
   const form = document.getElementById('uploadForm');
-  // Create a new FormData object
+  // Create a new FormData object and append the form data
   const formData = new FormData(form);
-  // Get runnerName from input field
-  const runnerName = document.getElementById('runnerName').value.trim();
-  // Check if runnerName is valid
-  if (runnerName === "") {
-    alert("Please enter a valid runner name.");
-    loading.style.display = 'none';
-    loading2.style.display = 'none';
-    uploaded_video_name = null;
-    return;
-  }
-  // Append the runnerName to the formData
-  formData.append('runnerName', runnerName);
-  // Get the runnerGender from the select field
-  const runnerGender = document.querySelector('input[name="runnerGender"]:checked').value;
-  // Append the runnerGender to the formData
-  formData.append('runnerGender', runnerGender);
-  // Get height_runner from the input fields (feet and inches)
-  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
-  const inches = parseInt(document.getElementById('heightInches').value) || 0;
-  // Convert to total inches for backend, or you can convert to meters if needed
-  const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
-  // Check if height_runner is valid
-  if (isNaN(height_runner) || height_runner <= 0) {
-    alert("Please enter a valid height.");
-    loading.style.display = 'none';
-    loading2.style.display = 'none';
-    uploaded_video_name = null;
-    return;
-  }
-  // Get selected AI model (radio buttons)
-  // const selectedModel = document.querySelector('input[name="model"]:checked').value;
-  const selectedModel = "mediapipe";
-  // Get usrname from usernameeDisplay span
-  const username = document.getElementById('usernameDisplay').innerText;
-  
-  //Append the height_runner, selectedModel, and settings_colors to the formData
-  formData.append('height_runner', height_runner);
-  formData.append('selectedModel', selectedModel);
-  // formData.append('settings_colors', JSON.stringify(settings_colors));
-  formData.append('username', username);
+  const userEmail = document.getElementById('useremailDisplay').innerText;
+  const runnerID = document.getElementById('runnerIDNumber').value.trim();
+  formData.append('selectedModel', "mediapipe");
+  formData.append('userEmail', userEmail);
+  formData.append('runnerID', runnerID);
 
   // Show the loading GIF
   loading.style.display = 'block';
@@ -804,15 +783,19 @@ function check_radio() {
 document.addEventListener('DOMContentLoaded', function () {
   // extract username from url
   const urlParams = new URLSearchParams(window.location.search);
-  const username = urlParams.get('username') || 'No-Profile';
+  const useremail = urlParams.get('useremail') || 'No-email';
+  const username = urlParams.get('username') || 'Profile';
   // Update span for show username
+  document.getElementById("useremailDisplay").innerText = useremail;
   document.getElementById("usernameDisplay").innerText = username;
 });
 
 function handelVideLogButton(event) {
+  const useremail = document.getElementById('useremailDisplay').innerText;
   const username = document.getElementById('usernameDisplay').innerText;
+
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/videolog?username=${encodeURIComponent(username)}`;
+  window.location.href = `http://${fetch_address}:5001/videolog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
 
 // handeler for logout button
@@ -834,7 +817,7 @@ async function handleChatBotButton(event){
   }
 
   // Get username and current date and time
-  const username = document.getElementById("usernameDisplay").innerText;
+  const username = document.getElementById("useremailDisplay").innerText;
   const dateTime = new Date().toLocaleString();
 
   // Make conversation history
@@ -994,13 +977,17 @@ function UplaodNewVideo() {
 
   // Reset any global state variables if needed
   uploaded_video_name = null;
+  // Reset runner info
+  document.getElementById("runnerIDNumber").value = "";
+  document.getElementById("runnerIDNumber").disabled = false; // enable the runner ID field
+  document.getElementById("nextbutton").disabled = false; // enable the submit button
+  document.getElementById("TabDiv").style.display = "none"; // hide the edit button
+  const autofillresult = document.getElementById("autofillResult");
+  autofillresult.innerText = "For quick search enter runner ID number.";
+  autofillresult.style.color = "green";
+  RunnerInfoFieldsClear();
+  RunnerInfoFeildsDisabled(false); // allow editing
 }
-
-// // Attach to button
-// const uploadNewVideoBtn = document.getElementById('UplaodNewVideo');
-// if (uploadNewVideoBtn) {
-//   uploadNewVideoBtn.addEventListener('click', UplaodNewVideo);
-// }
 
 function FillHistoryTable(username){
   console.log("FillHistoryTable");
@@ -1110,12 +1097,17 @@ function openTab(tabId) {
 // set the category list based on selected environment
 function updatecategorylist(selectedEnv){
     const optionList = document.getElementById("selectcategorizlist");
+    const selectrunningevent = document.getElementById("selectrunningevent");
     optionList.innerHTML = ""; // clear old options
+    selectrunningevent.innerHTML = ""; // clear old options
       let options = [];
+      let event = [];
       if (selectedEnv === "indoor") {
-        options = ["NCCA DIV. I", "NCCA DIV. II", "NCCA DIV. III","NAIA","NJCAA","NCCAA"];
+        options = ["NCAA DIV. I", "NCAA DIV. II", "NCAA DIV. III","NAIA","NJCAA"];
+        event = ["Sprint 60m", "Sprint 200m", "Sprint 400m", "Middle Distance 800m", "Middle Distance Mile (1609m) ", "Long Distance 3000m", "Long Distance 5000m"];
       } else if (selectedEnv === "outdoor") {
-        options = ["NCCA DIV. I", "DIV.I EAST","DIV.I WEST","NCCA DIV. II", "NCCA DIV. III", "NAIA","NJCAA DIV.I","NJCAA DIV.III","NCCAA","NWAC","USCAA"];
+        options = ["NCAA DIV. I","NCAA DIV. II", "NCAA DIV. III", "NAIA","NJCAA DIV.I"];
+        event = ["Sprint 100m", "Sprint 200m", "Sprint 400m", "Middle Distance 800m", "Middle Distance 1500m","Long Distance 5,000m", "Long Distance 10,000m"];
       }
       options.forEach(opt => {
         const option = document.createElement("option");
@@ -1123,16 +1115,308 @@ function updatecategorylist(selectedEnv){
         option.textContent = opt;
         optionList.appendChild(option);
       });
+      event.forEach(ev => {
+        const option = document.createElement("option");
+        option.value = ev;
+        option.textContent = ev;
+        selectrunningevent.appendChild(option);
+      });
 }
 // Add score input field dynamically
 function addScoreInput(){
   const container = document.getElementById('scoreContainer');
   const input = document.createElement('input');
-  input.type = 'number';
-  input.name = 'score';
-  input.min = '0';
-  input.step = '0.2';
+  input.type = 'text';
+  input.name = 'enterscore';
+  input.title="Fromat: m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34)"
   input.style.width = '80px';
   input.required = true;
   container.appendChild(input);
+  attachValidation(input);
+}
+
+function ScoreHelp(){
+  alert("To add multiple scores, click the '+Add Score' button.\nEach click will add a new input field for entering another score.\n\nFormat for each field is time in \nminutes:seconds.milliseconds (e.g., 4:30.52).\nor\nseconds.milliseconds (e.g., 10.52).");
+}
+
+// Validation pattern: m:ss.xx or s.xx for input score fields
+const pattern = /^(\d+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d)$/;
+const inputs = document.querySelectorAll('input[name="enterscore"]');
+inputs.forEach(input => attachValidation(input));
+// Attach validation to new input field
+function attachValidation(input) {
+  input.addEventListener('blur', () => {
+    const value = input.value.trim();
+    if (value && !pattern.test(value)) {
+      input.value = "";
+      input.classList.add('invalid');
+    } else {
+      input.classList.remove('invalid');
+    }
+  });
+
+  input.addEventListener('input', () => {
+    if (pattern.test(input.value.trim())) {
+      input.classList.remove('invalid');
+    }
+  });
+}
+
+
+// Send and receive data from server and work with API for sending score and get rank
+function SendScores(event) {
+
+  // event.preventDefault(); // Stop form from submitting the traditional way
+  // // check_radio();
+  // if (document.getElementById('videoUpload').files.length == 0) {
+  //   alert("You didn't upload video.");
+  //   uploaded_video_name = null;
+  //   return;
+  // }
+
+
+  // const loading = document.getElementById('parent-container-uploadvideo');
+  // const loading2 = document.getElementById('loading-uploadvideo');
+  
+  // // Get the form element
+  // const form = document.getElementById('uploadForm');
+  // // Create a new FormData object
+  // const formData = new FormData(form);
+  // // Get runnerName from input field
+  // const runnerName = document.getElementById('runnerName').value.trim();
+  // // Check if runnerName is valid
+  // if (runnerName === "") {
+  //   alert("Please enter a valid runner name.");
+  //   loading.style.display = 'none';
+  //   loading2.style.display = 'none';
+  //   uploaded_video_name = null;
+  //   return;
+  // }
+  // // Append the runnerName to the formData
+  // formData.append('runnerName', runnerName);
+  // // Get the runnerGender from the select field
+  // const runnerGender = document.querySelector('input[name="runnerGender"]:checked').value;
+  // // Append the runnerGender to the formData
+  // formData.append('runnerGender', runnerGender);
+  // // Get height_runner from the input fields (feet and inches)
+  // const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+  // const inches = parseInt(document.getElementById('heightInches').value) || 0;
+  // // Convert to total inches for backend, or you can convert to meters if needed
+  // const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
+  // // Check if height_runner is valid
+  // if (isNaN(height_runner) || height_runner <= 0) {
+  //   alert("Please enter a valid height.");
+  //   loading.style.display = 'none';
+  //   loading2.style.display = 'none';
+  //   uploaded_video_name = null;
+  //   return;
+  // }
+  // // Get selected AI model (radio buttons)
+  // // const selectedModel = document.querySelector('input[name="model"]:checked').value;
+  // const selectedModel = "mediapipe";
+  // // Get usrname from usernameeDisplay span
+  // const username = document.getElementById('useremailDisplay').innerText;
+  
+  // //Append the height_runner, selectedModel, and settings_colors to the formData
+  // formData.append('height_runner', height_runner);
+  // formData.append('selectedModel', selectedModel);
+  // // formData.append('settings_colors', JSON.stringify(settings_colors));
+  // formData.append('username', username);
+
+  // // Show the loading GIF
+  // loading.style.display = 'block';
+  // loading2.style.display = 'block';
+  // // Get upload and analysis sections id
+  // const upload_section = document.getElementById('upload-section');
+  // const analysis_section = document.getElementById('analysis-section');
+  
+  // // Send the data to the server
+  // fetch('http://'+fetch_address+':5001/run_analysis', {
+  //   method: 'POST',
+  //   body: formData
+  // })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log('Success:', data);
+  //     if (data.response) {
+  //       // alert('Data sent successfully and Model is running');
+  //       // Hide the loading GIF
+  //       loading.style.display = 'none';
+  //       loading2.style.display = 'none';
+  //       uploaded_video_name = data.videoaddress; // Store the uploaded video name
+  //       // Hide upload section and show analysis section
+  //       upload_section.style.display = 'none';
+  //       analysis_section.style.display = 'block';
+  //       //Show reslut video
+  //       console.log(data.message);
+  //     } else {
+  //       alert('Data sent failed');
+  //       console.log(data.message);
+  //       // Hide the loading GIF
+  //       loading.style.display = 'none';
+  //       loading2.style.display = 'none';
+  //       upload_section.style.display = 'block';
+  //       analysis_section.style.display = 'none';
+  //       // resultVideoPreview.style.display = 'none';
+  //     }
+  //   })
+  //   .catch(error => {
+  //     console.error('Error:', error);
+  //     // Hide the loading GIF
+  //     loading.style.display = 'none';
+  //     loading2.style.display = 'none';
+  //     upload_section.style.display = 'block';
+  //     analysis_section.style.display = 'none';
+  //   });
+}
+
+// Function to disable or enable the name,height, gender fiedls
+function RunnerInfoFeildsDisabled(Active){
+  if (Active){
+    document.getElementById('runnerName').disabled = true;
+    document.getElementById('heightFeet').disabled = true;
+    document.getElementById('heightInches').disabled = true;
+    document.getElementsByName('runnerGender').forEach(r => r.disabled = true);
+  }
+  else{
+    document.getElementById('runnerName').disabled = false;
+    document.getElementById('heightFeet').disabled = false;
+    document.getElementById('heightInches').disabled = false;
+    document.getElementsByName('runnerGender').forEach(r => r.disabled = false);
+    document.getElementsByName('runnerGender').forEach(r => {if(r.value === "Male") r.checked = true});
+  }
+}
+// Function to Clear runner info fields
+function RunnerInfoFieldsClear() {
+    document.getElementById('runnerName').value = '';
+    document.getElementById('heightFeet').value = '';
+    document.getElementById('heightInches').value = '';
+    document.getElementsByName('runnerGender').forEach(r => r.checked = false);
+}
+
+function autoFillRunnerInfo(){
+  const runnerID = document.getElementById("runnerIDNumber").value.trim();
+  const userEmail = document.getElementById("useremailDisplay").innerText;
+  const autofillresult = document.getElementById("autofillResult");
+  // console.log(runnerID, userEmail);
+  if (runnerID === ""){
+    RunnerInfoFeildsDisabled(false); // allow editing
+    return;
+  }
+  else{
+
+    fetch('http://'+fetch_address+':5001/get_runner_info',{method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ runnerID: runnerID, userEmail: userEmail })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.response) {
+            // Clear previous data
+            RunnerInfoFieldsClear();
+            // Fill the form
+            document.getElementById('runnerName').value = data.name;
+            document.getElementById('heightFeet').value = data.heightFeet;
+            document.getElementById('heightInches').value = data.heightInches;
+
+            const genderRadios = document.getElementsByName('runnerGender');
+            genderRadios.forEach(radio => {
+                radio.checked = (radio.value === data.gender);
+            });
+            autofillresult.innerText = "Runner info found and filled.";
+            autofillresult.style.color = "green";
+            RunnerInfoFeildsDisabled(true); // prevent editing
+        } else {
+            autofillresult.innerText = "Runner ID not found. Please enter the details manually.";
+            autofillresult.style.color = "red";
+            console.log(data.message);
+            RunnerInfoFieldsClear();
+            RunnerInfoFeildsDisabled(false); // allow editing
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching runner info:', error);
+        autofillresult.innerText = "Error fetching runner info. Please try again.";
+        autofillresult.style.color = "red";
+    });
+  }
+}
+
+function RunnerInfoSubmit(event){
+  event.preventDefault(); // Stop form from submitting the traditional way
+  // Get the form element
+  const form = document.getElementById('uploadForm');
+  // Create a new FormData object
+  const formData = new FormData(form);
+  // Get runnerName from input field
+  const runnerName = document.getElementById('runnerName').value.trim();
+  // Check if runnerName is valid
+  if (runnerName === "") {
+    alert("Please enter a valid runner name.");
+    return;
+  }
+  // Append the runnerName to the formData
+  formData.append('runnerName', runnerName);
+  // Get the runnerGender from the select field
+  const runnerGender = document.querySelector('input[name="runnerGender"]:checked').value;
+  // Append the runnerGender to the formData
+  formData.append('runnerGender', runnerGender);
+  // Get height_runner from the input fields (feet and inches)
+  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+  const inches = parseInt(document.getElementById('heightInches').value) || 0;
+  // Convert to total inches for backend, or you can convert to meters if needed
+  const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
+  // Check if height_runner is valid
+  if (isNaN(height_runner) || height_runner <= 0) {
+    alert("Please enter a valid height.");
+    return;
+  }
+
+  const useremail = document.getElementById('useremailDisplay').innerText;
+  formData.append('ruunerHeightFeet', feet);
+  formData.append('ruunerHeightInche', inches);
+  formData.append('userEmail', useremail);
+  const runnerID = document.getElementById("runnerIDNumber").value.trim();
+  formData.append('runnerID', runnerID);
+
+  const autofillresult = document.getElementById("autofillResult");
+  autofillresult.innerText = "";
+  // Send the data to the server
+  fetch('http://'+fetch_address+':5001/save_runner_info', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response) {
+        autofillresult.innerText = data.message;
+        autofillresult.style.color = "green";
+        RunnerInfoFeildsDisabled(true); // prevent editing
+        document.getElementById("runnerIDNumber").value = data.runnerID; // set the runner ID
+        document.getElementById("runnerIDNumber").disabled = true; // disable the runner ID field
+        document.getElementById("nextbutton").disabled = true; // disable the submit button
+        document.getElementById("TabDiv").style.display = "block"; // show the edit button
+      } else {
+        autofillresult.innerText = data.message;
+        autofillresult.style.color = "red";
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Failed to save runner information");
+    });
+}
+
+function RunnerInfoClear(event){
+  event.preventDefault();
+  document.getElementById("runnerIDNumber").value = "";
+  document.getElementById("runnerIDNumber").disabled = false; // enable the runner ID field
+  document.getElementById("nextbutton").disabled = false; // enable the submit button
+  document.getElementById("TabDiv").style.display = "none"; // hide the edit button
+  const autofillresult = document.getElementById("autofillResult");
+  autofillresult.innerText = "For quick search enter runner ID number.";
+  autofillresult.style.color = "green";
+  RunnerInfoFieldsClear();
+  RunnerInfoFeildsDisabled(false); // allow editing
 }

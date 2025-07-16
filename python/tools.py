@@ -6,7 +6,8 @@ import PIL.Image
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+import secrets
+import string
 
 class tools:
     
@@ -317,3 +318,40 @@ class tools:
             return False
         finally:
             server.close()  # Close the connection to the server
+    
+    def send_forget_password_email(receiver_email, new_password):
+        # Email configuration
+        sender_email = "mo.habibideh990@gmail.com"  # Your Gmail address
+        app_password = "zdha iqsm wkrc ivcw"  # Replace with your App Password
+
+        # Email content
+        subject = "Requested Password Reset"
+        body = f"Hello \n\n Here are is your new password:\n\nNew Password: {new_password} \n\nPlease change it after logging in."
+
+        # Create the email
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = receiver_email
+        message["Subject"] = subject
+        message.attach(MIMEText(body, "plain"))
+
+        try:
+            # Connect to Gmail's SMTP server
+            server = smtplib.SMTP("smtp.gmail.com", 587)  # Use Gmail's SMTP server and port
+            server.starttls()  # Upgrade the connection to secure
+            server.login(sender_email, app_password)  # Log in with App Password
+            server.sendmail(sender_email, receiver_email, message.as_string())  # Send the email
+            print("Email sent successfully!")
+            return True
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+        finally:
+            server.close()  # Close the connection to the server
+
+    def generate_strong_password(length=12):
+        # Ensure we include letters, digits, and punctuation
+        characters = string.ascii_letters + string.digits + string.punctuation
+        # Use secrets.choice for cryptographic randomness
+        password = ''.join(secrets.choice(characters) for _ in range(length))
+        return password

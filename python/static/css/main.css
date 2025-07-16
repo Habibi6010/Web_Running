@@ -1823,3 +1823,7 @@ th.fixed-desc::after {
 .tab-content.active {
   display: flex;
 }
+
+.invalid {
+  border: 2px solid red;
+}

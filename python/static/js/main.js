@@ -629,12 +629,14 @@ function SendDrawData(event) {
     const colorInput = document.getElementById(`colorSetting${i}`);
     settings_colors[document.getElementById(`setting${i}`).value] = [checkbox.checked, hexToRgb(colorInput.value)];
   }
-  
+  const video_id = document.getElementById('displayVideoID').innerText;
+  const userEmail = document.getElementById('useremailDisplay').innerText;
+  const runnerHeight = document.getElementById('displayRunnerHeight').innerText;
   // Send the data to the server
   fetch('http://'+fetch_address+':5001/draw_analysis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ settings_colors })
+    body: JSON.stringify({ "settings_colors":settings_colors, "video_id":video_id, "userEmail":userEmail,"runner_height":runnerHeight})
   })
     .then(response => response.json())
     .then(data => {
@@ -655,6 +657,7 @@ function SendDrawData(event) {
         video.play();
       } else {
         alert('Data sent failed');
+        console.log(data.message);
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
@@ -675,26 +678,31 @@ function SendDrawData(event) {
     });
 }
 
-let uploaded_video_name = null;
-
 // Send and receive data from server and work with API for sending video and get analysis
 function SendVideo(event) {
   event.preventDefault(); // Stop form from submitting the traditional way
   // check_radio();
   if (document.getElementById('videoUpload').files.length == 0) {
     alert("You didn't upload video.");
-    uploaded_video_name = null;
     return;
   }
+  // Show loading gif
   const loading = document.getElementById('parent-container-uploadvideo');
   const loading2 = document.getElementById('loading-uploadvideo');
-  
+  //Set runner info. text
+  document.getElementById('displayRunnerName').innerText = document.getElementById('runnerName').value.trim();
+  document.getElementById('displayRunnerID').innerText = document.getElementById('runnerIDNumber').value.trim();
+  document.getElementById('displayRunnerGender').innerText = document.querySelector('input[name="runnerGender"]:checked').value;
+  const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+  const inches = parseInt(document.getElementById('heightInches').value) || 0;
+  document.getElementById('displayRunnerHeight').innerText = feet + "'" + inches + '"';
   // Get the form element
   const form = document.getElementById('uploadForm');
   // Create a new FormData object and append the form data
   const formData = new FormData(form);
   const userEmail = document.getElementById('useremailDisplay').innerText;
   const runnerID = document.getElementById('runnerIDNumber').value.trim();
+
   formData.append('selectedModel', "mediapipe");
   formData.append('userEmail', userEmail);
   formData.append('runnerID', runnerID);
@@ -715,16 +723,19 @@ function SendVideo(event) {
     .then(data => {
       console.log('Success:', data);
       if (data.response) {
-        // alert('Data sent successfully and Model is running');
         // Hide the loading GIF
         loading.style.display = 'none';
         loading2.style.display = 'none';
-        uploaded_video_name = data.videoaddress; // Store the uploaded video name
         // Hide upload section and show analysis section
         upload_section.style.display = 'none';
         analysis_section.style.display = 'block';
         //Show reslut video
         console.log(data.message);
+        // set video info. text
+        document.getElementById('displayVideoName').innerText = data.video_name;
+        document.getElementById('displayVideoID').innerText = data.video_id;
+        document.getElementById('displayVideoDate').innerText = data.upload_date;
+
       } else {
         alert('Data sent failed');
         console.log(data.message);
@@ -975,8 +986,6 @@ function UplaodNewVideo() {
     videoPreview.style.display = 'none';
   }
 
-  // Reset any global state variables if needed
-  uploaded_video_name = null;
   // Reset runner info
   document.getElementById("runnerIDNumber").value = "";
   document.getElementById("runnerIDNumber").disabled = false; // enable the runner ID field
@@ -987,6 +996,9 @@ function UplaodNewVideo() {
   autofillresult.style.color = "green";
   RunnerInfoFieldsClear();
   RunnerInfoFeildsDisabled(false); // allow editing
+  // Reset score inputs
+  const scoreInputs= document.querySelectorAll('input[name="enterscore"]');
+  scoreInputs.forEach(input => input.value = "");
 }
 
 function FillHistoryTable(username){
@@ -1140,7 +1152,7 @@ function ScoreHelp(){
 }
 
 // Validation pattern: m:ss.xx or s.xx for input score fields
-const pattern = /^(\d+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d)$/;
+const pattern = /^(\d+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d|\d{2})$/;
 const inputs = document.querySelectorAll('input[name="enterscore"]');
 inputs.forEach(input => attachValidation(input));
 // Attach validation to new input field
@@ -1166,108 +1178,77 @@ function attachValidation(input) {
 // Send and receive data from server and work with API for sending score and get rank
 function SendScores(event) {
 
-  // event.preventDefault(); // Stop form from submitting the traditional way
-  // // check_radio();
-  // if (document.getElementById('videoUpload').files.length == 0) {
-  //   alert("You didn't upload video.");
-  //   uploaded_video_name = null;
-  //   return;
-  // }
+  event.preventDefault(); // Stop form from submitting the traditional way
+  // Get all data from the HTML page
+  const userEmail = document.getElementById('useremailDisplay').innerText;
+  const runnerID = document.getElementById('runnerIDNumber').value.trim();
+  const season = document.querySelector('input[name="env"]:checked').value;
+  const category = document.getElementById('selectcategorizlist').value;
+  const selectedEvent = document.getElementById('selectrunningevent').value;
+  const scoreInputs = document.querySelectorAll('input[name="enterscore"]');
+  let scores = [];
+  scoreInputs.forEach(input => {
+    const value = input.value.trim();
+    if (value) scores.push(value);
+  });
+  if (scores.length < 4 ) {
+    alert("Please enter at least five valid score.");  
+    return;
+  }
 
-
-  // const loading = document.getElementById('parent-container-uploadvideo');
-  // const loading2 = document.getElementById('loading-uploadvideo');
+  // Show the loading GIF
+  const loading = document.getElementById('parent-container-uploadvideo');
+  const loading2 = document.getElementById('loading-uploadvideo');
   
-  // // Get the form element
-  // const form = document.getElementById('uploadForm');
-  // // Create a new FormData object
-  // const formData = new FormData(form);
-  // // Get runnerName from input field
-  // const runnerName = document.getElementById('runnerName').value.trim();
-  // // Check if runnerName is valid
-  // if (runnerName === "") {
-  //   alert("Please enter a valid runner name.");
-  //   loading.style.display = 'none';
-  //   loading2.style.display = 'none';
-  //   uploaded_video_name = null;
-  //   return;
-  // }
-  // // Append the runnerName to the formData
-  // formData.append('runnerName', runnerName);
-  // // Get the runnerGender from the select field
-  // const runnerGender = document.querySelector('input[name="runnerGender"]:checked').value;
-  // // Append the runnerGender to the formData
-  // formData.append('runnerGender', runnerGender);
-  // // Get height_runner from the input fields (feet and inches)
-  // const feet = parseInt(document.getElementById('heightFeet').value) || 0;
-  // const inches = parseInt(document.getElementById('heightInches').value) || 0;
-  // // Convert to total inches for backend, or you can convert to meters if needed
-  // const height_runner = (feet * 12 + inches)*0.0254; // Convert to meters (1 inch = 0.0254 meters)
-  // // Check if height_runner is valid
-  // if (isNaN(height_runner) || height_runner <= 0) {
-  //   alert("Please enter a valid height.");
-  //   loading.style.display = 'none';
-  //   loading2.style.display = 'none';
-  //   uploaded_video_name = null;
-  //   return;
-  // }
-  // // Get selected AI model (radio buttons)
-  // // const selectedModel = document.querySelector('input[name="model"]:checked').value;
-  // const selectedModel = "mediapipe";
-  // // Get usrname from usernameeDisplay span
-  // const username = document.getElementById('useremailDisplay').innerText;
-  
-  // //Append the height_runner, selectedModel, and settings_colors to the formData
-  // formData.append('height_runner', height_runner);
-  // formData.append('selectedModel', selectedModel);
-  // // formData.append('settings_colors', JSON.stringify(settings_colors));
-  // formData.append('username', username);
-
-  // // Show the loading GIF
-  // loading.style.display = 'block';
-  // loading2.style.display = 'block';
-  // // Get upload and analysis sections id
-  // const upload_section = document.getElementById('upload-section');
-  // const analysis_section = document.getElementById('analysis-section');
-  
-  // // Send the data to the server
-  // fetch('http://'+fetch_address+':5001/run_analysis', {
-  //   method: 'POST',
-  //   body: formData
-  // })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     console.log('Success:', data);
-  //     if (data.response) {
-  //       // alert('Data sent successfully and Model is running');
-  //       // Hide the loading GIF
-  //       loading.style.display = 'none';
-  //       loading2.style.display = 'none';
-  //       uploaded_video_name = data.videoaddress; // Store the uploaded video name
-  //       // Hide upload section and show analysis section
-  //       upload_section.style.display = 'none';
-  //       analysis_section.style.display = 'block';
-  //       //Show reslut video
-  //       console.log(data.message);
-  //     } else {
-  //       alert('Data sent failed');
-  //       console.log(data.message);
-  //       // Hide the loading GIF
-  //       loading.style.display = 'none';
-  //       loading2.style.display = 'none';
-  //       upload_section.style.display = 'block';
-  //       analysis_section.style.display = 'none';
-  //       // resultVideoPreview.style.display = 'none';
-  //     }
-  //   })
-  //   .catch(error => {
-  //     console.error('Error:', error);
-  //     // Hide the loading GIF
-  //     loading.style.display = 'none';
-  //     loading2.style.display = 'none';
-  //     upload_section.style.display = 'block';
-  //     analysis_section.style.display = 'none';
-  //   });
+  loading.style.display = 'block';
+  loading2.style.display = 'block';
+  // Get upload and analysis sections id
+  const upload_section = document.getElementById('upload-section');
+  const analysis_section = document.getElementById('analysis-section');
+  let dataToSend = {
+    "userEmail": userEmail,
+    "runnerID": runnerID,
+    "season": season,
+    "category": category,
+    "selectedEvent": selectedEvent,
+    "scores": scores
+  };
+  // Send the data to the server
+  fetch('http://'+fetch_address+':5001/save_runner_score', {
+    method: 'POST',
+    body: JSON.stringify(dataToSend),
+    headers: { 'Content-Type': 'application/json'} 
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.response) {
+        // Hide the loading GIF
+        loading.style.display = 'none';
+        loading2.style.display = 'none';
+        // Hide upload section and show analysis section
+        upload_section.style.display = 'none';
+        analysis_section.style.display = 'block';
+        //Show reslut video
+        console.log(data.message,data.score_id);
+      } else {
+        alert('Data sent failed');
+        console.log(data.message);
+        // Hide the loading GIF
+        loading.style.display = 'none';
+        loading2.style.display = 'none';
+        upload_section.style.display = 'block';
+        analysis_section.style.display = 'none';
+        // resultVideoPreview.style.display = 'none';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Hide the loading GIF
+      loading.style.display = 'none';
+      loading2.style.display = 'none';
+      upload_section.style.display = 'block';
+      analysis_section.style.display = 'none';
+    });
 }
 
 // Function to disable or enable the name,height, gender fiedls
@@ -1305,7 +1286,7 @@ function autoFillRunnerInfo(){
   }
   else{
 
-    fetch('http://'+fetch_address+':5001/get_runner_info',{method: 'POST',
+    fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ runnerID: runnerID, userEmail: userEmail })
     })

@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, render_template,send_from_directory,send_file
+import json
 from flask_cors import CORS
 from drawing import drawing
 import cv2
@@ -12,7 +13,6 @@ import datetime
 import requests
 from tools import tools
 import math
-import datetime
 # import shutil
 import subprocess
 
@@ -183,7 +183,13 @@ def run_analysis():
     if len(response_upload_video.data) == 0:
         return jsonify({"response": False, "message": "Failed to log video upload in database"})
     else:
-        return jsonify({"response": True,"message":" Video is being analyzed in the background","video_ID":response_upload_video.data[0]['video_id']})
+        upload_time = response_upload_video.data[0]['upload_time']
+        upload_time = datetime.datetime.strptime(upload_time, "%Y-%m-%dT%H:%M:%S.%f")
+        formatted_time = upload_time.strftime("%Y-%m-%d %H:%M:%S")
+        return jsonify({"response": True,"message":" Video is being analyzed in the background",
+                        "video_name":video_file.filename,
+                        "video_id":response_upload_video.data[0]['video_id'],
+                        "upload_date":formatted_time})
 
 def run_model_get_landmarks(selected_model, video_address):   
     cap = cv2.VideoCapture(video_address)
@@ -256,11 +262,17 @@ def video(filename):
 
 @app.route('/draw_analysis', methods=['POST'])
 def draw_analysis():
-    username = page_data_dic['username']
-    timestamp = page_data_dic['timestamp']
-    input_video_name = page_data_dic['input_video_name']
-    video_file_address = f"{VIDEO_SAVE_PATH}{username}/{timestamp}_{input_video_name}"
-    print(f"Video file address: {video_file_address}")
+    data = request.json
+    video_id = data.get('video_id')
+    userEmail = data.get('userEmail')
+    setting_colors = data.get('settings_colors')
+    runner_height = height_to_cm(data.get('runner_height'))
+
+    # Get video information from database
+    response_video = supabase.table("upload_video").select("*").eq("video_id", video_id).execute()
+    if len(response_video.data) == 0:
+        return jsonify({"response": False, "message": "Video ID not found in database"})
+    video_info = response_video.data[0]
     # Create Analyzed Video Folder
     if not os.path.exists(ANALYZED_VIDEO_SAVE_PATH):
         os.makedirs(ANALYZED_VIDEO_SAVE_PATH)
@@ -268,49 +280,47 @@ def draw_analysis():
     else:
         print(f"Folder already exists: {ANALYZED_VIDEO_SAVE_PATH}")
     # Create User Analyzed Video Folder
-    user_folder = f"{ANALYZED_VIDEO_SAVE_PATH}{username}"
+    user_folder = f"{ANALYZED_VIDEO_SAVE_PATH}{userEmail}"
     if not os.path.exists(user_folder):
         os.makedirs(user_folder)
         print(f"Folder created: {user_folder}")
     else:
         print(f"Folder already exists: {user_folder}")
 
-    # Define settings for colors and angles to be drawn
-    setting_colors = request.json.get('settings_colors')
-    page_data_dic['setting_colors'] = setting_colors
-    print(f"settings_colors: {setting_colors}")
-    message,response,write_folder_name= drawing_on_video()
+    message,response,write_folder_name= drawing_on_video(setting_colors,userEmail,video_info,runner_height)
+
+    # Save the analyzed video path to database
+    if response:
+        response_update = supabase.table("analysis_video").insert({
+            "video_id": video_id,
+            "analysis_video_path": write_folder_name + '/fixed_output.mp4',
+            "analysis_csv_path": write_folder_name + '/all_data.csv',
+            "analysis_setting": json.dumps(setting_colors)
+        }).execute()
+        if len(response_update.data) == 0:
+            print("Failed to update analyzed video path in database")
+            return jsonify({"response": False, "message": "Failed to update analyzed video path in database"})
 
     output_video_address = write_folder_name + '/fixed_output.mp4'
     print(f"Output video address URL: {output_video_address}")
     output_video_csv = write_folder_name + '/all_data.csv'
     print(f"Output video csv address URL: {output_video_csv}") 
 
-    # file_link = f"http://{fetch_address}:5001/download_video/{write_file_name}"
-    # csv_link = f"http://{fetch_address}:5001/download_csv/{write_file_name}"
-    # print(f"file_link: {file_link}")
-    # print(f"csv_link: {csv_link}")
-    # i = 0
-    # while i < 3:
-    #     if (tools.send_email(username,file_link,csv_link)):
-    #         break
-    #     else:
-    #         i += 1
-    # return jsonify({"response": response, "message": text,"videoaddress":write_file_name,"csvaddress":write_file_name})
     return jsonify({"response": response, "message": message, "videoaddress": output_video_address, "csvaddress": output_video_csv})
 
-def drawing_on_video():
+def drawing_on_video(settings_colors,userEmail,video_info,runner_height):
     drawing_object = drawing()
-    username = page_data_dic['username']
-    timestamp = page_data_dic['timestamp']
-    input_video_name = page_data_dic['input_video_name']
-    selectModel = page_data_dic['selectedModel']
-    settings_colors = page_data_dic['setting_colors']
-    height_runner = page_data_dic['height_runner']
+    username = userEmail
+    timestamp = datetime.datetime.strptime(video_info['upload_time'], "%Y-%m-%dT%H:%M:%S.%f")
+    timestamp = timestamp.strftime("%Y%m%d%H%M%S") # YYYYMMDDHHMMSS
+    input_video_name = video_info['video_name']
+    selectModel = video_info['model_used']
+    settings_colors = settings_colors
+    height_runner = runner_height
 
-    video_file_address = f"{VIDEO_SAVE_PATH}{username}/{timestamp}_{input_video_name}"
-    name_without_ext = os.path.splitext(video_file_address)[0] 
-    csv_file_address = name_without_ext + '_landmarks.pkl'
+    video_file_address = video_info['video_path']
+    csv_file_address = video_info['landmark_path']
+
     print(f"Video file address in drawing: {video_file_address}")
     print(f"CSV File address in drawing: {csv_file_address}")
     df_landmarks = pd.read_pickle(csv_file_address)
@@ -498,7 +508,22 @@ def get_scale_factor_mediapipe(landmarks, height_runner,image_height,image_width
     # Calculate scale factor (cm per pixel)
     scale_factor = height_runner / pixel_height
     return scale_factor
+def height_to_cm(height_str):
+    # Remove any spaces and handle formats like 5'6", 5' 6", etc.
+    height_str = height_str.replace(" ", "")
+    
+    # Split at the apostrophe
+    try:
+        feet, inches = height_str.split("'")
+        inches = inches.replace('"', '')  # Remove the inch symbol if present
+        feet = int(feet)
+        inches = int(inches)
+    except:
+        raise ValueError("Invalid height format. Use format like 5'6\"")
 
+    # Convert to cm (1 foot = 30.48 cm, 1 inch = 2.54 cm)
+    cm = int(round(feet * 30.48 + inches * 2.54))
+    return cm
 # ChaBot using chatGPT API and RAG system
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -571,14 +596,35 @@ def get_user_history():
     return jsonify({"response": True, "message": "Video history found.", "history": uploaded_videos})
 
 #Get user information and scores
-@app.route('/get_user_score', methods=['POST'])
-def get_user_score():
+@app.route('/save_runner_score', methods=['POST'])
+def save_runner_score():
     data = request.json
-    print(data)
-    return
+    userEmail = data.get("userEmail")
+    runnerID = data.get("runnerID")
+    season = data.get("season")
+    category = data.get("category")
+    selectedEvent = data.get("selectedEvent")
+    scores = data.get("scores")
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Save scores to DB
+    scores_dic = {str(i+1): int(val) for i, val in enumerate(scores)}
+    response_save = supabase.table("score").insert({"runner_id": int(runnerID),
+                                                    "user_id": int(user_id),
+                                                    "season": season,
+                                                    "category": category,
+                                                    "event": selectedEvent,
+                                                    "score_list": json.dumps(scores_dic)
+                                                    }).execute()
+    if len(response_save.data) == 0:
+        return jsonify({"response": False, "message": "Failed to save scores."})
+    return jsonify({"response": True, "message": "Scores saved successfully.","score_id": response_save.data[0]['score_id'] })
 
-@app.route('/get_runner_info',methods=['POST'])
-def get_runner_info():
+@app.route('/find_runner_info',methods=['POST'])
+def find_runner_info():
     # Get runner info from json
     runner_id=request.json.get('runnerID')
     useremail=request.json.get('userEmail')

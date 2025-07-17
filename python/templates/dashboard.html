@@ -146,7 +146,7 @@
             <div id="tab2" class="tab-content" style="flex-direction: column; gap: 15px;">
               <!-- Environment and Category Selection -->
               <div style="display: flex;align-items: left; gap: 20px;">
-                <label for="selectwnvironment" style="width: 200px;">Season:</label>
+                <label for="selectenvironment" style="width: 200px;">Season:</label>
                 <div>
                   <label><input style="margin-left: 10px;" type="radio" name="env" value="indoor" onchange="updatecategorylist(this.value)" checked> Indoor</label>
                   <label><input style="margin-left: 10px;" type="radio" name="env" value="outdoor" onchange="updatecategorylist(this.value)"> Outdoor</label>
@@ -215,7 +215,24 @@
       </div> -->
 
       <div class="container_checkbox">
-          <!-- <h4>Select Analysis Settings and Colors</h4> -->
+          <div class="form-group" style="display: flex; flex-direction: row; gap: 80px; flex-wrap: wrap; margin-bottom: 15px;">
+            <!-- Runner Info -->
+            <div style="width: 300px;">
+              <h5>Runner Info.:</h5>
+              <div><label style="width: 80px; display: inline-block;">Name:</label> <span id="displayRunnerName" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayRunnerID" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">Height:</label> <span id="displayRunnerHeight" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">Gender:</label> <span id="displayRunnerGender" style="color: blue;">test</span></div>
+            </div>
+
+            <!-- Video Info -->
+            <div style="min-width: 200px;">
+              <h5>Video Info.:</h5>
+              <div><label style="width: 80px; display: inline-block;">Name:</label> <span id="displayVideoName" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayVideoID" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">Date:</label> <span id="displayVideoDate" style="color: blue;">test</span></div>
+            </div>
+          </div>
           <div class="container_checkbox">
               <h5>Select Postures</h5>
               <div class="control-buttons">

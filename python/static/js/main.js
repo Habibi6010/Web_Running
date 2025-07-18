@@ -788,8 +788,31 @@ function check_radio() {
     }
   }
 }
+// Listen for page load to fill the analysis page with data from local storage when redirect from rerun page
+window.addEventListener("DOMContentLoaded", () => {
+  const data = JSON.parse(localStorage.getItem("rerunData"));
+  if (data && Object.keys(data).length > 0) {
+    console.log("Page loaded, checking for rerun data...");
+    // Reset the upload form and settings
+    UplaodNewVideo();
+    // Show the analysis section and hide others
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('analysis-section').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    // Fill the fields
+    document.getElementById("displayVideoName").innerText = data.video_name;
+    document.getElementById("displayVideoID").innerText = data.video_id;
+    document.getElementById("displayVideoDate").innerText = data.timestamp;
 
+    document.getElementById("displayRunnerName").innerText = data.runner_name;
+    document.getElementById("displayRunnerID").innerText = data.runner_id;
+    document.getElementById("displayRunnerGender").innerText = data.runner_gender;
+    document.getElementById("displayRunnerHeight").innerText = data.runner_height;
 
+    // Optionally clear after loading
+    localStorage.removeItem("rerunData");
+  }
+});
 // add listener to profile page to get user details when page load
 document.addEventListener('DOMContentLoaded', function () {
   // extract username from url
@@ -1001,7 +1024,7 @@ function UplaodNewVideo() {
   scoreInputs.forEach(input => input.value = "");
 }
 
-function FillHistoryTable(username){
+function FillHistoryTable(userEmail){
   console.log("FillHistoryTable");
   const tableBody = document.getElementById('historyTableBody');
   // Clear existing rows
@@ -1009,7 +1032,7 @@ function FillHistoryTable(username){
   fetch('http://'+fetch_address+':5001/get_user_history', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: username })
+    body: JSON.stringify({ "userEmail": userEmail })
   })
     .then(response => response.json())
     .then(data => {
@@ -1040,16 +1063,20 @@ function populateVideoTable(videoList, tableBody) {
   videoList.forEach(item => {
     const row = document.createElement("tr");
 
-    // Video Name
+    // Runner Name
     const nameCell = document.createElement("td");
-    nameCell.textContent = item.video_name;
+    nameCell.textContent = item.runner_name;
     row.appendChild(nameCell);
-
+   
     // Timestamp
     const timeCell = document.createElement("td");
     timeCell.textContent = item.timestamp;
     row.appendChild(timeCell);
 
+    // Video Name and ID
+    const idCell = document.createElement("td");
+    idCell.innerHTML = `${item.video_name} (ID: ${item.video_id})`;
+    row.appendChild(idCell);
     // Original Video Link
     const videoLinkCell = document.createElement("td");
     const videoLink = document.createElement("a");
@@ -1082,7 +1109,7 @@ function populateVideoTable(videoList, tableBody) {
     const actionCell = document.createElement("td");
     const actionBtn = document.createElement("button");
     actionBtn.textContent = "Re-Run";
-    actionBtn.onclick = () => handleRunAction(item); // call your function with item
+    actionBtn.onclick = () => handleRerunAction(item); // call your function with item
     actionCell.appendChild(actionBtn);
     row.appendChild(actionCell);
 
@@ -1090,7 +1117,28 @@ function populateVideoTable(videoList, tableBody) {
     tableBody.appendChild(row);
   });
 }
-
+// Handle re-run action
+function handleRerunAction(item) {
+  console.log("Re-Run clicked for video ID:", item.video_id);
+  // load video data into analysis section
+  // go to analysis section
+  const useremail = document.getElementById('useremailDisplay').innerText;
+  const username = document.getElementById('usernameDisplay').innerText;
+  // Save data to localStorage
+  localStorage.setItem("rerunData", JSON.stringify({
+    video_name: item.video_name,
+    video_id: item.video_id,
+    timestamp: item.timestamp,
+    runner_name: item.runner_name,
+    runner_id: item.runner_id,
+    runner_gender: item.runner_gender,
+    runner_height: item.runner_height,
+    useremail: useremail,
+    username: username
+  }));
+  console.log(username);
+  window.location.href = `http://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+}
 // Manage Tabs
 function openTab(tabId) {
       // Hide all tab contents
@@ -1400,4 +1448,83 @@ function RunnerInfoClear(event){
   autofillresult.style.color = "green";
   RunnerInfoFieldsClear();
   RunnerInfoFeildsDisabled(false); // allow editing
+}
+
+function handelViewProfileButton(){
+  const useremail = document.getElementById('useremailDisplay').innerText;
+  const username = document.getElementById('usernameDisplay').innerText;
+  // Save data to localStorage
+  localStorage.setItem("profilePage",JSON.stringify({"userName":username,"userEmail":useremail})); 
+  window.location.href = `http://${fetch_address}:5001/profile`;
+  
+}
+
+
+// Fill runner table in profile page
+function FillRunnerTable(userEmail){
+  console.log("FillRunnerTable");
+  const tableBody = document.getElementById('runnerTableBody');
+  // Clear existing rows
+  tableBody.innerHTML = '';
+  fetch('http://'+fetch_address+':5001/get_user_runners', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "userEmail": userEmail })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response)
+      {
+        if (Array.isArray(data.runners) && data.runners.length > 0) {
+          populateRunnerTable(data.runners, tableBody);
+        } else {
+          alert('You do not have any runners yet.');
+          return;
+        }
+      }else{
+        console.log(data.message);
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+
+function populateRunnerTable(runnerList, tableBody) {
+  // Clear the table body first
+  tableBody.innerHTML = '';
+
+  runnerList.forEach(item => {
+    const row = document.createElement("tr");
+
+    // Runner ID
+    const idCell = document.createElement("td");
+    idCell.textContent = item.runner_id;
+    row.appendChild(idCell);
+
+    // Runner Name
+    const nameCell = document.createElement("td");
+    nameCell.textContent = item.name;
+    row.appendChild(nameCell);
+   
+    // Creation Time
+    const timeCell = document.createElement("td");
+    timeCell.textContent = item.created_at;
+    row.appendChild(timeCell);
+
+    // Runner Gender
+    const genderCell = document.createElement("td");
+    genderCell.innerHTML =item.gender;
+    row.appendChild(genderCell);
+
+    // Runner Height
+    const heightCell = document.createElement("td");
+    heightCell.innerText = item.height
+    row.appendChild(heightCell);
+    
+    // Append the row to the table body
+    tableBody.appendChild(row);
+  });
 }

@@ -1769,11 +1769,12 @@ width: 50%;
 }
 
 table {
-  max-width: 800px;
+  
   width: 100%;
   border:#060606 1px solid;
   border-collapse: collapse;
   margin-top: 20px;
+  table-layout: auto;
 }
 th {
   cursor: pointer;

@@ -70,6 +70,10 @@ def dashboard():
 def porfile():
     return render_template('VideoLog.html')
 
+@app.route('/profile')
+def profile():
+    return render_template('Profile.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -176,7 +180,8 @@ def run_analysis():
             "video_path": video_address,
             "model_used": selectedModel,
             "runner_id": runnerID,
-            "landmark_path": output_csv
+            "landmark_path": output_csv,
+            "upload_time": str(datetime.datetime.now())
         }).execute()
     else:
         return jsonify({"response": False, "message": "User email not found in database"})
@@ -295,7 +300,8 @@ def draw_analysis():
             "video_id": video_id,
             "analysis_video_path": write_folder_name + '/fixed_output.mp4',
             "analysis_csv_path": write_folder_name + '/all_data.csv',
-            "analysis_setting": json.dumps(setting_colors)
+            "analysis_setting": json.dumps(setting_colors),
+            "analysis_time": str(datetime.datetime.now())
         }).execute()
         if len(response_update.data) == 0:
             print("Failed to update analyzed video path in database")
@@ -552,45 +558,58 @@ def chat():
 @app.route('/get_user_history', methods=['POST'])
 def get_user_history():
     data = request.json
-    username = data.get('username')
-    print(f"Username:{username}")
-    user_video_path = f"{VIDEO_SAVE_PATH}{username}"
-    analyzed_user_video_path = f"{ANALYZED_VIDEO_SAVE_PATH}{username}"
-    if not os.path.exists(user_video_path):
-        print(f"User video folder does not exist: {user_video_path}")
+    userEmail = data.get('userEmail')
+    
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found.", "history": []})
+    user_id = response_email.data[0]['user_id']
+    print(f"Useremail:{userEmail} UserID:{user_id}")
+    # Find runner under this user
+    response_runner = supabase.table("runner").select("*").eq("user_id", int(user_id)).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "No runner found under this user.", "history": []})
+    # Find uploaded videos and analysis video from DB
+    response = supabase.table("upload_video").select("*, analysis_video(*)").eq("user_id", user_id).execute()
+    if len(response.data) == 0:
         return jsonify({"response": False, "message": "No video history found.", "history": []})
-    video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
-    video_files = [f for f in os.listdir(user_video_path) if f.lower().endswith(video_extensions)]
-    # print(f"Found {len(video_files)} video files for user {username}.")
-    # print(f"Video files: {video_files}")
+    # Construct the response data with video and analysis links 
     uploaded_videos = []
-    for video_file in video_files:
-            parts = video_file.split('_',1)
-            video_name = parts[1] if len(parts) > 1 else video_file
-            timestamp_str = parts[0]
-            try:
-                timestamp = datetime.datetime.strptime(timestamp_str, "%Y%m%d%H%M%S")
-                formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                formatted_time = "Unknown"
-            
-            # print(f"Processing video file: {video_file} with timestamp: {formatted_time} and name: {video_name}")
-            video_link = f"download_video/{user_video_path}/{video_file}"
-            # print(f"User video path: {video_link}")
+    for video in response.data:
+        # Find runner name
+        for runner in response_runner.data:
+            if video['runner_id'] == runner['runner_id']:
+                runner_name = runner['name']
+                runner_height = f"{runner['feet']}'{runner['inche']}\""
+                runner_gender = runner['gender']
+                break
+            else:
+                runner_name = "Unknown"
+                runner_height = "Unknown"
+                runner_gender = "Unknown"
+        # Find video upload time
+        upload_time = video['upload_time']
+        upload_time = datetime.datetime.strptime(upload_time, "%Y-%m-%dT%H:%M:%S.%f")
+        formatted_time = upload_time.strftime("%Y-%m-%d %H:%M:%S")
+        # Finde video link
+        video_link ="download_video/"+ video['video_path']
+        # Find analysis video link
+        result_link = []
+        for result in video['analysis_video']:
+            result_link.append("download_video/"+result['analysis_video_path'])
 
-            result_folders = os.listdir(analyzed_user_video_path)
-            result_link = []
-            for folder in result_folders:
-                if video_file in folder:
-                    result_path = analyzed_user_video_path + "/" + folder
-                    result_link.append(f"download_video/{result_path}/fixed_output.mp4")
-
-            uploaded_videos.append({
-                'video_name': video_name,
-                'timestamp': formatted_time,
-                'video_link': video_link,
-                'result_link': result_link
-            })
+        uploaded_videos.append({
+            'runner_name': runner_name,
+            'runner_id': video['runner_id'],
+            'runner_height': runner_height,
+            'runner_gender': runner_gender,
+            'timestamp': formatted_time,
+            'video_link': video_link,
+            'result_link': result_link,
+            'video_id': video['video_id'],
+            'video_name': video['video_name'],
+        })
             
     # print(f"Uploaded videos data: {uploaded_videos}")
     return jsonify({"response": True, "message": "Video history found.", "history": uploaded_videos})
@@ -617,7 +636,8 @@ def save_runner_score():
                                                     "season": season,
                                                     "category": category,
                                                     "event": selectedEvent,
-                                                    "score_list": json.dumps(scores_dic)
+                                                    "score_list": json.dumps(scores_dic),
+                                                    "created_at": str(datetime.datetime.now())
                                                     }).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to save scores."})
@@ -668,13 +688,41 @@ def save_runner_info():
         response_runner = supabase.table("runner").select("*").eq("name", runnerName).eq("user_id",int(user_id)).eq("feet",runnerHeightFeet).eq("inche",runnerHeightInche).eq("gender",runnerGender).execute()
         if len(response_runner.data) == 0:
             # If runner not found, insert new runner
-            response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender}).execute()  
+            response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender,"created_at":str(datetime.datetime.now())}).execute()  
             # print(f"Insert response: {response.data}")
             return jsonify({"response": True, "message": f"Runner info added to DB. Runner ID is {response.data[0]['runner_id']}","runnerID":response.data[0]['runner_id']})
         else:
             return jsonify({"response": True, "message": f"Runner with same info was in DB. Runner ID is {response_runner.data[0]['runner_id']}","runnerID":response_runner.data[0]['runner_id']})
     else:
         return jsonify({"response": True, "message": "Runner info was in DB.","runnerID":response_runner.data[0]['runner_id']})
+
+@app.route('/get_user_runners', methods=['POST'])
+def get_user_runners():
+    data = request.json
+    userEmail = data.get('userEmail')
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find runner under this user
+    response_runner = supabase.table("runner").select("*").eq("user_id", int(user_id)).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": True, "message": "No runner found under this user.","runners":[]})
+    runners = []
+    for runner in response_runner.data:
+        upload_time = runner['created_at']
+        upload_time = datetime.datetime.strptime(upload_time, "%Y-%m-%dT%H:%M:%S.%f")
+        formatted_time = upload_time.strftime("%Y-%m-%d %H:%M:%S")
+        runners.append({
+            "runner_id": runner['runner_id'],
+            "name": runner['name'],
+            "height": f"{runner['feet']}'{runner['inche']}\"",
+            "gender": runner['gender'],
+            "created_at": formatted_time
+        })
+    return jsonify({"response": True, "message": "Runners found successfully.","runners":runners})
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=True)

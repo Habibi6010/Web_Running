@@ -64,7 +64,7 @@
           <ol>
             <li><a href="index.html">Home</a></li>
             <li><a id="dashboardlink2" href="dashboard.html">Dashboard</a></li>
-            <li class="current">Video Log</li>
+            <li class="current">Profile</li>
           </ol>
         </nav>
         <h1>Video Log Page</h1>
@@ -75,31 +75,78 @@
 
     <!-- Starter Section Section -->
     <section id="starter-section" class="starter-section section">
-
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>History</h2>
-        <p>In this section, you can view the history of the videos you've uploaded along with their corresponding
-          analysis results. You'll be able to review previous videos and examine detailed insights derived from the
-          posture analysis, making it easy to track progress and compare results over time.</p>
-          <br>
+        <h2>Profile</h2>
+        <p>On the Profile page, you can update your personal information such as your name, 
+                change your password for account security, and view a list of all the runners you have added.</p>
+        <p>This section helps you manage your account and track your activity efficiently.</p>
+        <br>
       </div><!-- End Section Title -->
     </section><!-- /Starter Section Section -->
-    <!-- History Table Section -->
+    
+    <!-- User Information Section -->
     <section class="section" data-aos="fade-up">
+        <h2 style="text-align: center; margin-bottom: 20px;">User Information</h2>
+      <div class="container_checkbox" style="max-width: 1025px; display: flex; flex-direction: row; align-items: center; gap: 20px;">
+        <div class="form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: left; gap: 10px;">
+                <div>
+                        <label for="useremail" style="width: 150px;">Email:</label>
+                        <input type="email" id="useremail" name="useremail" disabled>
+                </div>
+                <div>
+                        <label for="created_at" style="width: 150px;">Account Created At:</label>
+                        <input type="text" id="created_at" name="created_at" disabled>
+                </div>
+                <div>
+                        <label for="user_role" style="width: 150px;">Role:</label>
+                        <input type="text" id="user_role" name="user_role" disabled>
+                </div>
+                <div>
+                        <label for="username" style="width: 150px;">Name:</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your name">
+                </div>
+                <div>
+                        <button id="updateProfileBtn" style="margin-left: 100px;" onclick="updateProfile()">Update Profile</button>
+                </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: left; gap: 10px;">
+                <div>
+                        <label for="oldpassword" style="width: 180px;">Old Password:</label>
+                        <input type="password" id="oldpassword" name="oldpassword" placeholder="Enter old password">
+                </div>
+                <div>
+                        <label for="newpassword" style="width: 180px;">New Password:</label>
+                        <input type="password" id="newpassword" name="newpassword" placeholder="Enter new password">
+                </div>
+                <div>
+                        <label for="confirmpassword" style="width: 180px;">Confirm New Password:</label>
+                        <input type="password" id="confirmpassword" name="confirmpassword" placeholder="Confirm new password">
+                </div>
+                <div>
+                        <span id="passwordMatchMessage" style="color: red; display: block;margin-left: 100px;">Passwords do not match!</span>
+                </div>
+                <div>
+                        <button id="changePasswordBtn" style="margin-left: 100px;" onclick="changePassword()">Change Password</button>
+                </div>
+      </div>
+    </section>
+    
+    <!-- Runner Table Section -->
+    <section class="section" data-aos="fade-up">
+        <h2 style="text-align: center; margin-bottom: 20px;">Runners You Added</h2>
       <div class="container_checkbox" style="overflow-x:auto;max-width: 1025px;">
-        <table id="historyTable" style="width: 1000px; min-width: 800px;">
+        <table id="runnerTable" style="width: 1000px; min-width: 800px;">
           <thead>
             <tr>
-              <th onclick="sortTable(0)" class>Runner Name</th>
-              <th onclick="sortTable(1)" class>Upload Date</th>
-              <th>Video Name (ID)</th>
-              <th>Original Video</th>
-              <th>Analysis</th>
-              <th>Action</th>
+              <th onclick="sortTable(0)" class>ID</th>
+              <th onclick="sortTable(1)" class>Name</th>
+              <th onclick="sortTable(2)" class>Enter Date</th>
+              <th onclick="sortTable(3)" class>Gender</th>
+              <th onclick="sortTable(4)" class>Height</th>
             </tr>
           </thead>
-          <tbody id="historyTableBody">
+          <tbody id="runnerTableBody">
             <!-- History entries will be dynamically inserted here -->
           </tbody>
         </table>
@@ -157,11 +204,8 @@
 
   <script>
     let sortDirections = []; // to toggle asc/desc
-
-    
-
     function sortTable(columnIndex) {
-        const table = document.getElementById("historyTable");
+        const table = document.getElementById("runnerTable");
         const tbody = table.tBodies[0];
         const rows = Array.from(tbody.querySelectorAll("tr"));
         
@@ -209,6 +253,9 @@
         // Always keep ▼ on first two columns
         table.querySelectorAll("th")[0].classList.add("fixed-desc");
         table.querySelectorAll("th")[1].classList.add("fixed-desc");
+        table.querySelectorAll("th")[2].classList.add("fixed-desc");
+        table.querySelectorAll("th")[3].classList.add("fixed-desc");
+        table.querySelectorAll("th")[4].classList.add("fixed-desc");
 
         // Update sorted column arrow
         table.querySelectorAll("th")[columnIndex].classList.remove("fixed-desc");
@@ -216,10 +263,26 @@
             sortDirections[columnIndex] ? "sort-asc" : "sort-desc"
         );
     }
-    // sort by first
-    window.onload = () => {
-        sortTable(1);
-    };
+
+        // Load user info from localStorage and sort table by first column on page load
+        window.onload = () => {
+                const profileData = JSON.parse(localStorage.getItem("profilePage"));
+                if (profileData) {
+                document.getElementById('usernameDisplay').innerText = profileData.userName;
+                document.getElementById('useremailDisplay').innerText = profileData.userEmail;
+                }
+
+                const dashboardLink1 = document.getElementById("doshboardlink1");
+                if (dashboardLink1) {
+                        dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
+                }
+                const dashboardLink2 = document.getElementById("dashboardlink2");
+                if (dashboardLink2) {
+                        dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
+                }
+                FillRunnerTable(profileData.userEmail);
+                sortTable(0); // Sort by first column on page load
+        };
   </script>
 </body>
 </html>

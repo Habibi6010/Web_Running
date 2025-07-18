@@ -88,7 +88,7 @@
     <!-- User Information Section -->
     <section class="section" data-aos="fade-up">
         <h2 style="text-align: center; margin-bottom: 20px;">User Information</h2>
-      <div class="container_checkbox" style="max-width: 1025px; display: flex; flex-direction: row; align-items: center; gap: 20px;">
+      <div class="container_checkbox" style=" display: flex; flex-direction: row; align-items: center; gap: 20px;">
         <div class="form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: left; gap: 10px;">
                 <div>
                         <label for="useremail" style="width: 150px;">Email:</label>
@@ -282,6 +282,7 @@
                 }
                 FillRunnerTable(profileData.userEmail);
                 sortTable(0); // Sort by first column on page load
+                document.getElementById("passwordMatchMessage").style.color = "white";
         };
   </script>
 </body>

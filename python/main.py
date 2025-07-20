@@ -554,7 +554,7 @@ def chat():
     return jsonify(system_answer)
 
 
-# User history
+# User runner history
 @app.route('/get_user_history', methods=['POST'])
 def get_user_history():
     data = request.json
@@ -723,6 +723,57 @@ def get_user_runners():
         })
     return jsonify({"response": True, "message": "Runners found successfully.","runners":runners})
 
+@app.route('/get_user_info', methods=['POST'])
+def get_user_info():
+    data = request.json
+    userEmail = data.get('userEmail')
+    # Find user info from DB
+    response_email = supabase.table("user").select("*").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_info = response_email.data[0]
+    time = user_info['created_at']
+    time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f")
+    formatted_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    return jsonify({"response": True, "message": "User info found successfully.",
+                    "full_name": user_info['full_name'],
+                    "role": user_info['role'],
+                    "created_at": formatted_time
+                    })
 
+@app.route('/update_user_info', methods=['POST'])
+def update_user_info():
+    data = request.json
+    userEmail = data.get('useremali')
+    full_name = data.get('full_name')
+    role = data.get('role')
+    print(f"Update user info: email={userEmail}, full_name={full_name}, role={role}")
+    # Update user info from DB
+    response_update = supabase.table("user").update({"full_name": full_name,'role':role}).eq("email", userEmail).execute()
+    if len(response_update.data) == 0:
+        return jsonify({"response": False, "message": "Failed to update user info."})
+    return jsonify({"response": True, "message": "User info updated successfully."})
+
+@app.route('/change_user_password', methods=['POST'])
+def change_user_password():
+    data = request.json
+    userEmail = data.get('useremali')
+    new_password = data.get('newPassword')
+    current_password = data.get('currentPassword')
+    print(f"Change password for email: {userEmail}")
+    # Check current password
+    response = supabase.table("user").select("password").eq("email", userEmail).execute()
+    if len(response.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    if response.data[0]['password'] == new_password:
+        return jsonify({"response": False, "message": "New password cannot be the same as the current password."})
+    if response.data[0]['password'] != current_password:
+        return jsonify({"response": False, "message": "Current password is incorrect."})
+    # Update user password from DB
+    auth_response = supabase.table("user").update({"password": new_password}).eq("email", userEmail).execute()
+    if len(auth_response.data)==0:
+        return jsonify({"response": False, "message": "Failed to change password. User not found."})
+    return jsonify({"response": True, "message": "Password changed successfully."})
+    
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=True)

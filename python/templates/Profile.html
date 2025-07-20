@@ -124,7 +124,7 @@
                         <input type="password" id="confirmpassword" name="confirmpassword" placeholder="Confirm new password">
                 </div>
                 <div>
-                        <span id="passwordMatchMessage" style="color: red; display: block;margin-left: 100px;">Passwords do not match!</span>
+                        <span id="passwordMatchMessage" style="color: red; display: block;height: 28.18px;">Passwords do not match!</span>
                 </div>
                 <div>
                         <button id="changePasswordBtn" style="margin-left: 100px;" onclick="changePassword()">Change Password</button>
@@ -281,6 +281,7 @@
                         dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
                 }
                 FillRunnerTable(profileData.userEmail);
+                FillUserInfo(profileData.userEmail);
                 sortTable(0); // Sort by first column on page load
                 document.getElementById("passwordMatchMessage").style.color = "white";
         };

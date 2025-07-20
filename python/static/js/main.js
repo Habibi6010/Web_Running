@@ -1523,8 +1523,127 @@ function populateRunnerTable(runnerList, tableBody) {
     const heightCell = document.createElement("td");
     heightCell.innerText = item.height
     row.appendChild(heightCell);
-    
+
     // Append the row to the table body
     tableBody.appendChild(row);
   });
+}
+
+// Fill the profile page with user data from DB
+function FillUserInfo(userEmail){
+  console.log("FillUserInfon");
+  fetch('http://'+fetch_address+':5001/get_user_info', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "userEmail": userEmail })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response)
+      {
+        document.getElementById("username").value = data.full_name;
+        document.getElementById("useremail").value = userEmail;
+        document.getElementById("created_at").value = data.created_at;
+        document.getElementById("user_role").value = data.role;
+      }else{
+        console.log(data.message);
+        document.getElementById("username").value = "";
+        document.getElementById("useremail").value = "";
+        document.getElementById("created_at").value = "";
+        document.getElementById("user_role").value = "";
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById("username").value = "";
+      document.getElementById("useremail").value = "";
+      document.getElementById("created_at").value = "";
+      document.getElementById("user_role").value = "";
+    });
+}
+
+// Update user info from profile page
+function updateProfile(){
+  full_name = document.getElementById("username").value.trim();
+  userEmali = document.getElementById("useremail").value.trim();
+  role = document.getElementById("user_role").value.trim();
+  if (full_name === "" || userEmali === "" || role === ""){
+    alert("All fields are required");
+    return;
+  }
+  fetch('http://'+fetch_address+':5001/update_user_info', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "full_name": full_name, "useremali": userEmali, "role":role })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response)
+      {
+        alert(data.message);
+      }else{
+        alert(data.message);
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Failed to update user info");
+    });
+    
+}
+
+// Change password from profile page
+function changePassword(){
+  const currentPassword = document.getElementById("oldpassword").value.trim();
+  const newPassword = document.getElementById("newpassword").value.trim();
+  const confirmNewPassword = document.getElementById("confirmpassword").value.trim();
+  const userEmali = document.getElementById("useremail").value.trim();
+
+  if (currentPassword === "" || newPassword === "" || confirmNewPassword === ""){
+    alert("All fields are required");
+    return;
+  }
+  if (newPassword !== confirmNewPassword){
+    document.getElementById('passwordMatchMessage').innerText = "New password and confirm password do not match";
+    document.getElementById('passwordMatchMessage').style.color = "red";
+    return;
+  }
+  if (newPassword.length < 6){
+    document.getElementById('passwordMatchMessage').innerText = "New password must be at least 6 characters long";
+    document.getElementById('passwordMatchMessage').style.color = "red";
+    return;
+  }
+
+  fetch('http://'+fetch_address+':5001/change_user_password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "useremali": userEmali, "currentPassword": currentPassword, "newPassword": newPassword })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response)
+      {
+        alert(data.message);
+        // Clear the input fields
+        document.getElementById("oldpassword").value = "";
+        document.getElementById("newpassword").value = "";
+        document.getElementById("confirmpassword").value = "";
+        document.getElementById('passwordMatchMessage').innerText = "";
+
+      }else{
+        alert(data.message);
+        document.getElementById('passwordMatchMessage').innerText = "";
+
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Failed to change password");
+    });
 }

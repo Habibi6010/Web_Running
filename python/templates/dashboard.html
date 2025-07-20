@@ -66,6 +66,7 @@
           </button>
           <div class="dropdown-menu">
             <button class="profile-button" id="videologebutton" onclick="handelVideLogButton()">Video Log </button>
+            <button class="profile-button" id="rancklogebutton" onclick="handelrankLogButton()">Ranking Log </button>
             <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">Profile </button>
             <button class="profile-button" id="logoutButton" onclick="handelLogoutButton()">Logout</button>
           </div>
@@ -613,11 +614,9 @@
       </div>
     </section>
 
-    
-
     <section id = "result" style="display: none;">
       <div class="container section-title" data-aos="fade-up">
-        <h2>Analysis Result </h2>
+        <h2>Video Analysis Result </h2>
       </div>
       <div class="container_checkbox">
         <label for="resultVideo" style="display: block; margin-bottom: 10px;">Result Video:</label>
@@ -632,6 +631,34 @@
         </video>
       </div>
     </section>
+
+    <section id="rankingResult-section" style="display: block;">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Ranking Prediction Result </h2>
+      </div>
+      <div class="container_checkbox">
+        <div class="form-group" style="display: flex; flex-direction: row; gap: 30px; flex-wrap: wrap; margin-bottom: 15px;">
+            <!-- Runner Info -->
+            <div style="width: 300px;">
+              <h5>Runner Info.:</h5>
+              <div><label style="width: 80px; display: inline-block;">Name:</label> <span id="displayRankRunnerName" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayRankRunnerID" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">Gender:</label> <span id="displayRankRunnerGender" style="color: blue;">test</span></div>
+              <div><label style="width: 80px; display: inline-block;">Height:</label> <span id="displayRankRunnerHeight" style="color: blue;">test</span></div>
+            </div>
+
+            <!-- Video Info -->
+            <div style="min-width: 200px;">
+              <h5>Records Info.:</h5>
+              <div><label style="width: 130px; display: inline-block;">Season:</label> <span id="displayRankSeason" style="color: blue;">test</span></div>
+              <div><label style="width: 130px; display: inline-block;">Category Division:</label> <span id="displayRankCategory" style="color: blue;">test</span></div>
+              <div><label style="width: 130px; display: inline-block;">Event:</label> <span id="displayRankEvent" style="color: blue;">test</span></div>
+              <div><label style="width: 130px; display: inline-block;">Records:</label> <span id="displaySubmittedScores" style="color: blue;">test</span></div>
+            </div>
+          </div>
+      </div>
+    </section>
+
 
     <!-- <section id="chatbot">
       <div class="container section-title" data-aos="fade-up">

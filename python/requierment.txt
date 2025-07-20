@@ -7,3 +7,5 @@ matplotlib
 mediapipe
 ultralytics
 fpdf
+joblib
+scikit-learn==1.6.0

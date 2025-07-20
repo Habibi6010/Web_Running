@@ -643,6 +643,18 @@ def save_runner_score():
         return jsonify({"response": False, "message": "Failed to save scores."})
     return jsonify({"response": True, "message": "Scores saved successfully.","score_id": response_save.data[0]['score_id'] })
 
+def ranking_prediction(category, event, scores):
+    # Dummy ranking prediction logic
+    avg_score = sum(scores) / len(scores)
+    if avg_score >= 90:
+        return "A"
+    elif avg_score >= 80:
+        return "B"
+    elif avg_score >= 70:
+        return "C"
+    else:
+        return "D"
+
 @app.route('/find_runner_info',methods=['POST'])
 def find_runner_info():
     # Get runner info from json

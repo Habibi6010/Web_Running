@@ -1252,7 +1252,7 @@ function SendScores(event) {
   loading2.style.display = 'block';
   // Get upload and analysis sections id
   const upload_section = document.getElementById('upload-section');
-  const analysis_section = document.getElementById('analysis-section');
+  const analysis_section = document.getElementById('rankingResult-section');
   let dataToSend = {
     "userEmail": userEmail,
     "runnerID": runnerID,
@@ -1276,6 +1276,18 @@ function SendScores(event) {
         // Hide upload section and show analysis section
         upload_section.style.display = 'none';
         analysis_section.style.display = 'block';
+        // Fill the ranking result fields
+        document.getElementById('displayRankRunnerName').innerText = document.getElementById('runnerName').value.trim();
+        document.getElementById('displayRankRunnerID').innerText = runnerID;
+        document.getElementById('displayRankRunnerGender').innerText = document.querySelector('input[name="runnerGender"]:checked').value;
+        const feet = parseInt(document.getElementById('heightFeet').value) || 0;
+        const inches = parseInt(document.getElementById('heightInches').value) || 0;
+        document.getElementById('displayRankRunnerHeight').innerText = feet + "'" + inches + '"';
+        document.getElementById('displayRankSeason').innerText = season;
+        document.getElementById('displayRankCategory').innerText = category;
+        document.getElementById('displayRankEvent').innerText = selectedEvent;
+        document.getElementById('displaySubmittedScores').innerText = scores.join(", ");
+
         //Show reslut video
         console.log(data.message,data.score_id);
       } else {
@@ -1646,4 +1658,9 @@ function changePassword(){
       console.error('Error:', error);
       alert("Failed to change password");
     });
+}
+
+// Handle ranking log button
+function handelrankLogButton(){
+  alert("This feature is coming soon.");
 }

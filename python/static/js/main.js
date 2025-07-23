@@ -997,10 +997,12 @@ function UplaodNewVideo() {
   // Hide analysis/result sections, show upload section
   const upload_section = document.getElementById('upload-section');
   const analysis_section = document.getElementById('analysis-section');
+  const ranking_section = document.getElementById('rankingResult-section');
   const result_section = document.getElementById('result');
   if (upload_section) upload_section.style.display = 'block';
   if (analysis_section) analysis_section.style.display = 'none';
   if (result_section) result_section.style.display = 'none';
+  if (ranking_section) ranking_section.style.display = 'none';
 
   // Hide video preview if present
   const videoPreview = document.getElementById('videoPreview');
@@ -1162,12 +1164,15 @@ function updatecategorylist(selectedEnv){
     selectrunningevent.innerHTML = ""; // clear old options
       let options = [];
       let event = [];
+      let event_value = [];
       if (selectedEnv === "indoor") {
         options = ["NCAA DIV. I", "NCAA DIV. II", "NCAA DIV. III","NAIA","NJCAA"];
         event = ["Sprint 60m", "Sprint 200m", "Sprint 400m", "Middle Distance 800m", "Middle Distance Mile (1609m) ", "Long Distance 3000m", "Long Distance 5000m"];
+        event_value = ["60m", "200m", "400m", "800m", "1609m ", "3000m", "5000m"];
       } else if (selectedEnv === "outdoor") {
         options = ["NCAA DIV. I","NCAA DIV. II", "NCAA DIV. III", "NAIA","NJCAA DIV.I"];
         event = ["Sprint 100m", "Sprint 200m", "Sprint 400m", "Middle Distance 800m", "Middle Distance 1500m","Long Distance 5,000m", "Long Distance 10,000m"];
+        event_value = ["100m", "200m", "400m", "800m", "1500m","5000m", "10000m"];
       }
       options.forEach(opt => {
         const option = document.createElement("option");
@@ -1177,10 +1182,11 @@ function updatecategorylist(selectedEnv){
       });
       event.forEach(ev => {
         const option = document.createElement("option");
-        option.value = ev;
+        option.value = event_value[event.indexOf(ev)];
         option.textContent = ev;
         selectrunningevent.appendChild(option);
       });
+
 }
 // Add score input field dynamically
 function addScoreInput(){
@@ -1288,8 +1294,50 @@ function SendScores(event) {
         document.getElementById('displayRankEvent').innerText = selectedEvent;
         document.getElementById('displaySubmittedScores').innerText = scores.join(", ");
 
-        //Show reslut video
-        console.log(data.message,data.score_id);
+        //Show reslut 
+        console.log(data.message);
+        document.getElementById('predictedRanking').src = data.plot_path;
+        document.getElementById('predictedRanking').style.display = 'block';
+
+        const tableHead = document.getElementById('classTableHead');
+        const tableBody = document.getElementById('classTableBody');
+        const columns = data.class_columns;  // use ordered list of columns
+        // Clear existing table content
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        if (data.class_summary.length>0){
+          // Add table headers
+          const headerRow = document.createElement('tr');
+          columns.forEach(col => {
+            const th = document.createElement('th');
+            th.textContent = col;
+            headerRow.appendChild(th);
+          });
+          tableHead.appendChild(headerRow);
+          // Add table rows
+          data.class_summary.forEach(item => {
+            const row = document.createElement('tr');
+            columns.forEach(col => {
+              const td = document.createElement('td');
+              td.textContent = item[col];
+              row.appendChild(td);
+            });
+            tableBody.appendChild(row);
+          });
+        }
+        else{
+          tableHead.innerHTML = "";
+          tableBody.innerHTML = "";
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 4; // Assuming there are 4 columns
+          noDataCell.textContent = "No ranking data available.";
+          noDataRow.appendChild(noDataCell);
+          tableBody.appendChild(noDataRow);
+          return;
+        }
+
       } else {
         alert('Data sent failed');
         console.log(data.message);

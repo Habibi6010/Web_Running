@@ -15,6 +15,8 @@ from tools import tools
 import math
 # import shutil
 import subprocess
+from RankClustering import RankClustering
+from RankClustering import ART2
 
 
 ##### Main Variable for  Address of server and video save path
@@ -629,6 +631,12 @@ def save_runner_score():
     if len(response_email.data) == 0:
         return jsonify({"response": False, "message": "User email not found."})
     user_id = response_email.data[0]['user_id']
+
+    # Find runner info from DB
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "Runner ID not found."})
+    gender = response_runner.data[0]['gender']
     # Save scores to DB
     scores_dic = {str(i+1): int(val) for i, val in enumerate(scores)}
     response_save = supabase.table("score").insert({"runner_id": int(runnerID),
@@ -641,19 +649,24 @@ def save_runner_score():
                                                     }).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to save scores."})
-    return jsonify({"response": True, "message": "Scores saved successfully.","score_id": response_save.data[0]['score_id'] })
+    
+    score_id = response_save.data[0]['score_id']
+    scores = [int(val) for val in scores]
+    print(scores)
+    # Predict ranking based on scores
+    plot,df_class_summary = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
+    
+    return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']}) 
 
-def ranking_prediction(category, event, scores):
-    # Dummy ranking prediction logic
-    avg_score = sum(scores) / len(scores)
-    if avg_score >= 90:
-        return "A"
-    elif avg_score >= 80:
-        return "B"
-    elif avg_score >= 70:
-        return "C"
-    else:
-        return "D"
+def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
+    data_dic={'gender':gender,'season':season,'category':category,'event':selectedEvent}
+    print(f"Data dic: {data_dic}")
+    rc = RankClustering(data_dic)
+    pred_cluster = rc.predict_cluster(scores)
+    print(f"Predicted cluster: {pred_cluster}")
+    plot_path = rc.darw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png")
+    df = rc.get_cluster_summary()
+    return plot_path,df
 
 @app.route('/find_runner_info',methods=['POST'])
 def find_runner_info():

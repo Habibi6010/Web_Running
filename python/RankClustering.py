@@ -3,12 +3,21 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.fftpack import fft
+import json,io, base64
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend to avoid GUI issues
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+
+
 class RankClustering:
     models_folder = "ClusterModels/"
+    plot_output_folder = "static/plots/"
+    path_seleceted_model = None
     art_model = None
     pca_transform = None
     normalization_transform = None
-
+    boxplot_summary = None
     def __init__(self, data: dict):
         # Initialize with data dictionary
         gender = data.get('gender', 'men')
@@ -16,16 +25,21 @@ class RankClustering:
         category = data.get('category', 'NCAA Div I')
         event = data.get('event', '100m')
         # Make model path
-        path_seleceted_model = f"{self.models_folder}{gender}/{event}/{season}"
+        self.path_seleceted_model = f"{self.models_folder}{gender}/{event}/{season}"
         # print(f"Model path: {self.path_seleceted_model}")
         # Load models
-        art_model_path = f"{path_seleceted_model}/art_{season}.pkl"
-        pca_transform_path = f"{path_seleceted_model}/pca_transform_{season}.pkl"
-        normalization_transform_path = f"{path_seleceted_model}/normalization_transform_{season}.pkl"
+        art_model_path = f"{self.path_seleceted_model}/art.pkl"
+        pca_transform_path = f"{self.path_seleceted_model}/pca_transform.pkl"
+        normalization_transform_path = f"{self.path_seleceted_model}/normalization_transform.pkl"
         self.pca_transform = self.load_model(pca_transform_path)
         self.normalization_transform = self.load_model(normalization_transform_path)
         self.art_model = self.load_model(art_model_path)
-        
+        # Load the summary statistics
+        with open(f"{self.path_seleceted_model}/boxplot_summary.json", "r") as f:
+            self.boxplot_summary = json.load(f)
+            print(f"Loaded boxplot summary")
+
+
     def load_model(self, path: str):
         if os.path.exists(path):
             with open(path, 'rb') as file:
@@ -53,11 +67,11 @@ class RankClustering:
         var_score = np.var(scores_array)
         cv= np.std(scores_array)/np.mean(scores_array) if np.mean(scores_array)!=0 else 0
         mean_fft = fft(scores_array).real.mean()
-        test_df = pd.DataFrame({'200m_best_score_indoor': [best_score],
-                        '200m_avg_score_indoor': [avg_score],
-                        '200m_var_score_indoor': [var_score],
-                        '200m_mean_fft_indoor': [mean_fft],
-                        '200m_cv_indoor': [cv]})
+        test_df = pd.DataFrame({'best_score': [best_score],
+                        'avg_score': [avg_score],
+                        'var_score': [var_score],
+                        'mean_fft': [mean_fft],
+                        'cv': [cv]})
         # Normalize the data
         normalized_data = self.normalization_transform.transform(test_df)
         # Apply PCA transformation
@@ -70,6 +84,80 @@ class RankClustering:
             test_label.append([self.art_model.find_label(row)+1,float(row.values[0])])  
         return test_label
     
+    def darw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png"):
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Colors and labels
+        box_color = (0.2, 0.4, 0.8, 0.2)         # more transparent blue
+        line_color = (0, 0, 0, 1)               # semi-transparent black for lines
+        outlier_color = (0.8, 0.2, 0.2, 0.6)      # semi-transparent red
+        median_color = (0.8, 0.2, 0.2, 0.7)        # red for median line
+        predict_color = (0.2, 0.8, 0.2, 0.6)       # semi-transparent green for predicted cluster
+
+        labels = ['A', 'B', 'C', 'D', 'E']
+        
+        
+        positions = list(range(len(self.boxplot_summary)))
+
+        for stat, pos in zip(self.boxplot_summary, positions):
+            q1 = stat["q1"]
+            median = stat["median"]
+            q3 = stat["q3"]
+            low = stat["whisker_low"]
+            high = stat["whisker_high"]
+            outliers = stat["outliers"]
+
+            # Draw box
+            rect = Rectangle((pos - 0.3, q1), 0.6, q3 - q1, facecolor=box_color, edgecolor=line_color, linewidth=1.2)
+            ax.add_patch(rect)
+
+            # Median line
+            ax.plot([pos - 0.3, pos + 0.3], [median, median], color=median_color, linewidth=1)
+
+            # Whiskers
+            ax.plot([pos, pos], [low, q1], color=line_color, linewidth=1)
+            ax.plot([pos, pos], [q3, high], color=line_color, linewidth=1)
+
+            # Whisker caps
+            ax.plot([pos - 0.1, pos + 0.1], [low, low], color=line_color, linewidth=1)
+            ax.plot([pos - 0.1, pos + 0.1], [high, high], color=line_color, linewidth=1)
+
+            # Outliers
+            # ax.plot([pos] * len(outliers), outliers, 'o', color=outlier_color, markersize=4)
+            
+
+        # Final formatting
+        ax.set_xticks(positions)
+        ax.set_xticklabels(labels)
+        ax.set_yticks([])
+        ax.set_ylabel("")
+        ax.set_xlabel("Performance Clusters", fontsize=12)
+        ax.set_title("Ranking Boxplots", fontsize=16)
+        ax.grid(True)
+
+        # Highlight predicted cluster
+        if predicte_label and predicte_label[0][0] != -1:
+            pred_cluster = predicte_label[0][0]
+            pred_value = predicte_label[0][1]
+            ax.plot([pred_cluster], [pred_value], 'o', color=predict_color, markersize=12, label='Predicted Cluster')
+        
+        os.makedirs(self.plot_output_folder, exist_ok=True)
+        file_path = os.path.join(self.plot_output_folder, plot_name)
+        plt.savefig(file_path, format='png', bbox_inches='tight')
+        plt.close()
+        return file_path
+    
+    def get_cluster_summary(self):
+        df = pd.read_csv(f"{self.path_seleceted_model}/class_summary.csv")
+        print(f"Cluster summary:\n{df.columns}")
+        df_selected = df[['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']]
+        # Map cluster numbers to letters
+        cluster_map = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}
+        df_selected['Cluster'] = df_selected['Cluster'].map(cluster_map)
+        df_selected = df_selected.round(2)
+        return df_selected
+
+
 class ART2:
     # Initialize ART2 parameters
     def __init__(self, max_clusters, vigilance_threshold,train_mode=True, do_normalization=False):
@@ -141,3 +229,5 @@ if __name__ == "__main__":
     rc = RankClustering(data)
     cluster = rc.predict_cluster(scores)
     print(f"Predicted cluster: {cluster}")
+    ax = rc.darw_boxpolt(cluster)
+

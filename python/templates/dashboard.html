@@ -105,8 +105,8 @@
             </div>
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <label for="runnerGender" style="margin-bottom: 0; min-width: 130px;">Gender:</label>
-              <label><input type="radio" name="runnerGender" value="Male" style="margin-right: 10px; margin-left: 10px;" checked>Male</label>
-              <label><input type="radio" name="runnerGender" value="Female" style="margin-right: 10px; margin-left: 10px;">Female</label>
+              <label><input type="radio" name="runnerGender" value="men" style="margin-right: 10px; margin-left: 10px;" checked>Male</label>
+              <label><input type="radio" name="runnerGender" value="women" style="margin-right: 10px; margin-left: 10px;">Female</label>
             </div>
 
             <!-- Submit button -->
@@ -632,7 +632,7 @@
       </div>
     </section>
 
-    <section id="rankingResult-section" style="display: block;">
+    <section id="rankingResult-section" style="display: none;">
       <div class="container section-title" data-aos="fade-up">
         <h2>Ranking Prediction Result </h2>
       </div>
@@ -656,6 +656,27 @@
               <div><label style="width: 130px; display: inline-block;">Records:</label> <span id="displaySubmittedScores" style="color: blue;">test</span></div>
             </div>
           </div>
+        <div class="container_checkbox" id="rankingResultContainer" style="display: flex; flex-direction: row; gap: 30px; flex-wrap: wrap; margin-bottom: 15px;">
+          <!-- Ranking results will be displayed here -->
+          <div>
+            <h3>Predicted Ranking:</h3>
+            <img id="predictedRanking" src="" alt="Predicted Ranking" style="max-width: 100%; height: auto;">
+          </div>
+          <div>
+            <h3>Classes Breakdown:</h3>
+            <table id="classTable" style="max-width: 800px;">
+            <thead id="classTableHead">
+              <!-- History entries will be dynamically inserted here -->
+            </thead>
+            <tbody id="classTableBody">
+              <!-- History entries will be dynamically inserted here -->
+            </tbody>
+          </table>    
+
+          </div>
+
+          <button type="submit" onclick="UplaodNewVideo()" class="btn btn-primary" style="margin-top: 20px;"> Return</button>
+        </div>
       </div>
     </section>
 

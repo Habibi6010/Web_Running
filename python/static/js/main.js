@@ -251,27 +251,6 @@
 
 })();
 
-// add listener to VideoLog page to get user details when page load and fill labels and history table
-document.addEventListener('DOMContentLoaded', function () {
-  // extract username from url
-  const urlParams = new URLSearchParams(window.location.search);
-  const username = urlParams.get('username') || 'Profile';
-  const useremail = urlParams.get('useremail') || 'Email';
-
-  // Update span for show username
-  document.getElementById("useremailDisplay").innerText = useremail;
-  document.getElementById("usernameDisplay").innerText = username;
-  // Set the link to dashboard links
-  const dashboardLink1 = document.getElementById("doshboardlink1");
-  if (dashboardLink1) {
-    dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
-  }
-  const dashboardLink2 = document.getElementById("dashboardlink2");
-  if (dashboardLink2) {
-    dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
-  }
-  FillHistoryTable(useremail);
-});
 
 // fetch_address = "13.59.211.224"
 fetch_address = "127.0.0.1"
@@ -1025,7 +1004,7 @@ function UplaodNewVideo() {
   const scoreInputs= document.querySelectorAll('input[name="enterscore"]');
   scoreInputs.forEach(input => input.value = "");
 }
-
+// Fill history table with user history data for video log page
 function FillHistoryTable(userEmail){
   console.log("FillHistoryTable");
   const tableBody = document.getElementById('historyTableBody');
@@ -1077,7 +1056,7 @@ function populateVideoTable(videoList, tableBody) {
 
     // Video Name and ID
     const idCell = document.createElement("td");
-    idCell.innerHTML = `${item.video_name} (ID: ${item.video_id})`;
+    idCell.innerHTML = `${item.video_name}`;
     row.appendChild(idCell);
     // Original Video Link
     const videoLinkCell = document.createElement("td");
@@ -1096,7 +1075,7 @@ function populateVideoTable(videoList, tableBody) {
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.href = '/' + link;
-        a.textContent = "Run " + (item.result_link.indexOf(link) + 1);
+        a.textContent = "Analysis " + (item.result_link.indexOf(link) + 1);
         a.target = "_blank";
         li.appendChild(a);
         ul.appendChild(li);
@@ -1119,7 +1098,9 @@ function populateVideoTable(videoList, tableBody) {
     tableBody.appendChild(row);
   });
 }
-// Handle re-run action
+
+// Handle re-run action on the history table for video log page
+// This function will be called when the "Re-Run" button is clicked
 function handleRerunAction(item) {
   console.log("Re-Run clicked for video ID:", item.video_id);
   // load video data into analysis section
@@ -1141,6 +1122,98 @@ function handleRerunAction(item) {
   console.log(username);
   window.location.href = `http://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
+
+// Fuction for autofill score table with runner data for Ranking page
+function FillScoreTable(userEmail) {
+  console.log("FillScoreTable");
+  document.getElementById("loadingScoreTable").style.display = "block";
+
+  const tableBody = document.getElementById('scoreTableBody');
+  // Clear existing rows
+  tableBody.innerHTML = '';
+  fetch('http://'+fetch_address+':5001/get_user_scores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ "userEmail": userEmail })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data.message);
+      if (data.response) {
+        if (Array.isArray(data.scores) && data.scores.length > 0) {
+          populateScoreTable(data.scores, tableBody);
+          document.getElementById("loadingScoreTable").style.display = "none"; // Hide loading indicator
+        } else {
+          alert('You do not have any scores yet.');
+          return;
+        }
+      } else {
+        console.log(data.message);
+        alert('You do not have any scores yet.');
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  
+}
+
+// Populate the score table with data for Ranking page
+function populateScoreTable(scoreList, tableBody) {
+  // Clear the table body first
+  tableBody.innerHTML = '';
+  scoreList.forEach(item => {
+    const row = document.createElement("tr");
+    // save item for action button
+    row.dataset.item = JSON.stringify(item); // Store the item data in the row for later
+    // Runner Name
+    const nameCell = document.createElement("td");
+    nameCell.textContent = item.runner_name;
+    row.appendChild(nameCell);
+    // Enter Date
+    const dateCell = document.createElement("td");
+    dateCell.textContent = item.created_at;
+    row.appendChild(dateCell);
+    // Season
+    const seasonCell = document.createElement("td");
+    seasonCell.textContent = item.season;
+    row.appendChild(seasonCell);
+    // Category
+    const categoryCell = document.createElement("td");
+    categoryCell.textContent = item.category;
+    row.appendChild(categoryCell);
+    // Event
+    const eventCell = document.createElement("td");
+    eventCell.textContent = item.event;
+    row.appendChild(eventCell);
+    // Scores
+    const scoresCell = document.createElement("td");
+    if (item.scores.length > 0) {
+
+      const ul = document.createElement("ul");
+      item.scores.forEach(score => {
+        const li = document.createElement("li");
+        li.textContent = score;
+        ul.appendChild(li);
+      });
+      scoresCell.appendChild(ul);
+    } else {
+      scoresCell.textContent = "No scores yet";
+    }
+    row.appendChild(scoresCell);
+    // Action Button Column
+    const actionCell = document.createElement("td");
+    const actionBtn = document.createElement("button");
+    actionBtn.textContent = "Get Rank";
+    actionBtn.onclick = () => handleGetRankAction(item); // call your function with item
+    actionCell.appendChild(actionBtn);
+    row.appendChild(actionCell);
+    // Append the row to the table body
+    tableBody.appendChild(row);
+  });
+}
+
 // Manage Tabs
 function openTab(tabId) {
       // Hide all tab contents
@@ -1206,7 +1279,9 @@ function ScoreHelp(){
 }
 
 // Validation pattern: m:ss.xx or s.xx for input score fields
-const pattern = /^(\d+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d|\d{2})$/;
+// const pattern = /^(\d+:\d{2}\.\d{2}|\d{2}+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d|\d{2})$/;
+const pattern = /^(\d{1,2}:\d{1,2}\.\d{1,2}|\d{1,2}\.\d{1,2}|\d{1,2})$/;
+
 const inputs = document.querySelectorAll('input[name="enterscore"]');
 inputs.forEach(input => attachValidation(input));
 // Attach validation to new input field
@@ -1372,7 +1447,7 @@ function RunnerInfoFeildsDisabled(Active){
     document.getElementById('heightFeet').disabled = false;
     document.getElementById('heightInches').disabled = false;
     document.getElementsByName('runnerGender').forEach(r => r.disabled = false);
-    document.getElementsByName('runnerGender').forEach(r => {if(r.value === "Male") r.checked = true});
+    document.getElementsByName('runnerGender').forEach(r => {if(r.value === "men") r.checked = true});
   }
 }
 // Function to Clear runner info fields
@@ -1519,7 +1594,6 @@ function handelViewProfileButton(){
   
 }
 
-
 // Fill runner table in profile page
 function FillRunnerTable(userEmail){
   console.log("FillRunnerTable");
@@ -1558,11 +1632,12 @@ function populateRunnerTable(runnerList, tableBody) {
 
   runnerList.forEach(item => {
     const row = document.createElement("tr");
-
-    // Runner ID
-    const idCell = document.createElement("td");
-    idCell.textContent = item.runner_id;
-    row.appendChild(idCell);
+    // store item json in the row for later use
+    row.dataset.originalItem = JSON.stringify(item);
+    // // Runner ID
+    // const idCell = document.createElement("td");
+    // idCell.textContent = item.runner_id;
+    // row.appendChild(idCell);
 
     // Runner Name
     const nameCell = document.createElement("td");
@@ -1583,10 +1658,177 @@ function populateRunnerTable(runnerList, tableBody) {
     const heightCell = document.createElement("td");
     heightCell.innerText = item.height
     row.appendChild(heightCell);
+    // Action Button Column
+    const actionCell = document.createElement("td");
+    // Create a button for deleting the runner
+    const actionBtn = document.createElement("button");
+    actionBtn.textContent = "Delete";
+    // actionBtn.onclick = deleteRow(item); // call your function with item
+    actionBtn.classList.add("delete-btn");
+    // Add a confirmation dialog before deletion
+    actionBtn.onclick = () => {
+      if (confirm("Are you sure you want to delete this runner?")) {
+        deleteRow(row); // Call the delete function
+      }
+    };
+    // Append the button to the action cell
+    actionCell.appendChild(actionBtn);
+
+    // Cearte a button for editing the runner
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.classList.add("edit-btn");
+    editBtn.onclick = () => {
+      editRow(row); // Call the edit function
+    }
+    // Append the edit button to the action cell
+    actionCell.appendChild(editBtn);
+
+    row.appendChild(actionCell);
 
     // Append the row to the table body
     tableBody.appendChild(row);
   });
+}
+
+// Function to delete a row from the runner table in profile page
+function deleteRow(row) {
+  const item = JSON.parse(row.dataset.originalItem); // Get the item from the row
+    fetch('http://'+fetch_address+':5001/delete_runner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ "runnerID": item.runner_id, "userEmail": item.userEmail })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.response) {
+          alert("Runner deleted successfully.");
+          FillRunnerTable(item.userEmail); // Refresh the table
+        } else {
+          alert("Failed to delete runner: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Failed to delete runner.");
+      });
+}
+// Function to edit a row in the runner table in profile page
+function editRow(row) {
+  const item = JSON.parse(row.dataset.originalItem); // Get the item from the row
+  // row.dataset.runnerId = item.runner_id; // Store the runner ID in the row for later use
+  const nameCell = row.querySelector('td:nth-child(1)');
+  const created_at = row.querySelector('td:nth-child(2)');
+  const genderCell = row.querySelector('td:nth-child(3)');
+  const heightCell = row.querySelector('td:nth-child(4)');
+  const actionCell = row.querySelector('td:nth-child(5)');
+  
+  nameCell.innerHTML = `<input type="text" value="${item.name}" id="editRunnerName">`;
+  genderCell.innerHTML = `
+    <select id="editRunnerGender">
+      <option value="men" ${item.gender === "men" ? "selected" : ""}>men</option>
+      <option value="women" ${item.gender === "women" ? "selected" : ""}>women</option>
+    </select>
+  `;
+  const heightParts = item.height.split("'").map(part => part.trim());
+  const feet = heightParts[0] || 0;
+  const inches = heightParts[1] ? heightParts[1].replace('"', '') : 0;
+
+  heightCell.innerHTML = `
+    <input type="number" min="0" value="${feet}" style="width: 40px;"> ft 
+    <input type="number" min="0" value="${inches}" style="width: 40px;"> in
+  `;
+  created_at.textContent = item.created_at; // Keep the original creation time
+  // Replace action buttons with save and cancel buttons
+  actionCell.innerHTML = ''; // Clear existing buttons
+  const saveButton = document.createElement('button');
+  saveButton.textContent = "Save";
+  saveButton.onclick = () => saveRow(row); // Call the save function with the row
+  const cancelButton = document.createElement('button');
+  cancelButton.textContent = "Cancel";
+  cancelButton.onclick = () => cancelRow(row); // Call the cancel function with the row
+  // Append the buttons to the action cell
+  actionCell.appendChild(saveButton);
+  actionCell.appendChild(cancelButton);
+  // Add the original item data to the row for later use
+  row.dataset.originalItem = JSON.stringify(item); // Store the original item data in the row
+  
+}
+
+// Function to save the edited row on the runner table in profile page
+function saveRow(row) {
+  // const row = button.parentElement.parentElement;
+  const item = JSON.parse(row.dataset.originalItem); // Get the item from the row
+
+  const nameInput = row.querySelector('#editRunnerName');
+  const genderSelect = row.querySelector('#editRunnerGender');
+  const heightInputs = row.querySelectorAll('input[type="number"]');
+  const feet = heightInputs[0].value;
+  const inches = heightInputs[1].value;
+  const userEmail = document.getElementById('useremailDisplay').innerText;
+  const updatedName = nameInput.value.trim();
+  const updatedGender = genderSelect.value;
+  const updatedHeight = `${feet}'${inches}"`;
+  if (updatedName === "" || updatedGender === "" || feet === "" || inches === "") {
+    alert("All fields are required");
+    return;
+  }
+  fetch('http://'+fetch_address+':5001/update_runner_info', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      "runnerID": item.runner_id, 
+      "userEmail": userEmail, 
+      "name": updatedName,
+      "gender": updatedGender,
+      "height": updatedHeight
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.response) {
+        alert("Runner updated successfully.");
+        FillRunnerTable(userEmail); // Refresh the table
+      } else {
+        alert("Failed to update runner: " + data.message);
+      }
+    })
+}
+
+// Function to cancel the edit on the runner table in profile page
+function cancelRow(row) {
+  const item = JSON.parse(row.dataset.originalItem); // Get the item from the row
+  const nameCell = row.querySelector('td:nth-child(1)');
+  const created_at_ = row.querySelector('td:nth-child(2)');
+  const genderCell = row.querySelector('td:nth-child(3)');
+  const heightCell = row.querySelector('td:nth-child(4)');
+  const actionCell = row.querySelector('td:nth-child(5)');
+
+  // Restore original values
+  nameCell.textContent = item.name;
+  genderCell.innerHTML = `<span>${item.gender}</span>`;
+  heightCell.innerHTML = `<span>${item.height}</span>`;
+  created_at_.textContent = item.created_at;
+  // Restore action buttons
+  actionCell.innerHTML = ''; // Clear existing buttons
+  const deleteButton = document.createElement('button');
+  deleteButton.textContent = "Delete";
+  deleteButton.classList.add("delete-btn");
+  deleteButton.onclick = () => {
+    if (confirm("Are you sure you want to delete this runner?")) {
+      deleteRow(row); // Call the delete function
+    }
+  };
+  const editButton = document.createElement('button');
+  editButton.textContent = "Edit";
+  editButton.classList.add("edit-btn");
+  editButton.onclick = () => {
+    editRow(row); // Call the edit function
+  };
+  // Append the buttons to the action cell
+  actionCell.appendChild(deleteButton);
+  actionCell.appendChild(editButton);
+  // 
 }
 
 // Fill the profile page with user data from DB
@@ -1710,5 +1952,9 @@ function changePassword(){
 
 // Handle ranking log button
 function handelrankLogButton(){
-  alert("This feature is coming soon.");
+  const useremail = document.getElementById('useremailDisplay').innerText;
+  const username = document.getElementById('usernameDisplay').innerText;
+
+  console.log(username);
+  window.location.href = `http://${fetch_address}:5001/rankinglog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }

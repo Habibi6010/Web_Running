@@ -64,10 +64,10 @@
           <ol>
             <li><a href="index.html">Home</a></li>
             <li><a id="dashboardlink2" href="dashboard.html">Dashboard</a></li>
-            <li class="current">Video Log</li>
+            <li class="current">Ranking Log</li>
           </ol>
         </nav>
-        <h1>Video Log Page</h1>
+        <h1>Ranking Log Page</h1>
         <h4 id="usernameDisplay">Profile</h4>
         <h6 id="useremailDisplay">Profile</h6>
       </div>
@@ -79,27 +79,34 @@
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>History</h2>
-        <p>In this section, you can view the history of the videos you've uploaded along with their corresponding
-          analysis results. You'll be able to review previous videos and examine detailed insights derived from the
-          posture analysis, making it easy to track progress and compare results over time.</p>
+        <p>In this section, you can view the history of the scores you've submitted along with their detailed analysis.
+                You'll be able to track your performance over time, compare past results, and gain insights into your progress across different events and conditions.
+                This makes it easy to monitor improvements and identify areas for further development.</p>
           <br>
       </div><!-- End Section Title -->
     </section><!-- /Starter Section Section -->
     <!-- History Table Section -->
     <section class="section" data-aos="fade-up">
       <div class="container_checkbox" style="overflow-x:auto;max-width: 1025px;">
-        <table id="historyTable" style="width: 1000px; min-width: 800px;">
+        <div id="loadingScoreTable" style="display: none;">
+                <h2 style="text-align: center;">Please Wait ...  </h2>
+                <div id="loading-score" style="display: block; width: 100%; height: 50px; position: relative;margin-top: 50px;">
+                        <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
+                </div>
+        </div>
+        <table id="scoreTable" style="width: 1000px; min-width: 800px;">
           <thead>
             <tr>
               <th onclick="sortTable(0)" class>Runner Name</th>
-              <th onclick="sortTable(1)" class>Upload Date</th>
-              <th>Video Name</th>
-              <th>Original Video</th>
-              <th>Result Video</th>
+              <th onclick="sortTable(1)" class>Enter Date</th>
+              <th onclick="sortTable(2)" class>Season</th>
+              <th onclick="sortTable(3)" class>Category</th>
+              <th onclick="sortTable(4)" class>Event</th>
+              <th>Scores</th>
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="historyTableBody">
+          <tbody id="scoreTableBody">
             <!-- History entries will be dynamically inserted here -->
           </tbody>
         </table>
@@ -161,7 +168,7 @@
     
 
     function sortTable(columnIndex) {
-        const table = document.getElementById("historyTable");
+        const table = document.getElementById("scoreTable");
         const tbody = table.tBodies[0];
         const rows = Array.from(tbody.querySelectorAll("tr"));
         
@@ -209,6 +216,9 @@
         // Always keep ▼ on first two columns
         table.querySelectorAll("th")[0].classList.add("fixed-desc");
         table.querySelectorAll("th")[1].classList.add("fixed-desc");
+        table.querySelectorAll("th")[2].classList.add("fixed-desc");
+        table.querySelectorAll("th")[3].classList.add("fixed-desc");
+        table.querySelectorAll("th")[4].classList.add("fixed-desc");
 
         // Update sorted column arrow
         table.querySelectorAll("th")[columnIndex].classList.remove("fixed-desc");
@@ -235,11 +245,9 @@
       if (dashboardLink2) {
         dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
       }
-      FillHistoryTable(useremail);  
-      
-      
-      sortTable(1);
 
+      FillScoreTable(useremail);  
+      sortTable(1);
     };
   </script>
 </body>

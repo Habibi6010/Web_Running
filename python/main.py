@@ -17,7 +17,7 @@ import math
 import subprocess
 from RankClustering import RankClustering
 from RankClustering import ART2
-
+import re
 
 ##### Main Variable for  Address of server and video save path
 # Define a directory to save the video files when user uploads
@@ -71,6 +71,10 @@ def dashboard():
 @app.route('/videolog')
 def porfile():
     return render_template('VideoLog.html')
+
+@app.route('/rankinglog')
+def rankinglog():
+    return render_template('RankingLog.html')
 
 @app.route('/profile')
 def profile():
@@ -638,25 +642,52 @@ def save_runner_score():
         return jsonify({"response": False, "message": "Runner ID not found."})
     gender = response_runner.data[0]['gender']
     # Save scores to DB
-    scores_dic = {str(i+1): int(val) for i, val in enumerate(scores)}
+    print(f"Scores: {scores}")
+    scores_list = [convert_scores_to_float(score) for score in scores if score.strip() != ''] 
     response_save = supabase.table("score").insert({"runner_id": int(runnerID),
                                                     "user_id": int(user_id),
                                                     "season": season,
                                                     "category": category,
                                                     "event": selectedEvent,
-                                                    "score_list": json.dumps(scores_dic),
+                                                    "score_list": json.dumps(scores_list),
                                                     "created_at": str(datetime.datetime.now())
                                                     }).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to save scores."})
     
     score_id = response_save.data[0]['score_id']
-    scores = [int(val) for val in scores]
+    scores = [float(val) for val in scores_list]
     print(scores)
     # Predict ranking based on scores
     plot,df_class_summary = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
     
     return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']}) 
+def convert_scores_to_float(time_str):
+    pattern = re.compile(r'^(\d{1,2}):(\d{1,2})\.(\d{1,2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$')
+    match = pattern.match(time_str)
+
+    if not match:
+        raise ValueError("Invalid time format")
+
+    if match.group(1) is not None:
+        # Format: mm:ss.xx
+        minutes = int(match.group(1))
+        seconds = int(match.group(2))
+        hundredths = int(match.group(3))
+        total_seconds = minutes * 60 + seconds + hundredths / 100
+    elif match.group(4) is not None:
+        # Format: ss.xx
+        seconds = int(match.group(4))
+        hundredths = int(match.group(5))
+        total_seconds = seconds + hundredths / 100
+    elif match.group(6) is not None:
+        # Format: s or ss
+        total_seconds = int(match.group(6))
+    else:
+        raise ValueError("Unrecognized format")
+
+    return round(total_seconds, 2)
+
 
 def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     data_dic={'gender':gender,'season':season,'category':category,'event':selectedEvent}
@@ -679,7 +710,7 @@ def find_runner_info():
         return jsonify({"response": False, "message": "User email not found."})
     user_id = response_email.data[0]['user_id']
     # Find runner info from DB
-    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runner_id)).eq("user_id",int(user_id)).execute()
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runner_id)).eq("user_id",int(user_id)).eq("isActive",True).execute()
     # print(f"response_runner: {response_runner.data}")
     if len(response_runner.data) == 0:
         return jsonify({"response": False, "message": "Runner ID not found."})
@@ -708,18 +739,46 @@ def save_runner_info():
     # Find runner info in DB
     if runnerID == '':
         runnerID = -1
-    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).execute()
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).eq("isActive",True).execute()
     if len(response_runner.data) == 0:
-        response_runner = supabase.table("runner").select("*").eq("name", runnerName).eq("user_id",int(user_id)).eq("feet",runnerHeightFeet).eq("inche",runnerHeightInche).eq("gender",runnerGender).execute()
+        response_runner = supabase.table("runner").select("*").eq("name", runnerName).eq("user_id",int(user_id)).eq("feet",runnerHeightFeet).eq("inche",runnerHeightInche).eq("gender",runnerGender).eq("isActive",True).execute()
         if len(response_runner.data) == 0:
             # If runner not found, insert new runner
-            response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender,"created_at":str(datetime.datetime.now())}).execute()  
+            response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender,"created_at":str(datetime.datetime.now()),"isActive":True}).execute()  
             # print(f"Insert response: {response.data}")
             return jsonify({"response": True, "message": f"Runner info added to DB. Runner ID is {response.data[0]['runner_id']}","runnerID":response.data[0]['runner_id']})
         else:
             return jsonify({"response": True, "message": f"Runner with same info was in DB. Runner ID is {response_runner.data[0]['runner_id']}","runnerID":response_runner.data[0]['runner_id']})
     else:
         return jsonify({"response": True, "message": "Runner info was in DB.","runnerID":response_runner.data[0]['runner_id']})
+
+@app.route('/update_runner_info',methods=['POST'])
+def update_runner_info():
+    data = request.json
+    runnerID = data.get('runnerID')
+    userEmail = data.get('userEmail')
+    updatedName = data.get('name')
+    updatedGender = data.get('gender')
+    updatedHeight = data.get('height')
+
+    feet = updatedHeight.split("'")[0]
+    inche = updatedHeight.split("'")[1].replace('"', '').strip()
+
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find runner info from DB
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).eq("isActive",True).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "Runner ID not found."})
+    # Update runner info in DB
+
+    response_update = supabase.table("runner").update({"name": updatedName, "gender":updatedGender,"feet": feet, "inche": inche}).eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).execute()
+    if len(response_update.data) == 0:
+        return jsonify({"response": False, "message": "Failed to update runner info."})
+    return jsonify({"response": True, "message": "Runner info updated successfully."})
 
 @app.route('/get_user_runners', methods=['POST'])
 def get_user_runners():
@@ -731,7 +790,7 @@ def get_user_runners():
         return jsonify({"response": False, "message": "User email not found."})
     user_id = response_email.data[0]['user_id']
     # Find runner under this user
-    response_runner = supabase.table("runner").select("*").eq("user_id", int(user_id)).execute()
+    response_runner = supabase.table("runner").select("*").eq("user_id", int(user_id)).eq("isActive",True).execute()
     if len(response_runner.data) == 0:
         return jsonify({"response": True, "message": "No runner found under this user.","runners":[]})
     runners = []
@@ -744,9 +803,32 @@ def get_user_runners():
             "name": runner['name'],
             "height": f"{runner['feet']}'{runner['inche']}\"",
             "gender": runner['gender'],
-            "created_at": formatted_time
+            "created_at": formatted_time,
+            "userEmail": userEmail
         })
     return jsonify({"response": True, "message": "Runners found successfully.","runners":runners})
+
+
+@app.route('/delete_runner', methods=['POST'])
+def delete_runner():
+    data = request.json
+    runnerID = data.get('runnerID')
+    userEmail = data.get('userEmail')
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find runner info from DB
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runnerID)).eq("user_id",int(user_id)).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "Runner ID not found."})
+    # Delete runner from DB
+    response_delete = supabase.table("runner").update({"isActive":False}).eq("runner_id", int(runnerID)).execute()
+    if len(response_delete.data) == 0:
+        return jsonify({"response": False, "message": "Failed to delete runner."})
+    return jsonify({"response": True, "message": "Runner deleted successfully."})
+
 
 @app.route('/get_user_info', methods=['POST'])
 def get_user_info():
@@ -800,5 +882,51 @@ def change_user_password():
         return jsonify({"response": False, "message": "Failed to change password. User not found."})
     return jsonify({"response": True, "message": "Password changed successfully."})
     
+@app.route('/get_user_scores', methods=['POST'])
+def get_user_scores():
+    data = request.json
+    userEmail = data.get('userEmail')
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find scores under this user
+    response_scores = supabase.table("score").select("*").eq("user_id", int(user_id)).execute()
+    if len(response_scores.data) == 0:
+        return jsonify({"response": True, "message": "No scores found under this user.","scores":[]})
+    scores = []
+    for score in response_scores.data:
+        # Find runner name
+        response_runner = supabase.table("runner").select("name").eq("runner_id", score['runner_id']).execute()
+        if len(response_runner.data) == 0:
+            runner_name = "Unknown"
+        else:
+            runner_name = response_runner.data[0]['name']
+        # Find season, category, event
+        season = score['season']
+        category = score['category']
+        event = score['event']
+        # Find created_at time
+        created_at = score['created_at']
+        created_at = datetime.datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%S.%f")
+        formatted_time = created_at.strftime("%Y-%m-%d %H:%M:%S")
+        # Find scores
+        scores_list = json.loads(score['score_list'])
+        scores.append({
+            "score_id": score['score_id'],
+            "runner_name": runner_name,
+            "season": season,
+            "category": category,
+            "event": event,
+            "scores": scores_list,
+            "created_at": formatted_time
+        })
+    return jsonify({"response": True, "message": "Scores found successfully.","scores":scores})
+
+
+
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=True)

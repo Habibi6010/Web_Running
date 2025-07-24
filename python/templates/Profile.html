@@ -139,11 +139,11 @@
         <table id="runnerTable" style="width: 1000px; min-width: 800px;">
           <thead>
             <tr>
-              <th onclick="sortTable(0)" class>ID</th>
-              <th onclick="sortTable(1)" class>Name</th>
-              <th onclick="sortTable(2)" class>Enter Date</th>
-              <th onclick="sortTable(3)" class>Gender</th>
-              <th onclick="sortTable(4)" class>Height</th>
+              <th onclick="sortTable(0)" class>Name</th>
+              <th onclick="sortTable(1)" class>Enter Date</th>
+              <th onclick="sortTable(2)" class>Gender</th>
+              <th onclick="sortTable(3)" class>Height</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="runnerTableBody">
@@ -255,7 +255,7 @@
         table.querySelectorAll("th")[1].classList.add("fixed-desc");
         table.querySelectorAll("th")[2].classList.add("fixed-desc");
         table.querySelectorAll("th")[3].classList.add("fixed-desc");
-        table.querySelectorAll("th")[4].classList.add("fixed-desc");
+        // table.querySelectorAll("th")[4].classList.add("fixed-desc");
 
         // Update sorted column arrow
         table.querySelectorAll("th")[columnIndex].classList.remove("fixed-desc");

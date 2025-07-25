@@ -792,16 +792,7 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("rerunData");
   }
 });
-// add listener to profile page to get user details when page load
-document.addEventListener('DOMContentLoaded', function () {
-  // extract username from url
-  const urlParams = new URLSearchParams(window.location.search);
-  const useremail = urlParams.get('useremail') || 'No-email';
-  const username = urlParams.get('username') || 'Profile';
-  // Update span for show username
-  document.getElementById("useremailDisplay").innerText = useremail;
-  document.getElementById("usernameDisplay").innerText = username;
-});
+
 
 function handelVideLogButton(event) {
   const useremail = document.getElementById('useremailDisplay').innerText;
@@ -1127,7 +1118,6 @@ function handleRerunAction(item) {
 function FillScoreTable(userEmail) {
   console.log("FillScoreTable");
   document.getElementById("loadingScoreTable").style.display = "block";
-
   const tableBody = document.getElementById('scoreTableBody');
   // Clear existing rows
   tableBody.innerHTML = '';
@@ -1190,14 +1180,11 @@ function populateScoreTable(scoreList, tableBody) {
     // Scores
     const scoresCell = document.createElement("td");
     if (item.scores.length > 0) {
-
-      const ul = document.createElement("ul");
-      item.scores.forEach(score => {
-        const li = document.createElement("li");
-        li.textContent = score;
-        ul.appendChild(li);
-      });
-      scoresCell.appendChild(ul);
+      const scoreSpan = document.createElement("span");
+      scoreSpan.style.whiteSpace = "pre-wrap"; // Allow line breaks if needed
+      scoreSpan.style.wordBreak = "break-word"; // Break long scores if necessary
+      scoreSpan.textContent = item.scores.join(", ");
+      scoresCell.appendChild(scoreSpan);
     } else {
       scoresCell.textContent = "No scores yet";
     }
@@ -1205,13 +1192,103 @@ function populateScoreTable(scoreList, tableBody) {
     // Action Button Column
     const actionCell = document.createElement("td");
     const actionBtn = document.createElement("button");
-    actionBtn.textContent = "Get Rank";
-    actionBtn.onclick = () => handleGetRankAction(item); // call your function with item
+    actionBtn.textContent = "Edit Scores";
+    actionBtn.onclick = () => handleEditScores(row); // call your function with item
     actionCell.appendChild(actionBtn);
     row.appendChild(actionCell);
     // Append the row to the table body
     tableBody.appendChild(row);
   });
+}
+
+// Handle edit scores action on the score table for Ranking page
+function handleEditScores(row) {
+  console.log("Edit Scores clicked");
+  // Load the item data from the row
+  const item = JSON.parse(row.dataset.item);
+  // Fill the form with the item data
+  const editscore = document.createElement("input");
+  editscore.type = "text";
+  editscore.name = "editscore";
+  editscore.title = "Fromat: m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34). Each score should be separated by comma.";
+  editscore.value = item.scores.join(", "); // Join scores for display
+  const scoresCell = row.querySelector('td:nth-child(6)'); // Assuming scores are in the 6th column
+  scoresCell.innerHTML = ''; // Clear existing content
+  scoresCell.appendChild(editscore); // Add the input field for editing scores
+  
+  // Change the action button to save changes and cancel 
+  // Clear existing action button
+  const actionBtn = row.querySelector('td:nth-child(7)'); // Assuming action button is in the 7th column
+  actionBtn.innerHTML = ''; // Clear existing button
+  // Create a save button
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "Save";
+  saveBtn.onclick = () => saveEditedScores(row, editscore.value); // Call save function with the input value
+  actionBtn.appendChild(saveBtn); // Add the save button
+
+  //  Create a cancel button
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.onclick = () => {
+    // Reset the scores cell to original content
+    scoresCell.textContent = item.scores.join(", "); // Restore original scores
+    // Reset the action button to edit scores
+    
+    actionBtn.innerHTML = ''; // Clear existing buttons
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit Scores";
+    editBtn.onclick = () => handleEditScores(row); // Call edit function again
+    actionBtn.appendChild(editBtn); // Add the edit button back
+  };
+  actionBtn.appendChild(cancelBtn); // Add the cancel button
+  
+}
+// Save edited scores function for Ranking page
+function saveEditedScores(row, newScores) {
+  // console.log("Save Changes clicked for row:", row.dataset.item);
+  // Load the item data from the row
+  const item = JSON.parse(row.dataset.item);
+  // Get the user email
+  const userEmail = document.getElementById('useremailDisplay').innerText;
+  // Prepare the data to send
+  const dataToSend = {
+    userEmail: userEmail,
+    score_id: item.score_id,
+    season: item.season,
+    category: item.category,
+    event: item.event,
+    scores: newScores.split(',').map(score => score.trim()) // Split and trim the new scores
+  };
+  // check if the new scores are valid
+  if (!pattern.test(newScores)) {
+    alert("Invalid score format. Please use m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34).\n Each score should be separated by comma.");
+    return;
+  }
+  // console.log("Data to send:", dataToSend);
+  // Send the data to the server
+  fetch('http://'+fetch_address+':5001/update_scores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dataToSend)
+  }).then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response) {
+        // Update the scores cell with the new scores
+        const scoresCell = row.querySelector('td:nth-child(6)'); // Assuming scores are in the 6th column
+        scoresCell.textContent = newScores; // Update with new scores
+        // Reset score table
+        FillScoreTable(userEmail);
+        alert('Scores updated successfully!');
+      } else {
+        alert('Failed to update scores: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error updating scores: ' + error.message);
+    });
+
 }
 
 // Manage Tabs
@@ -1458,53 +1535,136 @@ function RunnerInfoFieldsClear() {
     document.getElementsByName('runnerGender').forEach(r => r.checked = false);
 }
 
+
+// Work based on runner ID number which is removed from interface
+// function autoFillRunnerInfo(){
+//   const runnerID = document.getElementById("runnerIDNumber").value.trim();
+//   const userEmail = document.getElementById("useremailDisplay").innerText;
+//   const autofillresult = document.getElementById("autofillResult");
+//   // console.log(runnerID, userEmail);
+//   if (runnerID === ""){
+//     RunnerInfoFeildsDisabled(false); // allow editing
+//     return;
+//   }
+//   else{
+
+//     fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ runnerID: runnerID, userEmail: userEmail })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.response) {
+//             // Clear previous data
+//             RunnerInfoFieldsClear();
+//             // Fill the form
+//             document.getElementById('runnerName').value = data.name;
+//             document.getElementById('heightFeet').value = data.heightFeet;
+//             document.getElementById('heightInches').value = data.heightInches;
+
+//             const genderRadios = document.getElementsByName('runnerGender');
+//             genderRadios.forEach(radio => {
+//                 radio.checked = (radio.value === data.gender);
+//             });
+//             autofillresult.innerText = "Runner info found and filled.";
+//             autofillresult.style.color = "green";
+//             RunnerInfoFeildsDisabled(true); // prevent editing
+//         } else {
+//             autofillresult.innerText = "Runner ID not found. Please enter the details manually.";
+//             autofillresult.style.color = "red";
+//             console.log(data.message);
+//             RunnerInfoFieldsClear();
+//             RunnerInfoFeildsDisabled(false); // allow editing
+//         }
+//     })
+//     .catch(error => {
+//         console.error('Error fetching runner info:', error);
+//         autofillresult.innerText = "Error fetching runner info. Please try again.";
+//         autofillresult.style.color = "red";
+//     });
+//   }
+// }
+
+
 function autoFillRunnerInfo(){
-  const runnerID = document.getElementById("runnerIDNumber").value.trim();
-  const userEmail = document.getElementById("useremailDisplay").innerText;
-  const autofillresult = document.getElementById("autofillResult");
-  // console.log(runnerID, userEmail);
-  if (runnerID === ""){
-    RunnerInfoFeildsDisabled(false); // allow editing
+  console.log("autoFillRunnerInfo");
+  const runnerName = document.getElementById("runnerName");
+  const feet = document.getElementById("heightFeet");
+  const inches = document.getElementById("heightInches");
+  const genderRadios = document.getElementsByName('runnerGender');
+
+  const suggestionBox = document.getElementById("suggestions");
+
+  const runners = JSON.parse(localStorage.getItem("runnerInfo") || "[]"); // Get runner info from localStorage
+
+  const query = runnerName.value.toLowerCase();
+  suggestionBox.innerHTML = ""; // Clear previous suggestions
+
+  if (query.length === 0) {
+    suggestionBox.style.display = "none";
     return;
   }
-  else{
 
-    fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ runnerID: runnerID, userEmail: userEmail })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.response) {
-            // Clear previous data
-            RunnerInfoFieldsClear();
-            // Fill the form
-            document.getElementById('runnerName').value = data.name;
-            document.getElementById('heightFeet').value = data.heightFeet;
-            document.getElementById('heightInches').value = data.heightInches;
+  const matches = runners.filter(runner =>
+    runner.name.toLowerCase().startsWith(query)
+  );
 
-            const genderRadios = document.getElementsByName('runnerGender');
-            genderRadios.forEach(radio => {
-                radio.checked = (radio.value === data.gender);
-            });
-            autofillresult.innerText = "Runner info found and filled.";
-            autofillresult.style.color = "green";
-            RunnerInfoFeildsDisabled(true); // prevent editing
-        } else {
-            autofillresult.innerText = "Runner ID not found. Please enter the details manually.";
-            autofillresult.style.color = "red";
-            console.log(data.message);
-            RunnerInfoFieldsClear();
-            RunnerInfoFeildsDisabled(false); // allow editing
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching runner info:', error);
-        autofillresult.innerText = "Error fetching runner info. Please try again.";
-        autofillresult.style.color = "red";
-    });
+  if (matches.length === 0) {
+    suggestionBox.style.display = "none";
+    return;
   }
+
+  matches.forEach(runner => {
+      const li = document.createElement("li");
+      li.textContent = runner.name;
+      li.style.padding = "8px";
+      li.style.cursor = "pointer";
+
+      li.addEventListener("mouseover", () => li.style.backgroundColor = "#eee");
+      li.addEventListener("mouseout", () => li.style.backgroundColor = "#fff");
+
+      li.addEventListener("click", () => {
+        runnerName.value = runner.name;
+        feet.value = runner.feet;
+        inches.value = runner.inche;
+        genderRadios.forEach(radio => {
+          radio.checked = (radio.value === runner.gender);
+        });
+        // Save the selected runner info to sessionStorage
+        suggestionBox.innerHTML = "";
+        suggestionBox.style.display = "none";
+      });
+
+      suggestionBox.appendChild(li);
+  });
+
+  suggestionBox.style.display = "block";
 }
+
+function getRunneerInfoSaveSessionStorage(userEmail) {
+
+  fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({userEmail: userEmail })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.response) {
+        // Save data to localStorage
+        localStorage.setItem("runnerInfo", JSON.stringify(data.runners));
+        console.log("Runner info saved to localStorage"); 
+      }
+      else {
+        console.log('No runner info found for this user:', data.message);
+        localStorage.setItem("runnerInfo", JSON.stringify([])); // Save empty array if no runners found
+      }
+  })
+  .catch(error => {
+      console.error('Error fetching runner info:', error);
+
+  });
+}
+
 
 function RunnerInfoSubmit(event){
   event.preventDefault(); // Stop form from submitting the traditional way

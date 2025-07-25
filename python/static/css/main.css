@@ -1828,3 +1828,34 @@ th.fixed-desc::after {
 .invalid {
   border: 2px solid red;
 }
+
+.autocomplete-container {
+      position: relative;
+      width: 200px;
+      /* margin: 40px; */
+    }
+.suggestion-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid #ccc;
+  background-color: white;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  width: 200px; /* Fixed width */
+}
+
+.suggestion-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestion-list li:hover {
+  background-color: #eee;
+}

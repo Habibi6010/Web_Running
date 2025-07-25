@@ -662,6 +662,7 @@ def save_runner_score():
     plot,df_class_summary = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
     
     return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']}) 
+
 def convert_scores_to_float(time_str):
     pattern = re.compile(r'^(\d{1,2}):(\d{1,2})\.(\d{1,2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$')
     match = pattern.match(time_str)
@@ -688,7 +689,6 @@ def convert_scores_to_float(time_str):
 
     return round(total_seconds, 2)
 
-
 def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     data_dic={'gender':gender,'season':season,'category':category,'event':selectedEvent}
     print(f"Data dic: {data_dic}")
@@ -699,10 +699,39 @@ def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     df = rc.get_cluster_summary()
     return plot_path,df
 
+@app.route('/update_scores', methods=['POST'])
+def update_scores():
+    data = request.json
+    userEmail = data.get("userEmail")
+    score_id = data.get("score_id")
+    season = data.get("season")
+    category = data.get("category")
+    selectedEvent = data.get("event")
+    scores = data.get("scores")
+    scores_list = [convert_scores_to_float(score) for score in scores if score.strip() != '']
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # updata score info from DB
+    response_update = supabase.table("score").update({"season": season,
+                                                     "category": category,
+                                                     "event": selectedEvent,
+                                                     "score_list": json.dumps(scores_list),
+                                                     "updated_at": str(datetime.datetime.now())
+                                                    }).eq("score_id", int(score_id)).eq("user_id",int(user_id)).execute()
+    print(f"Response update: {response_update.data}")
+    if len(response_update.data) == 0:
+        return jsonify({"response": False, "message": "Failed to update scores."})
+    
+    return jsonify({"response": True, "message": "Scores updated successfully."})
+    # Predict ranking based on scores
+
+
 @app.route('/find_runner_info',methods=['POST'])
 def find_runner_info():
     # Get runner info from json
-    runner_id=request.json.get('runnerID')
     useremail=request.json.get('userEmail')
     # Find user id from DB
     response_email = supabase.table("user").select("user_id").eq("email", useremail).execute()
@@ -710,16 +739,11 @@ def find_runner_info():
         return jsonify({"response": False, "message": "User email not found."})
     user_id = response_email.data[0]['user_id']
     # Find runner info from DB
-    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runner_id)).eq("user_id",int(user_id)).eq("isActive",True).execute()
+    response_runner = supabase.table("runner").select("*").eq("user_id",int(user_id)).eq("isActive",True).execute()
     # print(f"response_runner: {response_runner.data}")
     if len(response_runner.data) == 0:
         return jsonify({"response": False, "message": "Runner ID not found."})
-    return jsonify({"response": True, "message": "Runner info found successfully.",
-                    "name": response_runner.data[0]['name'],
-                    "heightFeet": response_runner.data[0]['feet'],
-                    "heightInches": response_runner.data[0]['inche'],
-                    "gender": response_runner.data[0]['gender']
-                    })
+    return jsonify({"response": True, "message": "Runner info found successfully.", "runners": response_runner.data})
 
 
 @app.route('/save_runner_info',methods=['POST'])

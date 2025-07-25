@@ -84,17 +84,20 @@
           <div id="RunnerInfoDiv" style="display: block;">
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <lable for="runnerIDNumber" style="margin-bottom: 0; min-width: 130px;"> System Message:</lable>
-              <label id="autofillResult" style="margin-left: 10px;color: green;">For quick search enter runner ID number.</label>
+              <label id="autofillResult" style="margin-left: 10px;color: green;">For quick search enter runner name.</label>
             </div>
-            <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <!-- <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                 <lable for="runnerIDNumber" style="margin-bottom: 0; min-width: 130px;"> ID Number:</lable>
                 <input type="text" id="runnerIDNumber" name="runnerIDNumber" style="width: 200px;" placeholder="Runner ID Number" >
                 <span style="margin-left: 10px; font-size: smaller;">Enter your runner ID to auto-fill fields, or complete all other fields if you don't have an ID.</span>
-                <!-- <label for="autofill" style="margin-bottom: 0; min-width: 130px; margin-left: 20px;"></label> -->
-              </div>
+                <label for="autofill" style="margin-bottom: 0; min-width: 130px; margin-left: 20px;"></label>
+            </div> -->
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <label for="runnerName" style="margin-bottom: 0; min-width: 130px;">Name:</label>
-              <input type="text" id="runnerName" name="runnerName" style="width: 200px;" placeholder="Runner's Name" required>
+              <div class="autocomplete-container">
+                <input type="text" id="runnerName" name="runnerName" style="width: 200px;" placeholder="Runner's Name" autocomplete="off" required>
+                <ul id="suggestions" class="suggestion-list"></ul>  
+              </div>
             </div>
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <label for="heightFeet" style="margin-bottom: 0; min-width: 130px;">Height:</label>
@@ -798,20 +801,43 @@ colorSelectIds.forEach(id => {
 
 updatecategorylist("indoor"); // Initialize with default environment
 
+  // extract username from url
+  const urlParams = new URLSearchParams(window.location.search);
+  const useremail = urlParams.get('useremail') || 'No-email';
+  const username = urlParams.get('username') || 'Profile';
+  // Update span for show username
+  document.getElementById("useremailDisplay").innerText = useremail;
+  document.getElementById("usernameDisplay").innerText = username;
+
+
+getRunneerInfoSaveSessionStorage(useremail); // Find all runner info belong to the user and save it in session storage
 
 // wait for user to input idnumber
 let typingTimer;
-const doneTypingInterval = 500; // in ms (0.5 second)
-const runnerIDInput = document.getElementById('runnerIDNumber');
+const doneTypingInterval = 300; // in ms (0.3 second)
+// const runnerIDInput = document.getElementById('runnerIDNumber');
+// // Search for runner info based on ID
+// runnerIDInput.addEventListener('input', () => {
+//     clearTimeout(typingTimer);
+//     typingTimer = setTimeout(() => {
+//         autoFillRunnerInfo();
+//     }, doneTypingInterval);
+// });
 
-runnerIDInput.addEventListener('input', () => {
+// runnerIDInput.addEventListener('keydown', () => {
+//     clearTimeout(typingTimer); // if still typing, clear the timer
+// });
+
+const runnerNameInput = document.getElementById('runnerName');
+// Search for runner info based on ID
+runnerNameInput.addEventListener('input', () => {
     clearTimeout(typingTimer);
     typingTimer = setTimeout(() => {
         autoFillRunnerInfo();
     }, doneTypingInterval);
 });
 
-runnerIDInput.addEventListener('keydown', () => {
+runnerNameInput.addEventListener('keydown', () => {
     clearTimeout(typingTimer); // if still typing, clear the timer
 });
 </script>

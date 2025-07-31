@@ -642,7 +642,7 @@ def save_runner_score():
         return jsonify({"response": False, "message": "Runner ID not found."})
     gender = response_runner.data[0]['gender']
     # Save scores to DB
-    print(f"Scores: {scores}")
+    # print(f"Scores: {scores}")
     scores_list = [convert_scores_to_float(score) for score in scores if score.strip() != ''] 
     response_save = supabase.table("score").insert({"runner_id": int(runnerID),
                                                     "user_id": int(user_id),
@@ -650,21 +650,23 @@ def save_runner_score():
                                                     "category": category,
                                                     "event": selectedEvent,
                                                     "score_list": json.dumps(scores_list),
-                                                    "created_at": str(datetime.datetime.now())
+                                                    "created_at": str(datetime.datetime.now()),
                                                     }).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to save scores."})
     
     score_id = response_save.data[0]['score_id']
     scores = [float(val) for val in scores_list]
-    print(scores)
+    # print(scores)
     # Predict ranking based on scores
-    plot,df_class_summary = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
-    
+    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
+    response_save = supabase.table("score").update({"analysis_img_path":plot,"predict_info":predict_info}).eq("score_id",score_id).execute()
+    if len(response_save.data) == 0:
+        return jsonify({"response": False, "message": "Failed to analysis scores."})
     return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']}) 
 
 def convert_scores_to_float(time_str):
-    pattern = re.compile(r'^(\d{1,2}):(\d{1,2})\.(\d{1,2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$')
+    pattern = re.compile(r'^(\d{1,2}):(\d{1,2})\.(\d{1,2})$|^(\d{1,3}\.\d+)$|^(\d{1,3})$')
     match = pattern.match(time_str)
 
     if not match:
@@ -677,13 +679,11 @@ def convert_scores_to_float(time_str):
         hundredths = int(match.group(3))
         total_seconds = minutes * 60 + seconds + hundredths / 100
     elif match.group(4) is not None:
-        # Format: ss.xx
-        seconds = int(match.group(4))
-        hundredths = int(match.group(5))
-        total_seconds = seconds + hundredths / 100
-    elif match.group(6) is not None:
+        # Format: ss.xx — safely parse as float
+        total_seconds = float(match.group(4))
+    elif match.group(5) is not None:
         # Format: s or ss
-        total_seconds = int(match.group(6))
+        total_seconds = int(match.group(5))
     else:
         raise ValueError("Unrecognized format")
 
@@ -697,7 +697,50 @@ def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     print(f"Predicted cluster: {pred_cluster}")
     plot_path = rc.darw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png")
     df = rc.get_cluster_summary()
-    return plot_path,df
+    return plot_path,df,pred_cluster
+
+@app.route('/compare_scores_same_season_category_event_gender', methods=['POST'])
+def compare_scores_same_season_category_event_gender():
+    recived_data = request.json
+    userEmail = recived_data.get("userEmail")
+    gender = recived_data.get("gender")
+    event = recived_data.get("event")
+    season = recived_data.get("season")
+    category = recived_data.get("category")
+    # Find user id from DB
+    response_email = supabase.table("user").select("user_id").eq("email", userEmail).execute()
+    if len(response_email.data) == 0:
+        return jsonify({"response": False, "message": "User email not found."})
+    user_id = response_email.data[0]['user_id']
+    # Find scores info from DB
+    response_score = supabase.table("score").select("*").eq("user_id", int(user_id)).execute()
+    if len(response_score.data) == 0:
+        return jsonify({"response": False, "message": "No scores found for this user."})
+    # Filter scores based on user input selection
+    filtered_scores = []
+    image_name = f"{gender}_{season}_{category}_{event}"
+    for data in recived_data['score_data']:
+        score_id = data.get("score_id")
+        runner_name = data.get("runner_name")
+        # Find score info from DB
+        for score in response_score.data:
+            if (score['score_id'] == int(score_id)):
+                image_name=image_name + f"_{int(score_id)}"
+                filtered_scores.append({
+                    "score_id": score['score_id'],
+                    "name": runner_name,
+                    "predict_info": score['predict_info']})
+                break
+    if len(filtered_scores) == 0:
+        return jsonify({"response": False, "message": "No matched scores found for this selection."})
+    # Predict ranking based on scores
+    image_name = image_name + ".png"
+    # print(f"Filtered scores: {filtered_scores}   {image_name}")
+    rc = RankClustering({"gender":gender, "season": season, "category": category, "event": event})
+    result_path = rc.draw_boxplot_comparison_same_season_evet_category_gender(filtered_scores,image_name)
+    # print(f"Result path: {result_path}")
+    return jsonify({"response": True, "message": "Scores found successfully.", "result_path": result_path})
+       
 
 @app.route('/update_scores', methods=['POST'])
 def update_scores():
@@ -724,10 +767,30 @@ def update_scores():
     print(f"Response update: {response_update.data}")
     if len(response_update.data) == 0:
         return jsonify({"response": False, "message": "Failed to update scores."})
-    
-    return jsonify({"response": True, "message": "Scores updated successfully."})
+    # Find runner info from DB
+    runner_id = response_update.data[0]['runner_id']
+    # print(f"Runner ID: {runner_id}")
+    response_runner = supabase.table("runner").select("gender").eq("runner_id", int(runner_id)).execute()
+    if len(response_runner.data) == 0:
+        return jsonify({"response": False, "message": "Runner ID not found."})
+    gender = response_runner.data[0]['gender']
+    scores = [float(val) for val in scores_list]
+    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
+    response_update = supabase.table("score").update({"analysis_img_path": plot,"predict_info":predict_info}).eq("score_id", int(score_id)).execute()
+    if len(response_update.data) == 0:
+        return jsonify({"response": False, "message": "Failed to analysis scores."})
+    return jsonify({"response": True, "message": "Scores updated successfully.","plot_path": plot})
     # Predict ranking based on scores
 
+@app.route("/delete_scores", methods=['POST'])
+def delete_scores():
+    data = request.json
+    score_id = data.get("score_id")
+    # Detete score info from DB
+    response_delete = supabase.table("score").update({"isActive": False}).eq("score_id", int(score_id)).execute()
+    if len(response_delete.data) == 0:
+        return jsonify({"response": False, "message": "Failed to delete scores."})
+    return jsonify({"response": True, "message": "Scores deleted successfully."})
 
 @app.route('/find_runner_info',methods=['POST'])
 def find_runner_info():
@@ -916,18 +979,27 @@ def get_user_scores():
         return jsonify({"response": False, "message": "User email not found."})
     user_id = response_email.data[0]['user_id']
     # Find scores under this user
-    response_scores = supabase.table("score").select("*").eq("user_id", int(user_id)).execute()
+    response_scores = supabase.table("score").select("*").eq("user_id", int(user_id)).eq("isActive",True).execute()
     if len(response_scores.data) == 0:
         return jsonify({"response": True, "message": "No scores found under this user.","scores":[]})
     scores = []
+    # Find runner name
+    # response_runner = supabase.table("runner").select("name").eq("runner_id", score['runner_id']).execute()
+    response_runner = supabase.table("runner").select("name,runner_id,gender").eq("user_id",int(user_id)).execute()
+
     for score in response_scores.data:
         # Find runner name
-        response_runner = supabase.table("runner").select("name").eq("runner_id", score['runner_id']).execute()
-        if len(response_runner.data) == 0:
-            runner_name = "Unknown"
-        else:
-            runner_name = response_runner.data[0]['name']
-        # Find season, category, event
+        runner_name = "Unknown"
+        gender = "Unknown"
+        for runner in response_runner.data:
+            if score['runner_id'] == runner['runner_id']:
+                runner_name = runner['name']
+                gender = runner['gender']
+                break
+            else:
+                runner_name = "Unknown"
+                gender = "Unknown"
+       # Find season, category, event
         season = score['season']
         category = score['category']
         event = score['event']
@@ -940,11 +1012,13 @@ def get_user_scores():
         scores.append({
             "score_id": score['score_id'],
             "runner_name": runner_name,
+            "gender":gender,
             "season": season,
             "category": category,
             "event": event,
             "scores": scores_list,
-            "created_at": formatted_time
+            "created_at": formatted_time,
+            "analysis_img_path":score['analysis_img_path']
         })
     return jsonify({"response": True, "message": "Scores found successfully.","scores":scores})
 

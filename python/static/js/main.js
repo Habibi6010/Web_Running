@@ -802,6 +802,15 @@ function handelVideLogButton(event) {
   window.location.href = `http://${fetch_address}:5001/videolog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
 
+function handelDashboardButton (){
+  const useremail = document.getElementById('useremailDisplay').innerText;
+  const username = document.getElementById('usernameDisplay').innerText;
+
+  console.log(username);
+  window.location.href = `http://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+
+}
+
 // handeler for logout button
 function handelLogoutButton(){
   window.location.href = `http://${fetch_address}:5001/`;
@@ -1157,6 +1166,15 @@ function populateScoreTable(scoreList, tableBody) {
     const row = document.createElement("tr");
     // save item for action button
     row.dataset.item = JSON.stringify(item); // Store the item data in the row for later
+    // Checkbox for selecting scores
+    const checkboxCell = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "scoreCompareCheckbox"; // Name for the checkbox group
+    checkbox.value = item.score_id; // Use score_id as the value
+    checkboxCell.appendChild(checkbox);
+    row.appendChild(checkboxCell);
+
     // Runner Name
     const nameCell = document.createElement("td");
     nameCell.textContent = item.runner_name;
@@ -1189,17 +1207,56 @@ function populateScoreTable(scoreList, tableBody) {
       scoresCell.textContent = "No scores yet";
     }
     row.appendChild(scoresCell);
+    // Result for showing preditction 
+    const resultCell = document.createElement("td");
+    const a = document.createElement("a");
+    a.href = '/download_csv/'+item.analysis_img_path;
+    a.textContent = "Download Analysis";
+    a.target = "_blank"; // Open in new tab
+    resultCell.appendChild(a);
+    row.appendChild(resultCell);
     // Action Button Column
     const actionCell = document.createElement("td");
     const actionBtn = document.createElement("button");
-    actionBtn.textContent = "Edit Scores";
+    actionBtn.textContent = "Edit";
     actionBtn.onclick = () => handleEditScores(row); // call your function with item
     actionCell.appendChild(actionBtn);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = () => handleDeleteScores(row); // call your function with item
+    actionCell.appendChild(deleteBtn);
     row.appendChild(actionCell);
     // Append the row to the table body
     tableBody.appendChild(row);
   });
 }
+
+// Handle delete scores action on the score table for Ranking page
+function handleDeleteScores(row) {
+  console.log("Delete Scores clicked");
+  if (confirm("Are you sure you want to delete this score? This action cannot be undone.")) {
+    // Load the item data from the row
+    const item = JSON.parse(row.dataset.item);
+    // send the data to the server to delete 
+    fetch('http://'+fetch_address+':5001/delete_scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({score_id:item.score_id})})
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        if (data.response) {
+          const userEmail = document.getElementById('useremailDisplay').innerText;
+          // Refresh the score table
+          FillScoreTable(userEmail);
+          alert('Scores deleted successfully!');
+        } else {
+          alert('Failed to delete scores: ' + data.message);
+        }
+      })
+  }
+}
+
 
 // Handle edit scores action on the score table for Ranking page
 function handleEditScores(row) {
@@ -1212,13 +1269,13 @@ function handleEditScores(row) {
   editscore.name = "editscore";
   editscore.title = "Fromat: m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34). Each score should be separated by comma.";
   editscore.value = item.scores.join(", "); // Join scores for display
-  const scoresCell = row.querySelector('td:nth-child(6)'); // Assuming scores are in the 6th column
+  const scoresCell = row.querySelector('td:nth-child(7)'); // Assuming scores are in the 6th column
   scoresCell.innerHTML = ''; // Clear existing content
   scoresCell.appendChild(editscore); // Add the input field for editing scores
   
   // Change the action button to save changes and cancel 
   // Clear existing action button
-  const actionBtn = row.querySelector('td:nth-child(7)'); // Assuming action button is in the 7th column
+  const actionBtn = row.querySelector('td:nth-child(9)'); // Assuming action button is in the 7th column
   actionBtn.innerHTML = ''; // Clear existing button
   // Create a save button
   const saveBtn = document.createElement("button");
@@ -1236,61 +1293,149 @@ function handleEditScores(row) {
     
     actionBtn.innerHTML = ''; // Clear existing buttons
     const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit Scores";
+    editBtn.textContent = "Edit";
     editBtn.onclick = () => handleEditScores(row); // Call edit function again
     actionBtn.appendChild(editBtn); // Add the edit button back
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = () => handleDeleteScores(row); // Call delete function
+    actionBtn.appendChild(deleteBtn); // Add the delete button 
+    
   };
   actionBtn.appendChild(cancelBtn); // Add the cancel button
   
 }
+
 // Save edited scores function for Ranking page
 function saveEditedScores(row, newScores) {
-  // console.log("Save Changes clicked for row:", row.dataset.item);
-  // Load the item data from the row
-  const item = JSON.parse(row.dataset.item);
-  // Get the user email
-  const userEmail = document.getElementById('useremailDisplay').innerText;
-  // Prepare the data to send
-  const dataToSend = {
-    userEmail: userEmail,
-    score_id: item.score_id,
-    season: item.season,
-    category: item.category,
-    event: item.event,
-    scores: newScores.split(',').map(score => score.trim()) // Split and trim the new scores
-  };
-  // check if the new scores are valid
-  if (!pattern.test(newScores)) {
-    alert("Invalid score format. Please use m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34).\n Each score should be separated by comma.");
+  if(confirm
+("Are you sure you want to save changes? \nWhen you save, the old scores will be replaced with new scores and Results will be updated.")
+  ){
+    // console.log("Save Changes clicked for row:", row.dataset.item);
+    // Load the item data from the row
+    const item = JSON.parse(row.dataset.item);
+    // Get the user email
+    const userEmail = document.getElementById('useremailDisplay').innerText;
+    // Prepare the data to send
+    const dataToSend = {
+      userEmail: userEmail,
+      score_id: item.score_id,
+      season: item.season,
+      category: item.category,
+      event: item.event,
+      scores: newScores.split(',').map(score => score.trim()) // Split and trim the new scores
+    };
+    // Check if the new scores are not empty and more than 5
+    if (dataToSend.scores.length < 5) {
+      alert("Please enter at least five score.");
+      return;
+    }
+    // check if the new scores are valid
+    const allMatch = dataToSend.scores.every(score => pattern.test(score));
+    if (!allMatch) {
+      alert("Invalid score format. Please use m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34).\n Each score should be separated by comma.");
+      return;
+    }
+    // console.log("Data to send:", dataToSend);
+    // Send the data to the server
+    fetch('http://'+fetch_address+':5001/update_scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSend)
+    }).then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        if (data.response) {
+          // Update the scores cell with the new scores
+          const scoresCell = row.querySelector('td:nth-child(7)'); // Assuming scores are in the 6th column
+          scoresCell.textContent = newScores; // Update with new scores
+          // Reset score table
+          FillScoreTable(userEmail);
+          alert('Scores and Result updated successfully!');
+        } else {
+          alert('Failed to update scores: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating scores: ' + error.message);
+      });
+  }
+}
+
+
+function handleCompareScoreAnalysis(){
+  let selectedScores = [];
+  const rows = document.querySelectorAll("#scoreTableBody tr");
+  rows.forEach(row => {
+    const checkbox = row.querySelector('input[name="scoreCompareCheckbox"]');
+    if (checkbox && checkbox.checked) {
+      const item = JSON.parse(row.dataset.item); // Get the item data from the row
+      selectedScores.push({
+        score_id: item.score_id,
+        runner_name: item.runner_name,
+        season: item.season,
+        category: item.category,
+        event: item.event,
+        scores: item.scores,
+        gender: item.gender
+      });
+    }
+  });
+  // console.log("Selected Scores for Analysis:", selectedScores);
+  if (selectedScores.length < 2) {
+    alert("Please select at least two scores for comparison.");
     return;
   }
-  // console.log("Data to send:", dataToSend);
-  // Send the data to the server
-  fetch('http://'+fetch_address+':5001/update_scores', {
+  // Check if the selected rows are the same event and category and season
+  const firstScore = selectedScores[0];
+  const sameEvent = selectedScores.every(score => score.event === firstScore.event);
+  const sameCategory = selectedScores.every(score => score.category === firstScore.category);
+  const sameSeason = selectedScores.every(score => score.season === firstScore.season);
+  const sameGender = selectedScores.every(score => score.gender === firstScore.gender);
+  if (!sameEvent || !sameCategory || !sameSeason || !sameGender) {
+    alert("Please select scores from the same gender, event, category, and season for comparison.");
+    return;
+  }
+  // Prepare the data to send
+  const dataToSend = {
+    userEmail: document.getElementById('useremailDisplay').innerText,
+    gender: firstScore.gender,
+    event: firstScore.event,
+    category: firstScore.category,
+    season: firstScore.season,
+    score_data: selectedScores.map(score => ({
+      score_id: score.score_id,
+      scores: score.scores,
+      runner_name: score.runner_name,
+    }))
+  };
+
+  document.getElementById('loadingComparison').style.display = 'block'; // Show loading indicator
+  console.log("Data to send for comparison");
+  // Send the data to the server for analysis
+  fetch('http://'+fetch_address+':5001/compare_scores_same_season_category_event_gender', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dataToSend)
-  }).then(response => response.json())
+  })
+    .then(response => response.json())
     .then(data => {
-      console.log('Success:', data);
+      // console.log('Success:', data);
       if (data.response) {
-        // Update the scores cell with the new scores
-        const scoresCell = row.querySelector('td:nth-child(6)'); // Assuming scores are in the 6th column
-        scoresCell.textContent = newScores; // Update with new scores
-        // Reset score table
-        FillScoreTable(userEmail);
-        alert('Scores updated successfully!');
+        console.log('Comparison successful:', data.message);
+        document.getElementById('loadingComparison').style.display = 'none'; // Hide loading indicator
+        document.getElementById('comparison-section').style.display = 'block'; // Show result section
+        document.getElementById('comparisonImage').src = '/' + data.result_path; // Set the image source
       } else {
-        alert('Failed to update scores: ' + data.message);
+        alert('Failed to compare scores: ' + data.message);
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('Error updating scores: ' + error.message);
+      alert('Error comparing scores: ' + error.message);
     });
-
 }
-
 // Manage Tabs
 function openTab(tabId) {
       // Hide all tab contents
@@ -1357,7 +1502,7 @@ function ScoreHelp(){
 
 // Validation pattern: m:ss.xx or s.xx for input score fields
 // const pattern = /^(\d+:\d{2}\.\d{2}|\d{2}+:\d{2}\.\d{2}|\d+\.\d{2}|\d+\.\d|\d|\d{2})$/;
-const pattern = /^(\d{1,2}:\d{1,2}\.\d{1,2}|\d{1,2}\.\d{1,2}|\d{1,2})$/;
+const pattern = /^(\d{1,2}:\d{1,2}\.\d{1,2}|\d{1,3}\.\d{1,2}|\d{1,3})$/;
 
 const inputs = document.querySelectorAll('input[name="enterscore"]');
 inputs.forEach(input => attachValidation(input));
@@ -1606,7 +1751,7 @@ function autoFillRunnerInfo(){
   }
 
   const matches = runners.filter(runner =>
-    runner.name.toLowerCase().startsWith(query)
+    runner.name.toLowerCase().includes(query.toLowerCase())
   );
 
   if (matches.length === 0) {
@@ -2117,4 +2262,45 @@ function handelrankLogButton(){
 
   console.log(username);
   window.location.href = `http://${fetch_address}:5001/rankinglog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+}
+
+// Open and cloe the video info popup on dashboard page
+function closeVideoInfoPopup() {
+  const Popup = document.getElementById('videoInfoPopup');
+  Popup.style.display = 'none';
+}
+function openVideoInfoPopup() {
+  const Popup = document.getElementById('videoInfoPopup');
+  Popup.style.display = 'block';
+}
+// Open and cloe the Predict info popup on dashboard page
+function closePredictInfoPopup() {
+  const Popup = document.getElementById('PredictInfoPopup');
+  Popup.style.display = 'none';
+}
+function openPredictInfoPopup() {
+  const Popup = document.getElementById('PredictInfoPopup');
+  Popup.style.display = 'block';
+}
+
+// Handle the clear button on the ranking result page for clearing the comparison result
+function clearComparisonResult(){
+  document.getElementById('comparisonImage').src = "";
+  document.getElementById('comparison-section').style.display = 'none';
+}
+// Handle download button on the ranking result page for downloading the comparison image
+function downloadComparisonResult(){
+  const comparisonImage = document.getElementById('comparisonImage');
+  if (comparisonImage.src === "") {
+    alert("No comparison image to download.");
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = "/download_csv/"+comparisonImage.src;
+  link.download = 'comparison_image.png'; // Set the desired file name
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+
 }

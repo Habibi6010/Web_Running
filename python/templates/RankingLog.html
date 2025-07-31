@@ -48,8 +48,9 @@
       <ul>
         <li><a href="index.html"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
         <li><a id="doshboardlink1" href="dashboard.html"><i class="bi bi-person navicon"></i><span>Dashboard</span></a></li>
-        <li><a href="index.html#services"><i class="bi bi-hdd-stack navicon"></i><span>Services</span></a></li>
-        <li><a href="index.html#contact"><i class="bi bi-envelope navicon"></i><span>Contact</span></a></li>
+        <li><a onclick="handelVideLogButton()"><i class="bi bi-hdd-stack navicon"></i><span>Video Log</span></a></li>
+        <li><a onclick="handelViewProfileButton()"><i class="bi bi-person-circle navicon"></i><span>Profile</span></a></li>
+        <li><a onclick="handelLogoutButton()"><i class="bi bi-power navicon"></i><span>Logout</span></a></li>
       </ul>
     </nav>
 
@@ -70,6 +71,19 @@
         <h1>Ranking Log Page</h1>
         <h4 id="usernameDisplay">Profile</h4>
         <h6 id="useremailDisplay">Profile</h6>
+        <!-- User Profile Dropdown -->
+        <div class="user-profile">
+          <button class="profile-button" aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-person-circle"></i> <span id="myaccount">My Account ▼</span>
+          </button>
+          <div class="dropdown-menu">
+            <button class="profile-button" id="videologebutton" onclick="handelDashboardButton()">Dashboard </button>
+            <button class="profile-button" id="videologebutton" onclick="handelVideLogButton()">Video Log </button>
+            <!-- <button class="profile-button" id="rancklogebutton" onclick="handelrankLogButton()">Ranking Log </button> -->
+            <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">Profile </button>
+            <button class="profile-button" id="logoutButton" onclick="handelLogoutButton()">Logout</button>
+          </div>
+        </div>
       </div>
     </div><!-- End Page Title -->
 
@@ -87,22 +101,28 @@
     </section><!-- /Starter Section Section -->
     <!-- History Table Section -->
     <section class="section" data-aos="fade-up">
-      <div class="container_checkbox" style="overflow-x:auto;max-width: 1125px;">
+      <div class="container_checkbox" style="overflow-x:auto;max-width: 1275px;">
         <div id="loadingScoreTable" style="display: none;">
                 <h2 style="text-align: center;">Please Wait ...  </h2>
                 <div id="loading-score" style="display: block; width: 100%; height: 50px; position: relative;margin-top: 50px;">
                         <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
                 </div>
         </div>
-        <table id="scoreTable" style="width: 1100px; min-width: 800px;">
+        <div style="display: flex;flex-direction: column;">
+          <h4>Comparison Note:</h4>
+          <p> For Comparison select the runner with same geneder, season, category and event.</p>
+        </div>
+        <table id="scoreTable" style="width: 1250px; min-width: 800px;">
           <thead>
             <tr>
-              <th onclick="sortTable(0)" class>Runner Name</th>
-              <th onclick="sortTable(1)" class>Enter Date</th>
-              <th onclick="sortTable(2)" class>Season</th>
-              <th onclick="sortTable(3)" class>Category</th>
-              <th onclick="sortTable(4)" class>Event</th>
+              <th></th>
+              <th onclick="sortTable(1)" class>Runner Name</th>
+              <th onclick="sortTable(2)" class>Enter Date</th>
+              <th onclick="sortTable(3)" class>Season</th>
+              <th onclick="sortTable(4)" class>Category</th>
+              <th onclick="sortTable(5)" class>Event</th>
               <th>Scores</th>
+              <th>Results</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -110,8 +130,37 @@
             <!-- History entries will be dynamically inserted here -->
           </tbody>
         </table>
+        <div>
+          <button class="btn btn-primary" onclick="handleCompareScoreAnalysis()" style="width: 200px;" >Compare</button>
+        </div>
       </div>
     </section>
+    <!-- End History Table Section -->
+
+    <!-- Comparison Section -->
+     <section id="comparison-section" class="section" data-aos="fade-up" style="display: none;">
+        <!-- Title -->
+        <div class="container section-title" data-aos="fade-up">
+          <h2>Comparison Analysis</h2>
+        </div><!-- End Title -->
+        <div class="container_checkbox" style="overflow-x:auto;max-width: 1275px;">
+
+          <div id="loadingComparison" style="display: none;">
+            <h2 style="text-align: center;">Please Wait ...  </h2>
+            <div id="loading-score" style="display: block; width: 100%; height: 50px; position: relative;margin-top: 50px;">
+                    <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
+            </div>
+          </div>
+          <div id="comparisonResult" style="display: flex; justify-content: center; align-items: center;">
+            <img id="comparisonImage" src="" alt="Comparison Result" style="max-width: 100%; height: auto;"/>
+          </div>
+          <div style="display: flex; justify-content: left; align-items: left; flex-direction: row;">
+            <button class="btn btn-primary" onclick="clearComparisonResult()" style="width: 200px; margin-top: 20px;">Clear</button>
+            <button class="btn btn-primary" onclick="downloadComparisonResult()" style="width: 200px; margin-top: 20px;">Download</button>
+          </div>
+        </div>
+    </section>
+    <!-- End Comparison Section -->
 
   </main>
 
@@ -214,11 +263,11 @@
         });
 
         // Always keep ▼ on first two columns
-        table.querySelectorAll("th")[0].classList.add("fixed-desc");
         table.querySelectorAll("th")[1].classList.add("fixed-desc");
         table.querySelectorAll("th")[2].classList.add("fixed-desc");
         table.querySelectorAll("th")[3].classList.add("fixed-desc");
         table.querySelectorAll("th")[4].classList.add("fixed-desc");
+        table.querySelectorAll("th")[5].classList.add("fixed-desc");
 
         // Update sorted column arrow
         table.querySelectorAll("th")[columnIndex].classList.remove("fixed-desc");
@@ -247,7 +296,7 @@
       }
 
       FillScoreTable(useremail);  
-      sortTable(1);
+      sortTable(2);
     };
   </script>
 </body>

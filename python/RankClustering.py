@@ -86,7 +86,7 @@ class RankClustering:
             test_label.append([self.art_model.find_label(row)+1,float(row.values[0])])  
         return test_label
     
-    def darw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png"):
+    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png"):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Colors and labels

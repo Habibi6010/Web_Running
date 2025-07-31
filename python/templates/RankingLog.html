@@ -101,18 +101,18 @@
     </section><!-- /Starter Section Section -->
     <!-- History Table Section -->
     <section class="section" data-aos="fade-up">
-      <div class="container_checkbox" style="overflow-x:auto;max-width: 1275px;">
+      <div class="container_checkbox" style="overflow-x:auto;max-width: 1375px;">
         <div id="loadingScoreTable" style="display: none;">
                 <h2 style="text-align: center;">Please Wait ...  </h2>
                 <div id="loading-score" style="display: block; width: 100%; height: 50px; position: relative;margin-top: 50px;">
-                        <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
+                  <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 10%; position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);"/>
                 </div>
         </div>
         <div style="display: flex;flex-direction: column;">
           <h4>Comparison Note:</h4>
           <p> For Comparison select the runner with same geneder, season, category and event.</p>
         </div>
-        <table id="scoreTable" style="width: 1250px; min-width: 800px;">
+        <table id="scoreTable" style="width: 1350px; min-width: 800px;">
           <thead>
             <tr>
               <th></th>
@@ -136,7 +136,70 @@
       </div>
     </section>
     <!-- End History Table Section -->
+    <!-- Popup For Indevidual Comparison-->
+    <div id="comparisonPopup" class="popup">
+      <div class="popup-content" >
+        <h3>Comparison Category and Season</h3>
+        <p>You can select different seasons and categories using the same performance scores.</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
 
+          <!-- Name and Gender -->
+          <div style="display: flex; align-items: center;">
+            <label for="selectusernamepopup" style="width: 150px;">Name and Gender:</label>
+            <div style="display: flex; gap: 10px;">
+              <label id="runnernameDisplayPopup" style="width: 100px;">Runner Name</label>
+              <label id="runnergenderDisplayPopup" style="width: 100px;">Gender</label>
+            </div>
+          </div>
+
+          <!-- Event -->
+          <div style="display: flex; align-items: center;">
+            <label for="eventpopup" style="width: 150px;">Event:</label>
+            <label id="eventDisplayPopup" style="width: 200px;">Event</label>
+          </div>
+
+          <!-- Scores -->
+          <div style="display: flex; align-items: center;">
+            <label for="scorepopup" style="width: 150px;">Scores:</label>
+            <label id="scoresDisplayPopup" style="width: 200px;">Scores</label>
+          </div>
+
+          <!-- Season -->
+          <div style="display: flex; align-items: center;">
+            <label for="selectenvironmentpopup" style="width: 150px;">Season:</label>
+            <div style="display: flex; gap: 20px;">
+              <label><input type="radio" name="envpopup" value="indoor" onchange="updateCategoryListPopup(this.value)" checked> Indoor</label>
+              <label><input type="radio" name="envpopup" value="outdoor" onchange="updateCategoryListPopup(this.value)"> Outdoor</label>
+            </div>
+          </div>
+
+          <!-- Category Division -->
+          <div style="display: flex; align-items: center;">
+            <label for="selectcategorypopup" style="width: 150px;">Category Division:</label>
+            <select id="selectcategorizlistpopup" name="selectcategorypopup" style="width: 200px; height: 35px;">
+              <!-- Options will be loaded by JS -->
+            </select>
+          </div>
+
+          <!-- Loading (Hidden by Default) -->
+          <div id="loadingIndevidualComparisonPopup" style="display: none; position: relative;">
+            <img id="loadingIndevidualCompare" src="{{ url_for('static', filename='img/loading.gif')}}" alt="Loading..." style="width: 50px; position: absolute; top: 0; left: 50%; transform: translateX(-50%);" />
+          </div>
+
+          <div id="resultIndevidualComparisonPopup" style="display: none; position: relative;">
+            <img id="resultIndevidualCompareImg" src="" alt="Comparison Result" style="max-width: 100%; height: auto;" />
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 10px;">
+            <button class="popup-close-btn" onclick="GenerateComparisonPopup()">Generate</button>
+            <button class="popup-close-btn" onclick="downlaodComparisonPopup()">Download</button>
+            <button class="popup-close-btn" onclick="closeComparisonPopup()">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
     <!-- Comparison Section -->
      <section id="comparison-section" class="section" data-aos="fade-up" style="display: none;">
         <!-- Title -->
@@ -297,6 +360,7 @@
 
       FillScoreTable(useremail);  
       sortTable(2);
+      updateCategoryListPopup('indoor'); // Default to indoor season
     };
   </script>
 </body>

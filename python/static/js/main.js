@@ -1217,10 +1217,18 @@ function populateScoreTable(scoreList, tableBody) {
     row.appendChild(resultCell);
     // Action Button Column
     const actionCell = document.createElement("td");
+    // Create a button for comparing scores on different category and season
+    const compareBtn = document.createElement("button");
+    compareBtn.textContent = "Compare";
+    compareBtn.onclick =()=> compareIndividualDifferentCategoryAndSeason(row); // call your function
+    actionCell.appendChild(compareBtn);
+
+    // Create action buttons for edit and delete
     const actionBtn = document.createElement("button");
     actionBtn.textContent = "Edit";
     actionBtn.onclick = () => handleEditScores(row); // call your function with item
     actionCell.appendChild(actionBtn);
+    // Create delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete";
     deleteBtn.onclick = () => handleDeleteScores(row); // call your function with item
@@ -1229,6 +1237,17 @@ function populateScoreTable(scoreList, tableBody) {
     // Append the row to the table body
     tableBody.appendChild(row);
   });
+}
+
+// Function to compare individual scores on different category and season
+function compareIndividualDifferentCategoryAndSeason(row) {
+  row = JSON.parse(row.dataset.item); // Get the item data from the row
+  document.getElementById('comparisonPopup').style.display = 'block'; // Show the popup
+  // Load the item data from the row
+  document.getElementById("runnernameDisplayPopup").innerText = row['runner_name'] || "Unknown";
+  document.getElementById("runnergenderDisplayPopup").innerText = row['gender'] || "Unknown";
+  document.getElementById("eventDisplayPopup").innerText = row['event'] || "Unknown";
+  document.getElementById("scoresDisplayPopup").innerText = row['scores'] || "Unknown";
 }
 
 // Handle delete scores action on the score table for Ranking page
@@ -1292,6 +1311,12 @@ function handleEditScores(row) {
     // Reset the action button to edit scores
     
     actionBtn.innerHTML = ''; // Clear existing buttons
+    // Create compare button
+    const compareBtn = document.createElement("button");
+    compareBtn.textContent = "Compare";
+    compareBtn.onclick =()=> compareIndividualDifferentCategoryAndSeason(row); // call your function
+    actionBtn.appendChild(compareBtn); // Add the compare button
+    // Create the edit button again
     const editBtn = document.createElement("button");
     editBtn.textContent = "Edit";
     editBtn.onclick = () => handleEditScores(row); // Call edit function again
@@ -1363,79 +1388,6 @@ function saveEditedScores(row, newScores) {
   }
 }
 
-
-function handleCompareScoreAnalysis(){
-  let selectedScores = [];
-  const rows = document.querySelectorAll("#scoreTableBody tr");
-  rows.forEach(row => {
-    const checkbox = row.querySelector('input[name="scoreCompareCheckbox"]');
-    if (checkbox && checkbox.checked) {
-      const item = JSON.parse(row.dataset.item); // Get the item data from the row
-      selectedScores.push({
-        score_id: item.score_id,
-        runner_name: item.runner_name,
-        season: item.season,
-        category: item.category,
-        event: item.event,
-        scores: item.scores,
-        gender: item.gender
-      });
-    }
-  });
-  // console.log("Selected Scores for Analysis:", selectedScores);
-  if (selectedScores.length < 2) {
-    alert("Please select at least two scores for comparison.");
-    return;
-  }
-  // Check if the selected rows are the same event and category and season
-  const firstScore = selectedScores[0];
-  const sameEvent = selectedScores.every(score => score.event === firstScore.event);
-  const sameCategory = selectedScores.every(score => score.category === firstScore.category);
-  const sameSeason = selectedScores.every(score => score.season === firstScore.season);
-  const sameGender = selectedScores.every(score => score.gender === firstScore.gender);
-  if (!sameEvent || !sameCategory || !sameSeason || !sameGender) {
-    alert("Please select scores from the same gender, event, category, and season for comparison.");
-    return;
-  }
-  // Prepare the data to send
-  const dataToSend = {
-    userEmail: document.getElementById('useremailDisplay').innerText,
-    gender: firstScore.gender,
-    event: firstScore.event,
-    category: firstScore.category,
-    season: firstScore.season,
-    score_data: selectedScores.map(score => ({
-      score_id: score.score_id,
-      scores: score.scores,
-      runner_name: score.runner_name,
-    }))
-  };
-
-  document.getElementById('loadingComparison').style.display = 'block'; // Show loading indicator
-  console.log("Data to send for comparison");
-  // Send the data to the server for analysis
-  fetch('http://'+fetch_address+':5001/compare_scores_same_season_category_event_gender', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dataToSend)
-  })
-    .then(response => response.json())
-    .then(data => {
-      // console.log('Success:', data);
-      if (data.response) {
-        console.log('Comparison successful:', data.message);
-        document.getElementById('loadingComparison').style.display = 'none'; // Hide loading indicator
-        document.getElementById('comparison-section').style.display = 'block'; // Show result section
-        document.getElementById('comparisonImage').src = '/' + data.result_path; // Set the image source
-      } else {
-        alert('Failed to compare scores: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error comparing scores: ' + error.message);
-    });
-}
 // Manage Tabs
 function openTab(tabId) {
       // Hide all tab contents
@@ -1483,6 +1435,24 @@ function updatecategorylist(selectedEnv){
       });
 
 }
+// set the category list based on selected environment on the popup ranking page
+function updateCategoryListPopup(selectedEnv){
+  const optionList = document.getElementById("selectcategorizlistpopup");
+  optionList.innerHTML = ""; // clear old options
+    let options = [];
+    if (selectedEnv === "indoor") {
+      options = ["NCAA DIV. I", "NCAA DIV. II", "NCAA DIV. III","NAIA","NJCAA"];
+    } else if (selectedEnv === "outdoor") {
+      options = ["NCAA DIV. I","NCAA DIV. II", "NCAA DIV. III", "NAIA","NJCAA DIV.I"];
+    }
+    options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      optionList.appendChild(option);
+    });
+}
+
 // Add score input field dynamically
 function addScoreInput(){
   const container = document.getElementById('scoreContainer');
@@ -2301,6 +2271,154 @@ function downloadComparisonResult(){
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
 
+// Handle the compare button on the ranking result page for comparing two runners
+function handleCompareScoreAnalysis(){
+  let selectedScores = [];
+  const rows = document.querySelectorAll("#scoreTableBody tr");
+  rows.forEach(row => {
+    const checkbox = row.querySelector('input[name="scoreCompareCheckbox"]');
+    if (checkbox && checkbox.checked) {
+      const item = JSON.parse(row.dataset.item); // Get the item data from the row
+      selectedScores.push({
+        score_id: item.score_id,
+        runner_name: item.runner_name,
+        season: item.season,
+        category: item.category,
+        event: item.event,
+        scores: item.scores,
+        gender: item.gender
+      });
+    }
+  });
+  // console.log("Selected Scores for Analysis:", selectedScores);
+  if (selectedScores.length < 2) {
+    alert("Please select at least two scores for comparison.");
+    return;
+  }
+  // Check if the selected rows are the same event and category and season
+  const firstScore = selectedScores[0];
+  const sameEvent = selectedScores.every(score => score.event === firstScore.event);
+  const sameCategory = selectedScores.every(score => score.category === firstScore.category);
+  const sameSeason = selectedScores.every(score => score.season === firstScore.season);
+  const sameGender = selectedScores.every(score => score.gender === firstScore.gender);
+  if (!sameEvent || !sameCategory || !sameSeason || !sameGender) {
+    alert("Please select scores from the same gender, event, category, and season for comparison.");
+    return;
+  }
+  // Prepare the data to send
+  const dataToSend = {
+    userEmail: document.getElementById('useremailDisplay').innerText,
+    gender: firstScore.gender,
+    event: firstScore.event,
+    category: firstScore.category,
+    season: firstScore.season,
+    score_data: selectedScores.map(score => ({
+      score_id: score.score_id,
+      scores: score.scores,
+      runner_name: score.runner_name,
+    }))
+  };
 
+  document.getElementById('loadingComparison').style.display = 'block'; // Show loading indicator
+  document.getElementById('comparison-section').style.display = 'none'; // Hide result section
+  console.log("Data to send for comparison");
+  // Send the data to the server for analysis
+  fetch('http://'+fetch_address+':5001/compare_scores_same_season_category_event_gender', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dataToSend)
+  })
+    .then(response => response.json())
+    .then(data => {
+      // console.log('Success:', data);
+      if (data.response) {
+        console.log('Comparison successful:', data.message);
+        document.getElementById('loadingComparison').style.display = 'none'; // Hide loading indicator
+        document.getElementById('comparison-section').style.display = 'block'; // Show result section
+        document.getElementById('comparisonImage').src = '/' + data.result_path; // Set the image source
+      } else {
+        alert('Failed to compare scores: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error comparing scores: ' + error.message);
+    });
+}
+
+// Function to close the comparison popup on the ranking result page 
+function closeComparisonPopup(){
+  document.getElementById('comparisonPopup').style.display = 'none';
+  document.getElementById('loadingIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
+  document.getElementById('resultIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
+  document.getElementById('resultIndevidualComparisonPopup').innerHTML=''
+}
+
+function GenerateComparisonPopup(){
+  document.getElementById('loadingIndevidualComparisonPopup').style.display = 'block'; // Show loading indicator
+  document.getElementById('resultIndevidualComparisonPopup').style.display = 'none';
+  document.getElementById('resultIndevidualComparisonPopup').innerHTML = ''; // Clear previous results
+
+  const name = document.getElementById('runnernameDisplayPopup').innerText;
+  const gender = document.getElementById('runnergenderDisplayPopup').innerText;
+  const event = document.getElementById('eventDisplayPopup').innerText;
+  const scores = document.getElementById('scoresDisplayPopup').innerText;
+  const season = document.querySelector('input[name="envpopup"]:checked').value;
+  const category = document.getElementById("selectcategorizlistpopup").value;
+  const scoresArray = scores.split(',').map(score => score.trim()).filter(score => score !== "");
+  // Data to send for comparison
+  const dataToSend = {
+    name: name,
+    gender: gender,
+    event: event,
+    season: season,
+    category: category,
+    scores: scoresArray
+  };
+
+  console.log("Data to send for comparison:", dataToSend);
+  // Send the data to the server for analysis
+  fetch('http://'+fetch_address+':5001/compare_individual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dataToSend)
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if (data.response) {
+        document.getElementById('loadingIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
+        document.getElementById('resultIndevidualComparisonPopup').style.display = 'block'; // Show reslut indicator
+        const imgresult = document.createElement('img');
+        imgresult.src = '/' + data.result_path; // Set the image source
+        imgresult.style.maxWidth = '100%'; // Ensure the image fits within the popup
+        imgresult.style.height = 'auto'; // Maintain aspect ratio
+        document.getElementById('resultIndevidualComparisonPopup').appendChild(imgresult);
+      }
+      else{
+        alert(data.message);
+        return;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error comparing scores: ' + error.message);
+    });
+
+}
+// Function to download the comparison image from the popup ranking result page
+function downlaodComparisonPopup(){
+  const resultImage = document.querySelector('#resultIndevidualComparisonPopup img');
+  if (!resultImage) {
+    alert("No comparison image to download.");
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = resultImage.src; // Use the src of the image
+  link.download = 'comparison_image.png'; // Set the desired file name
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

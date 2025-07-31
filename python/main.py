@@ -695,7 +695,7 @@ def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     rc = RankClustering(data_dic)
     pred_cluster = rc.predict_cluster(scores)
     print(f"Predicted cluster: {pred_cluster}")
-    plot_path = rc.darw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png")
+    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png")
     df = rc.get_cluster_summary()
     return plot_path,df,pred_cluster
 
@@ -741,6 +741,29 @@ def compare_scores_same_season_category_event_gender():
     # print(f"Result path: {result_path}")
     return jsonify({"response": True, "message": "Scores found successfully.", "result_path": result_path})
        
+@app.route('/compare_individual',methods=['POST'])
+def compare_individual():
+    recived_data = request.json
+    name = recived_data.get("name")
+    gender = recived_data.get("gender")
+    event = recived_data.get("event")
+    season = recived_data.get("season")
+    category = recived_data.get("category")
+    scores = recived_data.get("scores")
+
+    # Predict ranking based on scores
+    try:
+        scores_list = [convert_scores_to_float(score) for score in scores if score.strip() != '']
+        # print(f"Scores list: {scores_list}")
+        rc = RankClustering({'gender':gender,'season':season,'category':category,'event':event})
+        pred_cluster = rc.predict_cluster(scores_list)
+        print(f"Predicted cluster: {pred_cluster}")
+        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"last_comparison.png")
+        return jsonify({"response": True, "message": "Scores found successfully.", "result_path": plot_path})
+    except Exception as e:
+        print(f"Error in compare_individual: {e}")
+        return jsonify({"response": False, "message": f"Failed to compare individual scores.\n{e}"})
+
 
 @app.route('/update_scores', methods=['POST'])
 def update_scores():

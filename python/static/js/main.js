@@ -1242,7 +1242,8 @@ function populateScoreTable(scoreList, tableBody) {
 // Function to compare individual scores on different category and season
 function compareIndividualDifferentCategoryAndSeason(row) {
   row = JSON.parse(row.dataset.item); // Get the item data from the row
-  document.getElementById('comparisonPopup').style.display = 'block'; // Show the popup
+  document.getElementById('comparison-individual-section').style.display = 'block'; // Show the popup
+  document.getElementById('comparison-section').style.display = 'none'; // Hide result section
   // Load the item data from the row
   document.getElementById("runnernameDisplayPopup").innerText = row['runner_name'] || "Unknown";
   document.getElementById("runnergenderDisplayPopup").innerText = row['gender'] || "Unknown";
@@ -2320,7 +2321,7 @@ function handleCompareScoreAnalysis(){
       runner_name: score.runner_name,
     }))
   };
-
+  document.getElementById('comparison-individual-section').style.display = 'none';
   document.getElementById('loadingComparison').style.display = 'block'; // Show loading indicator
   document.getElementById('comparison-section').style.display = 'none'; // Hide result section
   console.log("Data to send for comparison");
@@ -2350,7 +2351,7 @@ function handleCompareScoreAnalysis(){
 
 // Function to close the comparison popup on the ranking result page 
 function closeComparisonPopup(){
-  document.getElementById('comparisonPopup').style.display = 'none';
+  document.getElementById('comparison-individual-section').style.display = 'none';
   document.getElementById('loadingIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
   document.getElementById('resultIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
   document.getElementById('resultIndevidualComparisonPopup').innerHTML=''
@@ -2390,8 +2391,14 @@ function GenerateComparisonPopup(){
       console.log('Success:', data);
       if (data.response) {
         document.getElementById('loadingIndevidualComparisonPopup').style.display = 'none'; // Hide loading indicator
-        document.getElementById('resultIndevidualComparisonPopup').style.display = 'block'; // Show reslut indicator
+        document.getElementById('resultIndevidualComparisonPopup').style.display = 'flex'; // Show reslut indicator
+        // Delete any existing image in the individual comparison result section
+        const existingImage = document.getElementById('resultIndevidualCompareImg');
+        if (existingImage) {
+          existingImage.remove(); // Remove the existing image if it exists
+        }
         const imgresult = document.createElement('img');
+        imgresult.id = 'resultIndevidualCompareImg'; // Set an ID for the image
         imgresult.src = '/' + data.result_path; // Set the image source
         imgresult.style.maxWidth = '100%'; // Ensure the image fits within the popup
         imgresult.style.height = 'auto'; // Maintain aspect ratio

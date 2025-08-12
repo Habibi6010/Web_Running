@@ -18,6 +18,7 @@ import subprocess
 from RankClustering import RankClustering
 from RankClustering import ART2
 import re
+import time
 
 ##### Main Variable for  Address of server and video save path
 # Define a directory to save the video files when user uploads
@@ -695,7 +696,7 @@ def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
     rc = RankClustering(data_dic)
     pred_cluster = rc.predict_cluster(scores)
     print(f"Predicted cluster: {pred_cluster}")
-    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png")
+    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png",is_comparison=False)
     df = rc.get_cluster_summary()
     return plot_path,df,pred_cluster
 
@@ -758,7 +759,18 @@ def compare_individual():
         rc = RankClustering({'gender':gender,'season':season,'category':category,'event':event})
         pred_cluster = rc.predict_cluster(scores_list)
         print(f"Predicted cluster: {pred_cluster}")
-        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"last_comparison.png")
+        # Clean old coeresponding images
+        for old in os.listdir(rc.plot_output_folder):
+            if old.startswith('last_comparison_') and old.endswith('.png'):
+                p = os.path.join(rc.plot_output_folder, old)
+                if os.path.getmtime(p) < time.time() - 12 * 3600:
+                    try: os.remove(p)
+                    except: pass
+
+        # Make new name for image
+        plot_name = f"last_comparison_{int(time.time()*1000)}.png"
+
+        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"{plot_name}",is_comparison=True)
         return jsonify({"response": True, "message": "Scores found successfully.", "result_path": plot_path})
     except Exception as e:
         print(f"Error in compare_individual: {e}")

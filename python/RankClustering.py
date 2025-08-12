@@ -15,6 +15,7 @@ class RankClustering:
     models_folder = "ClusterModels/"
     plot_output_folder = "static/plots/"
     plot_output_folder_comparison_same = "static/plots/plots_comparison_same/"
+    plot_output_folder_comparison_individual = "static/plots/plots_comparison_individual/"
     path_seleceted_model = None
     art_model = None
     pca_transform = None
@@ -86,7 +87,7 @@ class RankClustering:
             test_label.append([self.art_model.find_label(row)+1,float(row.values[0])])  
         return test_label
     
-    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png"):
+    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png",is_comparison=False):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Colors and labels
@@ -142,9 +143,12 @@ class RankClustering:
             pred_cluster = predicte_label[0][0]
             pred_value = predicte_label[0][1]
             ax.plot([pred_cluster], [pred_value], 'o', color=predict_color, markersize=12, label='Predicted Cluster')
-        
-        os.makedirs(self.plot_output_folder, exist_ok=True)
-        file_path = os.path.join(self.plot_output_folder, plot_name)
+        if not is_comparison:
+            os.makedirs(self.plot_output_folder, exist_ok=True)
+            file_path = os.path.join(self.plot_output_folder, plot_name)
+        else:
+            os.makedirs(self.plot_output_folder_comparison_individual, exist_ok=True)
+            file_path = os.path.join(self.plot_output_folder_comparison_individual, plot_name)
         plt.savefig(file_path, format='png', bbox_inches='tight')
         plt.close()
         return file_path

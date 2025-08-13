@@ -1219,7 +1219,7 @@ function populateScoreTable(scoreList, tableBody) {
     const actionCell = document.createElement("td");
     // Create a button for comparing scores on different category and season
     const compareBtn = document.createElement("button");
-    compareBtn.textContent = "Compare";
+    compareBtn.textContent = "Re-Run";
     compareBtn.onclick =()=> compareIndividualDifferentCategoryAndSeason(row); // call your function
     actionCell.appendChild(compareBtn);
 
@@ -1241,6 +1241,7 @@ function populateScoreTable(scoreList, tableBody) {
 
 // Function to compare individual scores on different category and season
 function compareIndividualDifferentCategoryAndSeason(row) {
+  closeComparisonPopup(); // Close any existing popup
   row = JSON.parse(row.dataset.item); // Get the item data from the row
   document.getElementById('comparison-individual-section').style.display = 'block'; // Show the popup
   document.getElementById('comparison-section').style.display = 'none'; // Hide result section
@@ -1249,6 +1250,7 @@ function compareIndividualDifferentCategoryAndSeason(row) {
   document.getElementById("runnergenderDisplayPopup").innerText = row['gender'] || "Unknown";
   document.getElementById("eventDisplayPopup").innerText = row['event'] || "Unknown";
   document.getElementById("scoresDisplayPopup").innerText = row['scores'] || "Unknown";
+  localStorage.setItem("compare_score_id", row['score_id']); // Store the score_id in localStorage for later use
 }
 
 // Handle delete scores action on the score table for Ranking page
@@ -2369,6 +2371,7 @@ function GenerateComparisonPopup(){
   const season = document.querySelector('input[name="envpopup"]:checked').value;
   const category = document.getElementById("selectcategorizlistpopup").value;
   const scoresArray = scores.split(',').map(score => score.trim()).filter(score => score !== "");
+
   // Data to send for comparison
   const dataToSend = {
     name: name,
@@ -2376,10 +2379,10 @@ function GenerateComparisonPopup(){
     event: event,
     season: season,
     category: category,
-    scores: scoresArray
+    scores: scoresArray,
+    score_id: localStorage.getItem('compare_score_id'), // Get the score_id from localStorage
   };
-
-  console.log("Data to send for comparison:", dataToSend);
+  console.log("Data to send for individual comparison:", dataToSend);
   // Send the data to the server for analysis
   fetch('http://'+fetch_address+':5001/compare_individual', {
     method: 'POST',
@@ -2403,6 +2406,7 @@ function GenerateComparisonPopup(){
         imgresult.style.maxWidth = '100%'; // Ensure the image fits within the popup
         imgresult.style.height = 'auto'; // Maintain aspect ratio
         document.getElementById('resultIndevidualComparisonPopup').appendChild(imgresult);
+        FillScoreTable(document.getElementById('useremailDisplay').innerText); // Refresh the score table
       }
       else{
         alert(data.message);

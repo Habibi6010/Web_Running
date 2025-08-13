@@ -232,6 +232,22 @@ h6 {
   padding: 0 5px 0 7px;
 }
 
+#navmenu a.active {
+  color: #007bff; /* Highlight color */
+  font-weight: bold;
+}
+
+#navmenu a.active span {
+  border-bottom: 2px solid #007bff;
+}
+
+/* Disable click */
+.disabled-link {
+  pointer-events: none;  /* No clicking */
+  cursor: default;       /* Normal arrow cursor */
+  opacity: 0.6;          /* Optional: look disabled */
+}
+
 @media (max-width: 991px) {
   .header {
     height: 60px;
@@ -1897,11 +1913,11 @@ th.fixed-desc::after {
       background-color: #c9302c;
     }
 
-    .custom-info-btn {
+  .custom-info-btn {
     background-color: white;
     border: 1px solid black;
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     transition: background-color 0.3s ease;
     display: flex;             /* center content */
@@ -1915,5 +1931,11 @@ th.fixed-desc::after {
 
   .custom-info-icon {
     color: black;
-    font-size: 18px;
+    font-size: 14px;
   }
+
+  .btn-outline-dark:hover {
+  background-color: rgba(0, 123, 255, 0.6);
+  border-color: #007bff;
+  color: white;
+}

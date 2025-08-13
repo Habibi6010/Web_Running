@@ -49,6 +49,7 @@
         <li><a href="index.html"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
         <li><a id="doshboardlink1" href="dashboard.html"><i class="bi bi-person navicon"></i><span>Dashboard</span></a></li>
         <li><a href="#" onclick="handelVideLogButton()"><i class="bi bi-hdd-stack navicon"></i><span>Video Log</span></a></li>
+        <li><a href="#" class = "active disabled-link"><i class="bi bi-trophy navicon"></i><span>Ranking Log</span></a></li>
         <li><a href="#" onclick="handelViewProfileButton()"><i class="bi bi-person-circle navicon"></i><span>Profile</span></a></li>
         <li><a href="#" onclick="handelLogoutButton()"><i class="bi bi-power navicon"></i><span>Logout</span></a></li>
       </ul>
@@ -115,7 +116,7 @@
         <table id="scoreTable" style="width: 1350px; min-width: 800px;">
           <thead>
             <tr>
-              <th></th>
+              <th>Select</th>
               <th onclick="sortTable(1)" class>Runner Name</th>
               <th onclick="sortTable(2)" class>Enter Date</th>
               <th onclick="sortTable(3)" class>Season</th>

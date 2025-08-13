@@ -87,7 +87,7 @@ class RankClustering:
             test_label.append([self.art_model.find_label(row)+1,float(row.values[0])])  
         return test_label
     
-    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png",is_comparison=False):
+    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png",plot_title = "Ranking Prediction",is_comparison=False):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Colors and labels
@@ -135,7 +135,7 @@ class RankClustering:
         ax.set_yticks([])
         ax.set_ylabel("")
         ax.set_xlabel("Performance Clusters", fontsize=12)
-        # ax.set_title("Ranking Boxplots", fontsize=16)
+        ax.set_title(plot_title, fontsize=16)
         ax.grid(True)
 
         # Highlight predicted cluster
@@ -143,17 +143,21 @@ class RankClustering:
             pred_cluster = predicte_label[0][0]
             pred_value = predicte_label[0][1]
             ax.plot([pred_cluster], [pred_value], 'o', color=predict_color, markersize=12, label='Predicted Cluster')
+        # invert y-axis
+        ax.invert_yaxis()
+
         if not is_comparison:
             os.makedirs(self.plot_output_folder, exist_ok=True)
             file_path = os.path.join(self.plot_output_folder, plot_name)
         else:
             os.makedirs(self.plot_output_folder_comparison_individual, exist_ok=True)
             file_path = os.path.join(self.plot_output_folder_comparison_individual, plot_name)
+        # Save the plot
         plt.savefig(file_path, format='png', bbox_inches='tight')
         plt.close()
         return file_path
     
-    def draw_boxplot_comparison_same_season_evet_category_gender(self, predict_name_lable_dict, plot_name="boxplot_comparison.png"):
+    def draw_boxplot_comparison_same_season_evet_category_gender(self, predict_name_lable_dict, plot_name="boxplot_comparison.png", plot_title = "Comparison of Runners"):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Colors and labels
@@ -209,10 +213,11 @@ class RankClustering:
         ax.set_yticks([])
         ax.set_ylabel("")
         ax.set_xlabel("Performance Clusters", fontsize=12)
-        # ax.set_title("Ranking Boxplots", fontsize=16)
+        ax.set_title(plot_title, fontsize=16)
         ax.grid(True)
         ax.legend(title="Runner Predictions", bbox_to_anchor=(1.05, 1), loc='upper left')
-
+        # invert y-axis
+        ax.invert_yaxis()
         # Save the plot        
         os.makedirs(self.plot_output_folder_comparison_same, exist_ok=True)
         file_path = os.path.join(self.plot_output_folder_comparison_same, plot_name)
@@ -292,8 +297,12 @@ class ART2:
                     self.cluster_sample[len(self.cluster_centers)-1]=list(x)
                     return len(self.cluster_centers) - 1
                 else:
-                    # print("Maximum number of clusters reached. Cannot classify new input.")
-                    return -1
+                    if self.train_mode:
+                        print("Maximum number of clusters reached. Cannot classify new input.")
+                        return -1
+                    else:
+                        # If not in training mode, return the closest cluster index
+                        return len(self.cluster_centers)-1 if self.cluster_centers else self.max_clusters
 
 
 if __name__ == "__main__":

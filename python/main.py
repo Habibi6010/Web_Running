@@ -660,7 +660,7 @@ def save_runner_score():
     scores = [float(val) for val in scores_list]
     # print(scores)
     # Predict ranking based on scores
-    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
+    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores,runner_name=response_runner.data[0]['name'])
     response_save = supabase.table("score").update({"analysis_img_path":plot,"predict_info":predict_info}).eq("score_id",score_id).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to analysis scores."})
@@ -690,13 +690,14 @@ def convert_scores_to_float(time_str):
 
     return round(total_seconds, 2)
 
-def ranking_prediction(score_id,category, selectedEvent,season,gender, scores):
+def ranking_prediction(score_id,category, selectedEvent,season,gender, scores,runner_name="Unknown"):
     data_dic={'gender':gender,'season':season,'category':category,'event':selectedEvent}
     print(f"Data dic: {data_dic}")
     rc = RankClustering(data_dic)
     pred_cluster = rc.predict_cluster(scores)
     print(f"Predicted cluster: {pred_cluster}")
-    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png",is_comparison=False)
+    plot_title = f"{runner_name} {category} {selectedEvent} {season} Analysis"
+    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png",is_comparison=False,plot_title=plot_title)
     df = rc.get_cluster_summary()
     return plot_path,df,pred_cluster
 
@@ -751,7 +752,7 @@ def compare_individual():
     season = recived_data.get("season")
     category = recived_data.get("category")
     scores = recived_data.get("scores")
-
+    score_id = recived_data.get("score_id")
     # Predict ranking based on scores
     try:
         scores_list = [convert_scores_to_float(score) for score in scores if score.strip() != '']
@@ -759,18 +760,51 @@ def compare_individual():
         rc = RankClustering({'gender':gender,'season':season,'category':category,'event':event})
         pred_cluster = rc.predict_cluster(scores_list)
         print(f"Predicted cluster: {pred_cluster}")
-        # Clean old coeresponding images
-        for old in os.listdir(rc.plot_output_folder):
-            if old.startswith('last_comparison_') and old.endswith('.png'):
-                p = os.path.join(rc.plot_output_folder, old)
-                if os.path.getmtime(p) < time.time() - 12 * 3600:
-                    try: os.remove(p)
-                    except: pass
+        # get score data from score id to DB
+        print(f"Score ID: {score_id}")
+        response_score = supabase.table("score").select("*").eq("score_id", int(score_id)).execute()
+        if len(response_score.data) == 0:
+            return jsonify({"response": False, "message": "Score ID not found."})
+        score_data = response_score.data[0]
+        # Save score info to DB
+        response_save = supabase.table("score").insert({
+            "runner_id": int(score_data['runner_id']),
+            "user_id": int(score_data['user_id']),
+            "season": season,
+            "category": category,
+            "event": event,
+            "score_list": json.dumps(scores_list),
+            "created_at": str(datetime.datetime.now()),
+            "isActive": True,
+            "predict_info": pred_cluster}).execute()
+        if len(response_save.data) == 0:
+            return jsonify({"response": False, "message": "Failed to save scores."})
+        new_score_id = int(response_save.data[0]['score_id'])
+
+        # Save analysis image path to DB
+        response_update = supabase.table("score").update({"score_id": score_id}).eq("score_id", int(score_id)).execute()
+        if len(response_update.data) == 0:
+            return jsonify({"response": False, "message": "Failed to update scores."})
+        # Make plot name
+        plot_name = f"{new_score_id}_{category}_{event}_{season}.png"
+        plot_title = f"{name} {category} {event} {season} Analysis"
+        # # Clean old coeresponding images
+        # for old in os.listdir(rc.plot_output_folder):
+        #     if old.startswith('last_comparison_') and old.endswith('.png'):
+        #         p = os.path.join(rc.plot_output_folder, old)
+        #         if os.path.getmtime(p) < time.time() - 12 * 3600:
+        #             try: os.remove(p)
+        #             except: pass
 
         # Make new name for image
-        plot_name = f"last_comparison_{int(time.time()*1000)}.png"
+        # plot_name = f"last_comparison_{int(time.time()*1000)}.png"
 
-        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"{plot_name}",is_comparison=True)
+        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"{plot_name}",is_comparison=False,plot_title=plot_title)
+
+        # Save the plot path to DB
+        response_update = supabase.table("score").update({"analysis_img_path": plot_path}).eq("score_id", int(new_score_id)).execute()
+        if len(response_update.data) == 0:
+            return jsonify({"response": False, "message": "Failed to update analysis image path."})
         return jsonify({"response": True, "message": "Scores found successfully.", "result_path": plot_path})
     except Exception as e:
         print(f"Error in compare_individual: {e}")
@@ -805,12 +839,12 @@ def update_scores():
     # Find runner info from DB
     runner_id = response_update.data[0]['runner_id']
     # print(f"Runner ID: {runner_id}")
-    response_runner = supabase.table("runner").select("gender").eq("runner_id", int(runner_id)).execute()
+    response_runner = supabase.table("runner").select("*").eq("runner_id", int(runner_id)).execute()
     if len(response_runner.data) == 0:
         return jsonify({"response": False, "message": "Runner ID not found."})
     gender = response_runner.data[0]['gender']
     scores = [float(val) for val in scores_list]
-    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores)
+    plot,df_class_summary,predict_info = ranking_prediction(score_id,category, selectedEvent,season,gender, scores,runner_name=response_runner.data[0]['name'])
     response_update = supabase.table("score").update({"analysis_img_path": plot,"predict_info":predict_info}).eq("score_id", int(score_id)).execute()
     if len(response_update.data) == 0:
         return jsonify({"response": False, "message": "Failed to analysis scores."})

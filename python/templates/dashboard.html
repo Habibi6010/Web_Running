@@ -36,7 +36,8 @@
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="index.html" class="active"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
+        <li><a href="index.html" ><i class="bi bi-house navicon"></i><span>Home</span></a></li>
+        <li><a id="doshboardlink1" href="#" class="active disabled-link"><i class="bi bi-person navicon"></i><span>Dashboard</span></a></li>
         <li><a href="#" onclick="handelVideLogButton()"><i class="bi bi-hdd-stack navicon"></i><span>Video Log</span></a></li>
         <li><a href="#" onclick="handelrankLogButton()"><i class="bi bi-trophy navicon"></i><span>Ranking Log</span></a></li>
         <li><a href="#" onclick="handelViewProfileButton()"><i class="bi bi-person-circle navicon"></i><span>Profile</span></a></li>
@@ -131,8 +132,10 @@
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="display: flex; flex-direction: row; width: 200px; ">
                   <label for="videoUpload" style="display: flex;align-items: center;">Upload Video File:</label>
-                  <button type="button" onclick="openVideoInfoPopup()" class="custom-info-btn" title="More info">
-                    <i class="bi bi-info-lg custom-info-icon"></i>
+                  <!-- <button type="button" onclick="openVideoInfoPopup()" class="custom-info-btn" title="More info">
+                    <i class="bi bi-info-lg custom-info-icon"></i> -->
+                  <button type="button" onclick="openVideoInfoPopup()" class="btn btn-outline-dark btn-sm rounded-circle p-0" style="width:25px; height:25px;" title="More info">
+                    <i class="bi bi-info"></i>
                   </button>
                 </div>
                 <input type="file" id="videoUpload" name="videoUpload" accept="video/*" onchange="previewVideo()" required>
@@ -680,8 +683,10 @@
             <div style="display: flex; flex-direction: row; gap: 10px; flex-wrap: wrap;">
               <div style="display: flex; flex-direction: row; width: 400px; ">
                 <label for="videoUpload" style="display: flex;align-items: center;">Predicted Ranking (Boxplots):</label>
-                <button type="button" onclick="openPredictInfoPopup()" class="custom-info-btn" title="More info">
-                  <i class="bi bi-info-lg custom-info-icon"></i>
+                <!-- <button type="button" onclick="openPredictInfoPopup()" class="custom-info-btn" title="More info">
+                  <i class="bi bi-info-lg custom-info-icon"></i> -->
+                <button type="button" onclick="openPredictInfoPopup()"  class="btn btn-outline-dark btn-sm rounded-circle p-0" style="width:25px; height:25px;" title="More info">
+                  <i class="bi bi-info"></i>
                 </button>
               </div>
               <!-- The Popup -->

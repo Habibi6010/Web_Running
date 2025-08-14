@@ -664,7 +664,10 @@ def save_runner_score():
     response_save = supabase.table("score").update({"analysis_img_path":plot,"predict_info":predict_info}).eq("score_id",score_id).execute()
     if len(response_save.data) == 0:
         return jsonify({"response": False, "message": "Failed to analysis scores."})
-    return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Mean Best', 'Max Avg','Min Avg', 'Mean Avg']}) 
+    # Edit the summary DataFrame and heders
+    class_columns = ['Cluster', 'Max Best Score', 'Min Best Score', 'Max Avg','Min Avg', 'Mean Avg']
+    df_class_summary = df_class_summary[class_columns]
+    return jsonify({"response": True, "message": "Scores saved successfully.","plot_path":plot,'class_summary':df_class_summary.to_dict(orient='records'),'class_columns':['Cluster', 'Max Best Score', 'Min Best Score', 'Max Avg','Min Avg', 'Mean Avg']}) 
 
 def convert_scores_to_float(time_str):
     pattern = re.compile(r'^(\d{1,2}):(\d{1,2})\.(\d{1,2})$|^(\d{1,3}\.\d+)$|^(\d{1,3})$')
@@ -696,8 +699,8 @@ def ranking_prediction(score_id,category, selectedEvent,season,gender, scores,ru
     rc = RankClustering(data_dic)
     pred_cluster = rc.predict_cluster(scores)
     print(f"Predicted cluster: {pred_cluster}")
-    plot_title = f"{runner_name} {category} {selectedEvent} {season} Analysis"
-    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png",is_comparison=False,plot_title=plot_title)
+    plot_title = f"{category} {selectedEvent} {season} Analysis"
+    plot_path = rc.draw_boxpolt(pred_cluster,plot_name=f"{score_id}_{category}_{selectedEvent}_{season}.png",is_comparison=False,plot_title=plot_title,runner_name=runner_name)
     df = rc.get_cluster_summary()
     return plot_path,df,pred_cluster
 
@@ -721,6 +724,7 @@ def compare_scores_same_season_category_event_gender():
     # Filter scores based on user input selection
     filtered_scores = []
     image_name = f"{gender}_{season}_{category}_{event}"
+    plot_title = f"{gender}_{season}_{category}_{event}"
     for data in recived_data['score_data']:
         score_id = data.get("score_id")
         runner_name = data.get("runner_name")
@@ -736,10 +740,10 @@ def compare_scores_same_season_category_event_gender():
     if len(filtered_scores) == 0:
         return jsonify({"response": False, "message": "No matched scores found for this selection."})
     # Predict ranking based on scores
-    image_name = image_name + ".png"
+    # image_name = image_name + ".png"
     # print(f"Filtered scores: {filtered_scores}   {image_name}")
     rc = RankClustering({"gender":gender, "season": season, "category": category, "event": event})
-    result_path = rc.draw_boxplot_comparison_same_season_evet_category_gender(filtered_scores,image_name)
+    result_path = rc.draw_boxplot_comparison_same_season_evet_category_gender(filtered_scores,plot_name=image_name+".png",plot_title=plot_title)
     # print(f"Result path: {result_path}")
     return jsonify({"response": True, "message": "Scores found successfully.", "result_path": result_path})
        
@@ -787,7 +791,7 @@ def compare_individual():
             return jsonify({"response": False, "message": "Failed to update scores."})
         # Make plot name
         plot_name = f"{new_score_id}_{category}_{event}_{season}.png"
-        plot_title = f"{name} {category} {event} {season} Analysis"
+        plot_title = f"{category} {event} {season} Analysis"
         # # Clean old coeresponding images
         # for old in os.listdir(rc.plot_output_folder):
         #     if old.startswith('last_comparison_') and old.endswith('.png'):
@@ -799,7 +803,7 @@ def compare_individual():
         # Make new name for image
         # plot_name = f"last_comparison_{int(time.time()*1000)}.png"
 
-        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"{plot_name}",is_comparison=False,plot_title=plot_title)
+        plot_path = rc.draw_boxpolt(pred_cluster, plot_name=f"{plot_name}",is_comparison=False,plot_title=plot_title, runner_name=name)
 
         # Save the plot path to DB
         response_update = supabase.table("score").update({"analysis_img_path": plot_path}).eq("score_id", int(new_score_id)).execute()

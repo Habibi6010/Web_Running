@@ -9,6 +9,7 @@ matplotlib.use('Agg')  # Use non-interactive backend to avoid GUI issues
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import matplotlib.cm as cm
+from matplotlib.offsetbox import AnchoredText
 
 
 class RankClustering:
@@ -87,7 +88,7 @@ class RankClustering:
             test_label.append([self.art_model.find_label(row)+1,float(row.values[0])])  
         return test_label
     
-    def draw_boxpolt(self,predicte_label, plot_name="ranking_boxplot.png",plot_title = "Ranking Prediction",is_comparison=False):
+    def draw_boxpolt(self,predicte_label,plot_name="ranking_boxplot.png",plot_title = "Ranking Prediction",is_comparison=False,runner_name="Unknown"):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Colors and labels
@@ -98,8 +99,10 @@ class RankClustering:
         predict_color = (0.2, 0.8, 0.2, 0.6)       # semi-transparent green for predicted cluster
 
         labels = ['A', 'B', 'C', 'D', 'E']
-        
-        
+        df = self.get_cluster_summary()
+        df_index =0
+        label_y_offset = 0.04
+
         positions = list(range(len(self.boxplot_summary)))
 
         for stat, pos in zip(self.boxplot_summary, positions):
@@ -120,6 +123,9 @@ class RankClustering:
             # Whiskers
             ax.plot([pos, pos], [low, q1], color=line_color, linewidth=1)
             ax.plot([pos, pos], [q3, high], color=line_color, linewidth=1)
+            ax.text(pos, low-label_y_offset, f"[{df.iloc[df_index]['Min Best Score']}, {df.iloc[df_index]['Min Avg']}]", fontsize=10, color='black', ha='center')
+            ax.text(pos, high+label_y_offset+0.04, f"[{df.iloc[df_index]['Max Best Score']}, {df.iloc[df_index]['Max Avg']}]", fontsize=10, color='black', ha='center')
+            df_index += 1
 
             # Whisker caps
             ax.plot([pos - 0.1, pos + 0.1], [low, low], color=line_color, linewidth=1)
@@ -142,10 +148,22 @@ class RankClustering:
         if predicte_label and predicte_label[0][0] != -1:
             pred_cluster = predicte_label[0][0]
             pred_value = predicte_label[0][1]
-            ax.plot([pred_cluster], [pred_value], 'o', color=predict_color, markersize=12, label='Predicted Cluster')
+            if pred_cluster < 1 or pred_cluster > len(labels)-1:
+                ax.plot([pred_cluster], [pred_value], 'o', color='red', markersize=12, label=runner_name)
+                ax.text(pred_cluster, pred_value-0.07, "Out Of Range", fontsize=10, color='red', ha='center')
+            else:
+                ax.plot([pred_cluster], [pred_value], 'o', color=predict_color, markersize=12, label=runner_name)
+        ax.legend(title="Predicted Cluster", bbox_to_anchor=(1.05, 1), loc='upper left')
         # invert y-axis
         ax.invert_yaxis()
-
+        # Add information text
+        info_text = "Values:[PR, AVG]"
+        anchored_text = AnchoredText(info_text, loc='upper right', 
+                                    prop=dict(size=10), frameon=True)
+        anchored_text.patch.set_boxstyle("round,pad=0.5")
+        anchored_text.patch.set_facecolor("lightyellow")
+        anchored_text.patch.set_edgecolor("black")
+        ax.add_artist(anchored_text)
         if not is_comparison:
             os.makedirs(self.plot_output_folder, exist_ok=True)
             file_path = os.path.join(self.plot_output_folder, plot_name)
@@ -168,7 +186,11 @@ class RankClustering:
 
         labels = ['A', 'B', 'C', 'D', 'E']
         positions = list(range(len(self.boxplot_summary)))
-
+        # Get boxplot summary statistics
+        df = self.get_cluster_summary()
+        df_index =0
+        label_y_offset = 0.04
+        # Draw boxplots
         for stat, pos in zip(self.boxplot_summary, positions):
             q1 = stat["q1"]
             median = stat["median"]
@@ -176,25 +198,30 @@ class RankClustering:
             low = stat["whisker_low"]
             high = stat["whisker_high"]
             outliers = stat["outliers"]
-
             # Draw box
             rect = Rectangle((pos - 0.3, q1), 0.6, q3 - q1, facecolor=box_color, edgecolor=line_color, linewidth=1.2)
             ax.add_patch(rect)
 
             # Median line
             ax.plot([pos - 0.3, pos + 0.3], [median, median], color=median_color, linewidth=1)
+            # add labels for Median
+            median_label =f"[{df.iloc[df_index]['Mean Best']}, {df.iloc[df_index]['Mean Avg']}]"
+            # ax.text(pos, median+label_y_offset, f"{median_label}", fontsize=10, color='black', ha='center')
 
             # Whiskers
             ax.plot([pos, pos], [low, q1], color=line_color, linewidth=1)
+            ax.text(pos, low-label_y_offset, f"[{df.iloc[df_index]['Min Best Score']}, {df.iloc[df_index]['Min Avg']}]", fontsize=10, color='black', ha='center')
             ax.plot([pos, pos], [q3, high], color=line_color, linewidth=1)
+            ax.text(pos, high+label_y_offset+0.04, f"[{df.iloc[df_index]['Max Best Score']}, {df.iloc[df_index]['Max Avg']}]", fontsize=10, color='black', ha='center')
 
             # Whisker caps
             ax.plot([pos - 0.1, pos + 0.1], [low, low], color=line_color, linewidth=1)
             ax.plot([pos - 0.1, pos + 0.1], [high, high], color=line_color, linewidth=1)
-
+            df_index += 1
             # Outliers
             # ax.plot([pos] * len(outliers), outliers, 'o', color=outlier_color, markersize=4)
-            
+            # Add lables for each boxplot
+
         # Runner predictions
         runner_names = [item["name"] for item in predict_name_lable_dict]
         color_map = cm.get_cmap('tab10', len(runner_names))  # Use 'tab10' colormap for up to 10 unique runners
@@ -206,6 +233,8 @@ class RankClustering:
                 cluster_id = pred_label[0][0]
                 cluster_value = pred_label[0][1]
                 ax.scatter(cluster_id, cluster_value, s=100, color=color_map(idx), label=name, edgecolors='black')
+                if cluster_id < 1 or cluster_id > len(labels)-1:
+                    ax.text(cluster_id, cluster_value-0.07, "Out Of Range", fontsize=10, color='red', ha='center')
 
         # Final formatting
         ax.set_xticks(positions)
@@ -218,6 +247,16 @@ class RankClustering:
         ax.legend(title="Runner Predictions", bbox_to_anchor=(1.05, 1), loc='upper left')
         # invert y-axis
         ax.invert_yaxis()
+        # Add information text
+        info_text = "Values:[PR, AVG]"
+        anchored_text = AnchoredText(info_text, loc='upper right', 
+                                    prop=dict(size=10), frameon=True)
+        anchored_text.patch.set_boxstyle("round,pad=0.5")
+        anchored_text.patch.set_facecolor("lightyellow")
+        anchored_text.patch.set_edgecolor("black")
+        ax.add_artist(anchored_text)
+
+
         # Save the plot        
         os.makedirs(self.plot_output_folder_comparison_same, exist_ok=True)
         file_path = os.path.join(self.plot_output_folder_comparison_same, plot_name)

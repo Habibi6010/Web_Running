@@ -251,9 +251,10 @@
 
 })();
 
-
-fetch_address = "3.150.57.26"
-// fetch_address = "127.0.0.1"
+// feath server address
+// fetch_address = "aims-technologies.com"
+// fetch_address = "3.150.57.26"
+fetch_address = "127.0.0.1"
 // submit signin form
 function handelSigninButton(event) {
   event.preventDefault();

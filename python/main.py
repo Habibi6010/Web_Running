@@ -29,8 +29,8 @@ ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
 # ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
 ffmpeg_path = "ffmpeg"
 # Server fetch address
-fetch_address = "3.150.57.26"
-# fetch_address = "127.0.0.1"
+# fetch_address = "3.150.57.26"
+fetch_address = "127.0.0.1"
 
 
 # supabase api infroamtion

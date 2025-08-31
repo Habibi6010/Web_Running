@@ -85,8 +85,9 @@
           <div id="RunnerInfoDiv" style="display: block;">
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <lable for="runnerIDNumber" style="margin-bottom: 0; min-width: 130px;"> System Message:</lable>
-              <label id="autofillResult" style="margin-left: 10px;color: green;">For quick search enter runner name.</label>
+              <label id="autofillResult" style="margin-left: 10px;color: green;">Enter athlete's information (add new or search existing)</label>
             </div>
+            
             <div class="form-group" style="margin-bottom: 20px; display: none; align-items: center; gap: 10px;">
                 <lable for="runnerIDNumber" style="margin-bottom: 0; min-width: 130px;"> ID Number:</lable>
                 <input type="text" id="runnerIDNumber" name="runnerIDNumber" style="width: 200px;" placeholder="Runner ID Number" >
@@ -109,8 +110,8 @@
             </div>
             <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
               <label for="runnerGender" style="margin-bottom: 0; min-width: 130px;">Gender:</label>
-              <label><input type="radio" name="runnerGender" value="men" style="margin-right: 10px; margin-left: 10px;" checked>men</label>
-              <label><input type="radio" name="runnerGender" value="women" style="margin-right: 10px; margin-left: 10px;">women</label>
+              <label><input type="radio" name="runnerGender" value="men" style="margin-right: 10px; margin-left: 10px;" checked>Male</label>
+              <label><input type="radio" name="runnerGender" value="women" style="margin-right: 10px; margin-left: 10px;">Female</label>
             </div>
 
             <!-- Submit button -->
@@ -237,12 +238,12 @@
       </div> -->
 
       <div class="container_checkbox">
-          <div class="form-group" style="display: flex; flex-direction: row; gap: 80px; flex-wrap: wrap; margin-bottom: 15px;">
+          <div class="form-group" style="display: flex; flex-direction: row; gap: 50px; flex-wrap: wrap; margin-bottom: 15px;">
             <!-- Runner Info -->
             <div style="width: 300px;">
               <h5>Runner Info.:</h5>
               <div><label style="width: 80px; display: inline-block;">Name:</label> <span id="displayRunnerName" style="color: blue;">test</span></div>
-              <div><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayRunnerID" style="color: blue;">test</span></div>
+              <div style="display: none;"><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayRunnerID" style="color: blue;">test</span></div>
               <div><label style="width: 80px; display: inline-block;">Height:</label> <span id="displayRunnerHeight" style="color: blue;">test</span></div>
               <div><label style="width: 80px; display: inline-block;">Gender:</label> <span id="displayRunnerGender" style="color: blue;">test</span></div>
             </div>
@@ -251,7 +252,7 @@
             <div style="min-width: 200px;">
               <h5>Video Info.:</h5>
               <div><label style="width: 80px; display: inline-block;">Name:</label> <span id="displayVideoName" style="color: blue;">test</span></div>
-              <div><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayVideoID" style="color: blue;">test</span></div>
+              <div style="display: none;"><label style="width: 80px; display: inline-block;">ID:</label> <span id="displayVideoID" style="color: blue;">test</span></div>
               <div><label style="width: 80px; display: inline-block;">Date:</label> <span id="displayVideoDate" style="color: blue;">test</span></div>
             </div>
           </div>
@@ -744,10 +745,10 @@
   
   <footer id="footer" class="footer position-relative light-background">
     <div class="container">
-      <h3 class="sitename">Smart Running</h3>
-      <p>Building a Digital Kinematic Database.
-        Automating Pose Detection and Classification.
-        Data Visualization and Expert Evaluation.</p>
+      <h3 class="sitename">AIMS (AI Mapping for Sports)</h3>
+      <p>Train Informed. Smart Running. 
+        Posture & Kinematic Analysis. Performance Ranking & Prediction.
+         Video Annotation & Analytics.</p>
       <div class="social-links d-flex justify-content-center">
         <a href=""><i class="bi bi-twitter-x"></i></a>
         <a href=""><i class="bi bi-facebook"></i></a>
@@ -757,11 +758,7 @@
       </div>
       <div class="container">
         <div class="credits">
-          <!-- All the links in the footer should remain intact. -->
-          <!-- You can delete the links only if you've purchased the pro version. -->
-          <!-- Licensing information: https://bootstrapmade.com/license/ -->
-          <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+          <p>&copy; 2025 <strong>AIMS Technologies</strong>. All rights reserved.</p>
         </div>
       </div>
     </div>
@@ -821,7 +818,8 @@ function updateSelectColor(select) {
   // Set text color for contrast (white for dark, black for light backgrounds)
   let textColor = '#fff';
   if (color === '#ffa500' || color === '#ff0000' || color === '#00ff00') textColor = '#222';
-  if (color === '#0563bb' || color === '#800080') textColor = '#fff';
+  // if (color === '#0563bb' || color === '#800080') textColor = '#fff';
+  if (color === '#0563bb' || color === '#800080') textColor = '#222';
   select.style.color = textColor;
 }
 

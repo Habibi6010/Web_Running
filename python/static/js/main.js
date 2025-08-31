@@ -997,7 +997,7 @@ function UplaodNewVideo() {
   document.getElementById("nextbutton").disabled = false; // enable the submit button
   document.getElementById("TabDiv").style.display = "none"; // hide the edit button
   const autofillresult = document.getElementById("autofillResult");
-  autofillresult.innerText = "For quick search enter runner ID number.";
+  autofillresult.innerText = "Enter athlete's information (add new or search existing).";
   autofillresult.style.color = "green";
   RunnerInfoFieldsClear();
   RunnerInfoFeildsDisabled(false); // allow editing
@@ -1252,6 +1252,15 @@ function compareIndividualDifferentCategoryAndSeason(row) {
   document.getElementById("eventDisplayPopup").innerText = row['event'] || "Unknown";
   document.getElementById("scoresDisplayPopup").innerText = row['scores'] || "Unknown";
   localStorage.setItem("compare_score_id", row['score_id']); // Store the score_id in localStorage for later use
+  // Adjust this to your fixed header height
+  const section = document.getElementById('comparison-individual-section');
+  // Smooth scroll into view (after layout updates)
+  requestAnimationFrame(() => {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // If you use AOS animations:
+  if (window.AOS && typeof AOS.refreshHard === 'function') AOS.refreshHard();
 }
 
 // Handle delete scores action on the score table for Ranking page
@@ -1858,7 +1867,7 @@ function RunnerInfoClear(event){
   document.getElementById("nextbutton").disabled = false; // enable the submit button
   document.getElementById("TabDiv").style.display = "none"; // hide the edit button
   const autofillresult = document.getElementById("autofillResult");
-  autofillresult.innerText = "For quick search enter runner ID number.";
+  autofillresult.innerText = "Enter athlete's information (add new or search existing).";
   autofillresult.style.color = "green";
   RunnerInfoFieldsClear();
   RunnerInfoFeildsDisabled(false); // allow editing

@@ -158,8 +158,12 @@ class RankClustering:
         ax.invert_yaxis()
         # Add information text
         info_text = "Values:[PR, AVG]"
-        anchored_text = AnchoredText(info_text, loc='upper right', 
-                                    prop=dict(size=10), frameon=True)
+        anchored_text = AnchoredText(info_text, 
+                             loc='upper left', 
+                             prop=dict(size=10), 
+                             frameon=True,
+                             bbox_to_anchor=(-0.2, 0.9),  # shift left & up
+                             bbox_transform=ax.transAxes)
         anchored_text.patch.set_boxstyle("round,pad=0.5")
         anchored_text.patch.set_facecolor("lightyellow")
         anchored_text.patch.set_edgecolor("black")
@@ -249,8 +253,12 @@ class RankClustering:
         ax.invert_yaxis()
         # Add information text
         info_text = "Values:[PR, AVG]"
-        anchored_text = AnchoredText(info_text, loc='upper right', 
-                                    prop=dict(size=10), frameon=True)
+        anchored_text = AnchoredText(info_text, 
+                             loc='upper left', 
+                             prop=dict(size=10), 
+                             frameon=True,
+                             bbox_to_anchor=(-0.2, 0.9),  # shift left & up
+                             bbox_transform=ax.transAxes)
         anchored_text.patch.set_boxstyle("round,pad=0.5")
         anchored_text.patch.set_facecolor("lightyellow")
         anchored_text.patch.set_edgecolor("black")

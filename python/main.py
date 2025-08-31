@@ -26,8 +26,8 @@ VIDEO_SAVE_PATH = 'received_videos/'
 # Define a directory to save the analyzed video files
 ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
 # Definfe ffmpeg path
-# ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
-ffmpeg_path = "ffmpeg"
+ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
+# ffmpeg_path = "ffmpeg"
 # Server fetch address
 # fetch_address = "3.150.57.26"
 fetch_address = "127.0.0.1"
@@ -300,14 +300,13 @@ def draw_analysis():
     else:
         print(f"Folder already exists: {user_folder}")
 
-    message,response,write_folder_name= drawing_on_video(setting_colors,userEmail,video_info,runner_height)
-
+    message,response,write_folder_name,input_video_name= drawing_on_video(setting_colors,userEmail,video_info,runner_height)
     # Save the analyzed video path to database
     if response:
         response_update = supabase.table("analysis_video").insert({
             "video_id": video_id,
-            "analysis_video_path": write_folder_name + '/fixed_output.mp4',
-            "analysis_csv_path": write_folder_name + '/all_data.csv',
+            "analysis_video_path": write_folder_name + f'/{input_video_name}_annotated_video.mp4',
+            "analysis_csv_path": write_folder_name + f'/{input_video_name}_all_data.csv',
             "analysis_setting": json.dumps(setting_colors),
             "analysis_time": str(datetime.datetime.now())
         }).execute()
@@ -315,10 +314,10 @@ def draw_analysis():
             print("Failed to update analyzed video path in database")
             return jsonify({"response": False, "message": "Failed to update analyzed video path in database"})
 
-    output_video_address = write_folder_name + '/fixed_output.mp4'
+    output_video_address = write_folder_name + f'/{input_video_name}_annotated_video.mp4'
     print(f"Output video address URL: {output_video_address}")
-    output_video_csv = write_folder_name + '/all_data.csv'
-    print(f"Output video csv address URL: {output_video_csv}") 
+    output_video_csv = write_folder_name + f'/{input_video_name}_all_data.csv'
+    print(f"Output video csv address URL: {output_video_csv}")
 
     return jsonify({"response": response, "message": message, "videoaddress": output_video_address, "csvaddress": output_video_csv})
 
@@ -328,6 +327,7 @@ def drawing_on_video(settings_colors,userEmail,video_info,runner_height):
     timestamp = datetime.datetime.strptime(video_info['upload_time'], "%Y-%m-%dT%H:%M:%S.%f")
     timestamp = timestamp.strftime("%Y%m%d%H%M%S") # YYYYMMDDHHMMSS
     input_video_name = video_info['video_name']
+    input_video_name = input_video_name.split('.')[0]
     selectModel = video_info['model_used']
     settings_colors = settings_colors
     height_runner = runner_height
@@ -358,7 +358,7 @@ def drawing_on_video(settings_colors,userEmail,video_info,runner_height):
         os.makedirs(write_folder_name)
         width=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        out = cv2.VideoWriter(f'{write_folder_name}/video_output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+        out = cv2.VideoWriter(f'{write_folder_name}/{input_video_name}_video_output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                             (width,height))  # Output file
         
         df_posture_features = pd.DataFrame()
@@ -477,24 +477,24 @@ def drawing_on_video(settings_colors,userEmail,video_info,runner_height):
                     df_temp = pd.DataFrame([dic])
                     df_posture_features = pd.concat([df_posture_features,df_temp],ignore_index=True)
             out.write(frame)
-            df_all_data.to_csv(f'{write_folder_name}/all_data.csv',index=False)
-            df_posture_features.to_csv(f'{write_folder_name}/posture_features.csv',index=False)
-            
+            df_all_data.to_csv(f'{write_folder_name}/{input_video_name}_all_data.csv',index=False)
+            df_posture_features.to_csv(f'{write_folder_name}/{input_video_name}_posture_features.csv',index=False)
+
             # cv2.imshow('frame', frame)
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         cap.release()
         out.release()
         # shutil.copy(f'{write_folder_name}/video_output.mp4', 'static/videos/test.mp4')
-        input_path = f"{write_folder_name}/video_output.mp4"
-        output_path = f"{write_folder_name}/fixed_output.mp4"
+        input_path = f"{write_folder_name}/{input_video_name}_video_output.mp4"
+        output_path = f"{write_folder_name}/{input_video_name}_annotated_video.mp4"
 
         subprocess.run([
             ffmpeg_path, '-y','-i', input_path,
             '-c:v', 'libx264', '-c:a', 'aac', '-strict', 'experimental',
             output_path
         ])
-        return("Analysis Done",True,write_folder_name)
+        return("Analysis Done",True,write_folder_name,input_video_name)
     except Exception as e:
         print(f"Error: {e}")
         return(f"Error: {e}",False,"")
@@ -907,11 +907,11 @@ def save_runner_info():
             # If runner not found, insert new runner
             response = supabase.table("runner").insert({"user_id": int(user_id), "name": runnerName,"feet":runnerHeightFeet,"inche":runnerHeightInche,"gender":runnerGender,"created_at":str(datetime.datetime.now()),"isActive":True}).execute()  
             # print(f"Insert response: {response.data}")
-            return jsonify({"response": True, "message": f"Runner info added to DB. Runner ID is {response.data[0]['runner_id']}","runnerID":response.data[0]['runner_id']})
+            return jsonify({"response": True, "message": "Runner info is added to database.","runnerID":response.data[0]['runner_id']})
         else:
-            return jsonify({"response": True, "message": f"Runner with same info was in DB. Runner ID is {response_runner.data[0]['runner_id']}","runnerID":response_runner.data[0]['runner_id']})
+            return jsonify({"response": True, "message": "Runner with same info was in database.","runnerID":response_runner.data[0]['runner_id']})
     else:
-        return jsonify({"response": True, "message": "Runner info was in DB.","runnerID":response_runner.data[0]['runner_id']})
+        return jsonify({"response": True, "message": "Runner info was in database.","runnerID":response_runner.data[0]['runner_id']})
 
 @app.route('/update_runner_info',methods=['POST'])
 def update_runner_info():

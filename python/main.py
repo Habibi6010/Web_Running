@@ -27,13 +27,15 @@ VIDEO_SAVE_PATH = 'received_videos/'
 ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
 # Define a directory for temporary save videos
 TEMP_VIDEO_SAVE_PATH = 'temp_video_file/'
-# Define ffmpeg path
-ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
-# ffmpeg_path = "ffmpeg"
+# Define ffmpeg path 
+# windows example
+# ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
+# linux example
+ffmpeg_path = "ffmpeg"
 # Server fetch address
 # fetch_address = "3.150.57.26"
-fetch_address = "127.0.0.1"
-
+# fetch_address = "127.0.0.1"
+fetch_address = "aims-technologies.com"
 
 # supabase api infroamtion
 SUPABASE_URL = "https://rokmmhmgoothqrqbppqo.supabase.co"

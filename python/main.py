@@ -25,7 +25,9 @@ import time
 VIDEO_SAVE_PATH = 'received_videos/'
 # Define a directory to save the analyzed video files
 ANALYZED_VIDEO_SAVE_PATH = 'analyzed_video_file/'
-# Definfe ffmpeg path
+# Define a directory for temporary save videos
+TEMP_VIDEO_SAVE_PATH = 'temp_video_file/'
+# Define ffmpeg path
 ffmpeg_path = r"C:\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
 # ffmpeg_path = "ffmpeg"
 # Server fetch address
@@ -887,6 +889,9 @@ def find_runner_info():
 def save_runner_info():
     data = request.form
     runnerName = data.get('runnerName')
+    # Save all name in lowercase
+    runnerName = str(runnerName)
+    runnerName = runnerName.lower()
     runnerGender = data.get('runnerGender')
     runnerHeightFeet= data.get('ruunerHeightFeet')
     runnerHeightInche= data.get('ruunerHeightInche')
@@ -1097,8 +1102,48 @@ def get_user_scores():
     return jsonify({"response": True, "message": "Scores found successfully.","scores":scores})
 
 
+@app.route('/convert_upload_video_preview', methods=['POST'])
+def convert_upload_video_preview():
+    video_file = request.files.get("video") or request.files.get("videoUpload")
+    print(f"video file: {video_file}")
+    # Check if video file is provided
+    if not video_file:
+        return jsonify({"response": False, "message": "No video file provided."})
+    # Check if temp folder is existing
+    if not os.path.exists(TEMP_VIDEO_SAVE_PATH):
+        os.makedirs(TEMP_VIDEO_SAVE_PATH)
+    # Delete all files in the temporary video save directory
+    for filename in os.listdir(TEMP_VIDEO_SAVE_PATH):
+        file_path = os.path.join(TEMP_VIDEO_SAVE_PATH, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+            continue
+    # Save video on the temporary path
+    video_path = os.path.join(TEMP_VIDEO_SAVE_PATH, video_file.filename)
+    with open(video_path, "wb") as f:
+        video_file.save(f)
+    # Call the video conversion function (to be implemented)
+    preview_path = convert_video_to_preview(video_path)
+    if not preview_path:
+        return jsonify({"response": False, "message": "Failed to create video preview."})
+    return jsonify({"response": True, "message": "Video preview created successfully.", "preview_path": preview_path})
 
+def convert_video_to_preview(video_path):
+    # convert video file to mp4
+    input_path = video_path
+    output_path = f"{TEMP_VIDEO_SAVE_PATH}/{os.path.basename(video_path)}.mp4"
 
+    subprocess.run([
+        ffmpeg_path, '-y','-i', input_path,
+        '-c:v', 'libx264', '-c:a', 'aac', '-strict', 'experimental',
+        output_path
+    ])
+    output_path = "video/" + output_path
+    print(f"Converted video saved to: {output_path}")
+    return output_path
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=5001,debug=True)

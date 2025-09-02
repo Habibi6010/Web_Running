@@ -393,10 +393,26 @@ function previewVideo() {
   const source = document.getElementById('videoSource');
 
   if (fileInput.files && fileInput.files[0]) {
-    const fileURL = URL.createObjectURL(fileInput.files[0]);
-    source.src = fileURL;
-    video.style.display = "block";
-    video.load();
+    const file = document.getElementById('videoUpload').files?.[0];
+    const fd = new FormData();
+    fd.append('video', file);
+    fetch('http://'+fetch_address+':5001/convert_upload_video_preview', {
+      method: 'POST',
+      body: fd
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.response) {
+          source.src = data.preview_path;
+          video.style.display = "block";
+          video.load();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        alert("Server Error"+error.message);
+      });
   }
 }
 

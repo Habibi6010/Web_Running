@@ -1,0 +1,173 @@
+0) set vars (so you can copy/paste later)
+export DOMAIN="aims-technologies.com"
+export WWW_DOMAIN="www.aims-technologies.com"
+export EMAIL="you@example.com"   # change to your email for Certbot
+
+1) sanity checks
+# see OS (Amazon Linux 2 vs 2023)
+cat /etc/os-release
+
+# nginx really running and listening on 80 (and maybe 443)
+sudo ss -ltnp | egrep ':80|:443'
+
+# who answers if the Host header is your domain?
+curl -I -H "Host: $DOMAIN" http://127.0.0.1
+curl -I -H "Host: $WWW_DOMAIN" http://127.0.0.1
+
+
+Right now these likely return the welcome page headers — that’s what we’ll fix.
+
+Also make sure your EC2 Security Group allows inbound 80 and 443 from 0.0.0.0/0.
+In Route 53:
+
+A record for aims-technologies.com → your Elastic IP (3.150.57.26)
+
+CNAME for www → aims-technologies.com
+
+2) back up nginx config
+sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak.$(date +%s)
+sudo mkdir -p /etc/nginx/conf.d/backups
+
+3) create a proper server block for your domain (port 80)
+
+This tells Nginx: “when Host is aims-technologies.com (or www), send to my app.”
+
+If your app listens on 127.0.0.1:8000, use this reverse-proxy example. (If you serve static files from a folder, I show that below.)
+
+sudo tee /etc/nginx/conf.d/$DOMAIN.conf >/dev/null <<'CONF'
+server {
+    listen 80;
+    server_name aims-technologies.com www.aims-technologies.com;
+
+    # Reverse proxy to your app (change the port if needed)
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+CONF
+
+(alternative) static site instead of proxy
+
+If you’re serving plain files (HTML/CSS/JS), do this instead:
+
+sudo tee /etc/nginx/conf.d/$DOMAIN.conf >/dev/null <<'CONF'
+server {
+    listen 80;
+    server_name aims-technologies.com www.aims-technologies.com;
+
+    root /usr/share/nginx/html;   # change if your files live elsewhere
+    index index.html;
+}
+CONF
+
+4) make the default server stop showing the welcome page
+
+We’ll add a catch-all default that redirects to your domain (so even mistakes don’t show “Welcome to nginx!”).
+
+sudo tee /etc/nginx/conf.d/000-default-redirect.conf >/dev/null <<'CONF'
+server {
+    listen 80 default_server;
+    server_name _;
+    return 301 http://aims-technologies.com$request_uri;
+}
+CONF
+
+
+If you already have some default .conf in /etc/nginx/conf.d/ that serves /usr/share/nginx/html, you can move it out:
+
+sudo mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/backups/default.conf.$(date +%s) 2>/dev/null || true
+
+5) test + reload
+sudo nginx -t && sudo systemctl reload nginx
+
+6) verify routing (important)
+curl -I -H "Host: $DOMAIN" http://127.0.0.1
+curl -I -H "Host: $WWW_DOMAIN" http://127.0.0.1
+
+
+Now you should not see the welcome page. You should see your app’s headers (or at least a 200/301 that isn’t the default page).
+Also try in your browser: http://aims-technologies.com — it should hit your app.
+
+7) install certbot (Let’s Encrypt) + nginx plugin
+
+Pick the command based on your OS:
+
+Amazon Linux 2
+
+sudo yum install -y certbot python3-certbot-nginx
+
+
+Amazon Linux 2023
+
+sudo dnf install -y certbot python3-certbot-nginx
+
+
+Ubuntu/Debian (if that’s what you run)
+
+sudo apt update
+sudo apt install -y certbot python3-certbot-nginx
+
+8) get the certificate + auto HTTPS redirect
+sudo certbot --nginx \
+  -d $DOMAIN -d $WWW_DOMAIN \
+  -m $EMAIL --agree-tos --redirect --non-interactive
+
+
+This edits your $DOMAIN.conf to add the 443 server and a HTTP→HTTPS 301 rule automatically.
+
+It will reload Nginx for you.
+
+Open: https://aims-technologies.com — you should now see the padlock.
+
+9) auto-renew (hands-free)
+# confirm the timer exists
+systemctl list-timers | grep certbot
+
+# test renewal
+sudo certbot renew --dry-run
+
+if something still shows the welcome page
+
+Run:
+
+sudo nginx -T | sed -n '/server {/,/}/p'
+
+
+Look for:
+
+a server { listen 80 default_server; ... } block — ours should now be the redirect block above
+
+the block with server_name aims-technologies.com www.aims-technologies.com;
+
+it must exist once and point to your app/static root
+
+duplicate/conflicting files in /etc/nginx/conf.d/
+
+And re-check:
+
+curl -I -H "Host: $DOMAIN" http://127.0.0.1
+curl -I -H "Host: $WWW_DOMAIN" http://127.0.0.1
+
+quick checklist (common gotchas)
+
+DNS: nslookup aims-technologies.com returns 3.150.57.26
+
+SG: inbound 80/443 open
+
+No AAAA unless you actually enabled IPv6
+
+App port matches proxy_pass (127.0.0.1:8000 here)
+
+Only one active server_name aims-technologies.com ... block
+
+Reload after edits: sudo nginx -t && sudo systemctl reload nginx
+
+If you paste the outputs of:
+
+nginx -T | sed -n '/server {/,/}/p'
+curl -I -H "Host: aims-technologies.com" http://127.0.0.1
+curl -I -H "Host: www.aims-technologies.com" http://127.0.0.1

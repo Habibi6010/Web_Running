@@ -275,7 +275,7 @@ function handelSigninButton(event) {
     password
   }
   
-  fetch('http://'+fetch_address+':5001/login', {
+  fetch('https://'+fetch_address+':5001/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -287,7 +287,7 @@ function handelSigninButton(event) {
       if (data.accsess) {
         let username = data.username;
         let useremail = data.useremail;
-        window.location.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
+        window.location.href = `https://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
         console.log('Login successful: \n' + email);
       }
       else {
@@ -310,7 +310,7 @@ function forgotPassword() {
       return;
     }
     data ={email}
-    fetch('http://'+fetch_address+':5001/forget_password', {
+    fetch('https://'+fetch_address+':5001/forget_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -362,7 +362,7 @@ function handelContactUsButton(event) {
     subject,
     message
   }
-  fetch('http://'+fetch_address+':5001/contact_us', {
+  fetch('https://'+fetch_address+':5001/contact_us', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -396,7 +396,7 @@ function previewVideo() {
     const file = document.getElementById('videoUpload').files?.[0];
     const fd = new FormData();
     fd.append('video', file);
-    fetch('http://'+fetch_address+':5001/convert_upload_video_preview', {
+    fetch('https://'+fetch_address+':5001/convert_upload_video_preview', {
       method: 'POST',
       body: fd
     })
@@ -629,7 +629,7 @@ function SendDrawData(event) {
   const userEmail = document.getElementById('useremailDisplay').innerText;
   const runnerHeight = document.getElementById('displayRunnerHeight').innerText;
   // Send the data to the server
-  fetch('http://'+fetch_address+':5001/draw_analysis', {
+  fetch('https://'+fetch_address+':5001/draw_analysis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "settings_colors":settings_colors, "video_id":video_id, "userEmail":userEmail,"runner_height":runnerHeight})
@@ -711,7 +711,7 @@ function SendVideo(event) {
   const analysis_section = document.getElementById('analysis-section');
   
   // Send the data to the server
-  fetch('http://'+fetch_address+':5001/run_analysis', {
+  fetch('https://'+fetch_address+':5001/run_analysis', {
     method: 'POST',
     body: formData
   })
@@ -816,7 +816,7 @@ function handelVideLogButton(event) {
   const username = document.getElementById('usernameDisplay').innerText;
 
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/videolog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+  window.location.href = `https://${fetch_address}:5001/videolog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
 
 function handelDashboardButton (){
@@ -824,13 +824,13 @@ function handelDashboardButton (){
   const username = document.getElementById('usernameDisplay').innerText;
 
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+  window.location.href = `https://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 
 }
 
 // handeler for logout button
 function handelLogoutButton(){
-  window.location.href = `http://${fetch_address}:5001/`;
+  window.location.href = `https://${fetch_address}:5001/`;
   // Clear the local storage
   localStorage.clear();
   // Clear the session storage
@@ -873,7 +873,7 @@ async function handleChatBotButton(event){
   // Scroll to the latest message
   chatBox.scrollTop = chatBox.scrollHeight;
   // Send user input to server and get response
-  fetch('http://' + fetch_address + ':5001/chat', {
+  fetch('https://' + fetch_address + ':5001/chat', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message: conversationMessage }),
@@ -1027,7 +1027,7 @@ function FillHistoryTable(userEmail){
   const tableBody = document.getElementById('historyTableBody');
   // Clear existing rows
   tableBody.innerHTML = '';
-  fetch('http://'+fetch_address+':5001/get_user_history', {
+  fetch('https://'+fetch_address+':5001/get_user_history', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "userEmail": userEmail })
@@ -1137,7 +1137,7 @@ function handleRerunAction(item) {
     username: username
   }));
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+  window.location.href = `https://${fetch_address}:5001/dashboard?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
 
 // Fuction for autofill score table with runner data for Ranking page
@@ -1147,7 +1147,7 @@ function FillScoreTable(userEmail) {
   const tableBody = document.getElementById('scoreTableBody');
   // Clear existing rows
   tableBody.innerHTML = '';
-  fetch('http://'+fetch_address+':5001/get_user_scores', {
+  fetch('https://'+fetch_address+':5001/get_user_scores', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "userEmail": userEmail })
@@ -1286,7 +1286,7 @@ function handleDeleteScores(row) {
     // Load the item data from the row
     const item = JSON.parse(row.dataset.item);
     // send the data to the server to delete 
-    fetch('http://'+fetch_address+':5001/delete_scores', {
+    fetch('https://'+fetch_address+':5001/delete_scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({score_id:item.score_id})})
@@ -1392,7 +1392,7 @@ function saveEditedScores(row, newScores) {
     }
     // console.log("Data to send:", dataToSend);
     // Send the data to the server
-    fetch('http://'+fetch_address+':5001/update_scores', {
+    fetch('https://'+fetch_address+':5001/update_scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dataToSend)
@@ -1564,7 +1564,7 @@ function SendScores(event) {
     "scores": scores
   };
   // Send the data to the server
-  fetch('http://'+fetch_address+':5001/save_runner_score', {
+  fetch('https://'+fetch_address+':5001/save_runner_score', {
     method: 'POST',
     body: JSON.stringify(dataToSend),
     headers: { 'Content-Type': 'application/json'} 
@@ -1692,7 +1692,7 @@ function RunnerInfoFieldsClear() {
 //   }
 //   else{
 
-//     fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
+//     fetch('https://'+fetch_address+':5001/find_runner_info',{method: 'POST',
 //     headers: { 'Content-Type': 'application/json' },
 //     body: JSON.stringify({ runnerID: runnerID, userEmail: userEmail })
 //     })
@@ -1787,7 +1787,7 @@ function autoFillRunnerInfo(){
 
 function getRunneerInfoSaveSessionStorage(userEmail) {
 
-  fetch('http://'+fetch_address+':5001/find_runner_info',{method: 'POST',
+  fetch('https://'+fetch_address+':5001/find_runner_info',{method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({userEmail: userEmail })
   })
@@ -1850,7 +1850,7 @@ function RunnerInfoSubmit(event){
   const autofillresult = document.getElementById("autofillResult");
   autofillresult.innerText = "";
   // Send the data to the server
-  fetch('http://'+fetch_address+':5001/save_runner_info', {
+  fetch('https://'+fetch_address+':5001/save_runner_info', {
     method: 'POST',
     body: formData
   })
@@ -1894,7 +1894,7 @@ function handelViewProfileButton(){
   const username = document.getElementById('usernameDisplay').innerText;
   // Save data to localStorage
   localStorage.setItem("profilePage",JSON.stringify({"userName":username,"userEmail":useremail})); 
-  window.location.href = `http://${fetch_address}:5001/profile`;
+  window.location.href = `https://${fetch_address}:5001/profile`;
   
 }
 
@@ -1904,7 +1904,7 @@ function FillRunnerTable(userEmail){
   const tableBody = document.getElementById('runnerTableBody');
   // Clear existing rows
   tableBody.innerHTML = '';
-  fetch('http://'+fetch_address+':5001/get_user_runners', {
+  fetch('https://'+fetch_address+':5001/get_user_runners', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "userEmail": userEmail })
@@ -1998,7 +1998,7 @@ function populateRunnerTable(runnerList, tableBody) {
 // Function to delete a row from the runner table in profile page
 function deleteRow(row) {
   const item = JSON.parse(row.dataset.originalItem); // Get the item from the row
-    fetch('http://'+fetch_address+':5001/delete_runner', {
+    fetch('https://'+fetch_address+':5001/delete_runner', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ "runnerID": item.runner_id, "userEmail": item.userEmail })
@@ -2077,7 +2077,7 @@ function saveRow(row) {
     alert("All fields are required");
     return;
   }
-  fetch('http://'+fetch_address+':5001/update_runner_info', {
+  fetch('https://'+fetch_address+':5001/update_runner_info', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
@@ -2138,7 +2138,7 @@ function cancelRow(row) {
 // Fill the profile page with user data from DB
 function FillUserInfo(userEmail){
   console.log("FillUserInfon");
-  fetch('http://'+fetch_address+':5001/get_user_info', {
+  fetch('https://'+fetch_address+':5001/get_user_info', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "userEmail": userEmail })
@@ -2179,7 +2179,7 @@ function updateProfile(){
     alert("All fields are required");
     return;
   }
-  fetch('http://'+fetch_address+':5001/update_user_info', {
+  fetch('https://'+fetch_address+':5001/update_user_info', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "full_name": full_name, "useremali": userEmali, "role":role })
@@ -2224,7 +2224,7 @@ function changePassword(){
     return;
   }
 
-  fetch('http://'+fetch_address+':5001/change_user_password', {
+  fetch('https://'+fetch_address+':5001/change_user_password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ "useremali": userEmali, "currentPassword": currentPassword, "newPassword": newPassword })
@@ -2260,7 +2260,7 @@ function handelrankLogButton(){
   const username = document.getElementById('usernameDisplay').innerText;
 
   console.log(username);
-  window.location.href = `http://${fetch_address}:5001/rankinglog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
+  window.location.href = `https://${fetch_address}:5001/rankinglog?useremail=${encodeURIComponent(useremail)}&username=${encodeURIComponent(username)}`;
 }
 
 // Open and cloe the video info popup on dashboard page
@@ -2354,7 +2354,7 @@ function handleCompareScoreAnalysis(){
   document.getElementById('comparison-section').style.display = 'none'; // Hide result section
   console.log("Data to send for comparison");
   // Send the data to the server for analysis
-  fetch('http://'+fetch_address+':5001/compare_scores_same_season_category_event_gender', {
+  fetch('https://'+fetch_address+':5001/compare_scores_same_season_category_event_gender', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dataToSend)
@@ -2410,7 +2410,7 @@ function GenerateComparisonPopup(){
   };
   console.log("Data to send for individual comparison:", dataToSend);
   // Send the data to the server for analysis
-  fetch('http://'+fetch_address+':5001/compare_individual', {
+  fetch('https://'+fetch_address+':5001/compare_individual', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dataToSend)

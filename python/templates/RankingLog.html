@@ -355,11 +355,11 @@
       // Set the link to dashboard links
       const dashboardLink1 = document.getElementById("doshboardlink1");
       if (dashboardLink1) {
-        dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
+        dashboardLink1.href = `/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
       }
       const dashboardLink2 = document.getElementById("dashboardlink2");
       if (dashboardLink2) {
-        dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
+        dashboardLink2.href = `/dashboard?username=${encodeURIComponent(username)}&useremail=${encodeURIComponent(useremail)}`;
       }
 
       FillScoreTable(useremail);  

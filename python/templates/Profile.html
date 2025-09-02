@@ -78,7 +78,7 @@
             <i class="bi bi-person-circle"></i> <span id="myaccount">My Account ▼</span>
           </button>
           <div class="dropdown-menu">
-            <button class="profile-button" id="videologebutton" onclick="handelDashboardButton()">Dashboard </button>
+            <button class="profile-button" id="dashboardbutton" onclick="handelDashboardButton()">Dashboard </button>
             <button class="profile-button" id="videologebutton" onclick="handelVideLogButton()">Video Log </button>
             <button class="profile-button" id="rancklogebutton" onclick="handelrankLogButton()">Ranking Log </button>
             <!-- <button class="profile-button" id="viewprofilebutton" onclick="handelViewProfileButton()">Profile </button> -->
@@ -287,11 +287,11 @@
 
                 const dashboardLink1 = document.getElementById("doshboardlink1");
                 if (dashboardLink1) {
-                        dashboardLink1.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
+                        dashboardLink1.href = `/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
                 }
                 const dashboardLink2 = document.getElementById("dashboardlink2");
                 if (dashboardLink2) {
-                        dashboardLink2.href = `http://${fetch_address}:5001/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
+                        dashboardLink2.href = `/dashboard?username=${encodeURIComponent(profileData.userName)}&useremail=${encodeURIComponent(profileData.userEmail)}`;
                 }
                 FillRunnerTable(profileData.userEmail);
                 FillUserInfo(profileData.userEmail);

@@ -35,7 +35,7 @@ ffmpeg_path = "ffmpeg"
 # Server fetch address
 # fetch_address = "3.150.57.26"
 # fetch_address = "127.0.0.1"
-fetch_address = "aims-technologies.com"
+# fetch_address = "aims-technologies.com"
 
 # supabase api infroamtion
 SUPABASE_URL = "https://rokmmhmgoothqrqbppqo.supabase.co"

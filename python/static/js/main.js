@@ -2272,7 +2272,18 @@ function openVideoInfoPopup() {
   const Popup = document.getElementById('videoInfoPopup');
   Popup.style.display = 'block';
 }
-// Open and cloe the Predict info popup on dashboard page
+
+//open and close the Add Score info popup on dashboard page
+function closeAddScoreInfoPopup() {
+  const Popup = document.getElementById('AddScoreInfoPopup');
+  Popup.style.display = 'none';
+}
+function openAddScoreInfoPopup() {
+  const Popup = document.getElementById('AddScoreInfoPopup');
+  Popup.style.display = 'block';
+}
+
+// Open and close the Predict info popup on dashboard page
 function closePredictInfoPopup() {
   const Popup = document.getElementById('PredictInfoPopup');
   Popup.style.display = 'none';

@@ -194,8 +194,22 @@
                 <label style="width: auto;">Performance Records (At Least 5 most resent/best):</label>
                 <div>
                   <button type="button" id="addScoreButton" onclick="addScoreInput()" style="width: 150px;">+Add Score</button>
-                  <button type="button" id="addScoreHelp" onclick="ScoreHelp()" style="width: 150px;">Help</button>
+                  <!-- <button type="button" id="addScoreHelp" onclick="ScoreHelp()" style="width: 150px;">Help</button> -->
+
+                  <button type="button" onclick="openAddScoreInfoPopup()" class="btn btn-outline-dark btn-sm rounded-circle p-0" style="width:25px; height:25px;" title="More info">
+                    <i class="bi bi-info"></i>
+                  </button>
                 </div>
+                  <!-- The Popup -->
+                  <div id="AddScoreInfoPopup" class="popup">
+                    <div class="popup-content">
+                      <h3>Information</h3>
+                      <p>For additional scores, click on "+Add Score".</p>
+                      <p>Acceptable formats are: seconds.milliseconds (e.g. 24.61) or minutes:seconds.milliseconds (e.g. 4:30.28)</p>
+                      <button class="popup-close-btn" onclick="closeAddScoreInfoPopup()">Close</button>
+                    </div>
+                  </div>
+
                 <div id="scoreContainer" style="display: flex; flex-wrap: wrap; gap: 10px;">
                   <input type="text" name="enterscore" title="Fromat: m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34)" style="width: 80px;" required>
                   <input type="text" name="enterscore" title="Fromat: m:ss.xx (e.g., 1:23.45) or s.xx (e.g., 12.34)" style="width: 80px;" required>
